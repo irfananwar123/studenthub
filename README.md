@@ -71,17 +71,19 @@ You can also open `index.html` directly (double-click it) and browse the whole s
    ```
    No secrets belong in this file. The contact form only opens the visitor's email app; it never sends data to a server.
 3. **Check the privacy policy** and update the contact details if needed.
-4. **Advertising is live.** All supplied network tags are configured in `assets/js/ads.js`:
+4. **Advertising is live.** The supplied vendor tags are written into the generated HTML by `scripts/generate.js` (the `ADS` object near the top). They must be static, parse-time tags: the 468×60 tag calls `document.write`, which does nothing when injected after load.
 
    | Placement | Where it appears | Where to change it |
    | --- | --- | --- |
-   | 468×60 display banner | Homepage slot | `placements.banner468` + `slotMap.home` |
-   | Native banner | Tool and article slots | `placements.native` + `slotMap.tool/article` |
-   | Social bar | All general pages | `placements.socialBar` |
-   | Pop-under | Every page view, including mobile | `placements.popunder` |
-   | Sponsored SmartLink | Footer of general pages | `placements.smartlink` |
+   | 468×60 display banner | Homepage slot | `ADS.bannerKey` / `ADS.banner` + `bannerAd()` |
+   | Native banner | Tool and article slots | `ADS.native` / `ADS.nativeContainer` + `nativeAd()` |
+   | Social bar | Head of all general pages | `ADS.social` + `headAds()` |
+   | Pop-under | Head of every page, all devices | `ADS.popunder` + `headAds()` |
+   | Sponsored SmartLink | Footer of general pages | `ADS.smartlink` + `sponsoredLink()` |
 
-   Set `enabled: false` on any individual placement, or `config.enabled: false` to turn every ad off. Ads are intentionally skipped on `/privacy-policy/`, `/contact/` and `/workspace/`. Appending `?noads=1` to any URL also suppresses them (used by the automated tests). If a network replaces a tag, update only its URL/key in `ads.js` — the page HTML does not need changing.
+   Set `ADS.enabled = false` in `scripts/generate.js` and run `node scripts/generate.js` to remove every ad placement. Ads are intentionally omitted from `/privacy-policy/`, `/contact/` and `/workspace/` (`ads: false` on those pages). `assets/js/ads.js` keeps the same URLs for reference, hides slots when `?noads=1` is present (used by the tests), and shows a clearly labelled sponsored fallback link if a network returns no creative after four seconds. If a network replaces a tag, edit `ADS` in `scripts/generate.js`, regenerate and redeploy — editing `ads.js` alone will not change the live tags.
+
+   Ad networks usually only serve creatives to approved publisher accounts and allowlisted domains. Test locally or from an unapproved domain and the scripts may return HTTP 200 while displaying nothing; the fallback link still gives visitors a working sponsored destination.
 
 ---
 
@@ -156,7 +158,7 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - **SEO**: unique titles/descriptions/canonical/OG tags, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, sitemap and robots.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.
 - **Performance**: system fonts, no dependencies, small vanilla scripts, deferred JS, tiny PNG/SVG assets, no layout-shifting imagery, simple CSS animations only.
-- **Advertising**: five live placements (banner, native, social bar, pop-under, SmartLink) configured in one file, with per-placement switches and three ad-free pages.
+- **Advertising**: five live placements (banner, native, social bar, pop-under, SmartLink) generated as static parse-time tags, with a single master switch, three ad-free pages and a sponsored fallback link when no creative renders.
 
 ---
 

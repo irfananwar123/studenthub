@@ -7,6 +7,46 @@ const { icon, f, faq } = require('./helpers');
 
 const ROOT = path.resolve(__dirname, '..');
 const SITE = 'https://studenthub.pages.dev';
+/* Advertising tags. They are written into the HTML at build time, not injected
+   after load: the 468x60 tag calls document.write, which only works while the
+   document is still parsing. Set enabled to false to remove every placement. */
+const ADS = {
+  enabled: true,
+  popunder: 'https://afders.org/1/3c0e12112693371a49e8da1ecaf03499',
+  smartlink: 'https://arwf.org/4/f9c719598061c9d7137f077570fe38b1',
+  native: 'https://bicea.org/21/9b5ea66616f3e02be4f9a4fe968d7547',
+  nativeContainer: 'container-9b5ea66616f3e02be4f9a4fe968d7547',
+  social: 'https://bicea.org/14/3d7fa5667db565ec11331c4b0846ee9b',
+  bannerKey: '96d3c3868be22016392b6676ae58d572',
+  banner: 'https://bicea.org/22/96d3c3868be22016392b6676ae58d572'
+};
+function headAds() {
+  return `<script data-cfasync="false" src="${ADS.popunder}"></script>
+<script data-cfasync="false" src="${ADS.social}"></script>`;
+}
+function nativeAd() {
+  return `<script async fetchpriority="high" data-cfasync="false" src="${ADS.native}"></script>
+<div id="${ADS.nativeContainer}"></div>`;
+}
+function bannerAd() {
+  return `<div class="ad-unit-banner"><script>
+  atOptions = {
+    'key' : '${ADS.bannerKey}',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script data-cfasync="false" src="${ADS.banner}"></script></div>`;
+}
+function adSlot(kind, on) {
+  if (!on) return `<div class="ad-slot" data-ad-slot="${kind}" hidden aria-label="Reserved advertisement placement">Advertisement</div>`;
+  return `<div class="ad-slot ad-slot-active" data-ad-slot="${kind}" aria-label="Advertisement">${kind === 'home' ? bannerAd() : nativeAd()}</div>`;
+}
+function sponsoredLink(on) {
+  return on ? `<span class="sponsored-links"><a href="${ADS.smartlink}" target="_blank" rel="sponsored noopener noreferrer">Sponsored</a> · </span>` : '';
+}
 const core = fs.readFileSync(path.join(ROOT, 'assets/js/core.js'), 'utf8');
 const listText = core.match(/var TOOLS = (\[[\s\S]*?\n  \]);/);
 if (!listText) throw new Error('Tool registry not found in core.js');
@@ -75,6 +115,7 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
 <script>(function(){try{var t=JSON.parse(localStorage.getItem('studenthub:theme')||'"auto"');var d=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
+${opts.ads !== false ? headAds() : ''}
 ${ld}
 </head>`;
 }
@@ -96,7 +137,7 @@ function header() {
     </div>
   </div></header>`;
 }
-function footer() {
+function footer(adsOn) {
   return `<footer class="site-footer"><div class="container">
     <div class="footer-grid">
       <div class="footer-brand"><a class="brand" href="/" style="color:#fff">${brand.replace(/<a[^>]*>|<\/a>/g, '')}</a><p>Free, private study tools that work in your browser. No account, no subscription. Adverts help keep it free.</p></div>
@@ -104,7 +145,7 @@ function footer() {
       <div><h3>Learn</h3><ul><li><a href="/articles/study-tips/">Study tips</a></li><li><a href="/articles/active-recall/">Active recall</a></li><li><a href="/articles/spaced-repetition/">Spaced repetition</a></li><li><a href="/articles/exam-preparation/">Exam preparation</a></li></ul></div>
       <div><h3>StudentHub</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy-policy/">Privacy policy</a></li><li><a href="/terms/">Terms</a></li></ul></div>
     </div>
-    <div class="footer-bottom"><span>© <span data-current-year>2026</span> StudentHub. All tools run locally in your browser.</span><span><a href="/sitemap.xml">Sitemap</a> · Built for students, everywhere.</span></div>
+    <div class="footer-bottom">${sponsoredLink(adsOn)}<span>© <span data-current-year>2026</span> StudentHub. All tools run locally in your browser.</span><span><a href="/sitemap.xml">Sitemap</a> · Built for students, everywhere.</span></div>
   </div></footer>`;
 }
 function scripts(extra) {
@@ -112,12 +153,13 @@ function scripts(extra) {
   return base.map(n => `<script src="/assets/js/${n}.js" defer></script>`).join('\n') + '\n' + (extra || '');
 }
 function shell(opts) {
-  return head(opts) + `\n<body${opts.bodyAttrs ? ' ' + opts.bodyAttrs : ''}>
+  const adsOn = ADS.enabled && opts.ads !== false;
+  return head(Object.assign({}, opts, { ads: adsOn })) + `\n<body${opts.bodyAttrs ? ' ' + opts.bodyAttrs : ''}>
 <a class="skip-link" href="#main">Skip to main content</a>
 ${header()}
 <div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
 ${opts.body}
-${footer()}
+${footer(adsOn)}
 ${scripts(opts.scripts)}
 </body>\n</html>\n`;
 }
@@ -147,7 +189,7 @@ function toolPage(t) {
     <div class="page-hero-head"><div><span class="eyebrow">${t.category}</span><h1>${c.h1}</h1><p>${c.intro}</p></div>
       <div class="btn-row"><button class="btn btn-secondary btn-small" type="button" data-favorite aria-pressed="false">${icon('star', 16)} <span data-favorite-label>Save</span></button><button class="btn btn-secondary btn-small" type="button" data-print>${icon('print', 16)} Print</button></div>
     </div>
-    <div class="ad-slot" data-ad-slot="tool" hidden aria-label="Reserved advertisement placement">Advertisement</div>
+    ${adSlot('tool', ADS.enabled)}
   </section>
   <section class="section" style="padding-top:.5rem"><div class="container tool-layout">
     <div class="card tool-panel"><h2>Use the tool</h2><form id="${t.id}-form" novalidate>${c.form}</form></div>
@@ -229,7 +271,7 @@ function homepage() {
 
   <section class="section section-soft" id="articles" aria-labelledby="articles-heading"><div class="container"><div class="section-head"><span class="eyebrow">Guides</span><h2 id="articles-heading">Helpful educational articles</h2><p>Short, practical reading — no paid content or pop-ups.</p></div><div class="grid grid-2">${articles.map(([slug, title, desc]) => `<article class="article-card"><div class="card-icon">${icon('pencil', 20)}</div><h3><a href="/articles/${slug}/">${title}</a></h3><p>${desc}</p><span class="card-link">Read guide →</span></article>`).join('')}</div></div></section>
 
-  <div class="container"><div class="ad-slot" data-ad-slot="home" hidden aria-label="Reserved advertisement placement">Advertisement</div></div>
+  <div class="container">${adSlot('home', ADS.enabled)}</div>
 
   <section class="section" aria-labelledby="faq-heading"><div class="container prose"><h2 id="faq-heading">Frequently asked questions</h2>${faq([
     ['Is StudentHub really free?', 'Yes. All tools are free to use, with no subscription and no paid API. The project is built with plain HTML, CSS and JavaScript.'],
@@ -311,7 +353,7 @@ function articlePage(slug, a) {
       <div class="notice">These are general study suggestions, not official exam regulations. Follow your institution’s guidance for exams and assessments.</div>
       <h2>Related tools</h2><div class="chip-list"><a href="/tools/study-timetable-maker/">Study Timetable Maker</a><a href="/tools/flashcard-maker/">Flashcard Maker</a><a href="/tools/pomodoro-timer/">Pomodoro Timer</a><a href="/tools/exam-countdown/">Exam Countdown</a></div>
     </article>
-    <aside class="card"><h2>Try a related tool</h2><p>Use the plan below to turn advice into action.</p><div class="grid">${['study-timetable-maker', 'flashcard-maker', 'pomodoro-timer'].map(id => toolCard(TOOLS.find(t => t.id === id))).join('')}</div><div class="ad-slot" data-ad-slot="article" hidden aria-label="Reserved advertisement placement">Advertisement</div></aside>
+    <aside class="card"><h2>Try a related tool</h2><p>Use the plan below to turn advice into action.</p><div class="grid">${['study-timetable-maker', 'flashcard-maker', 'pomodoro-timer'].map(id => toolCard(TOOLS.find(t => t.id === id))).join('')}</div>${adSlot('article', ADS.enabled)}</aside>
   </div></section>
 </main>`;
   return shell({ title: `${a.title} | StudentHub`, desc: a.desc, path: `/articles/${slug}/`, body });
@@ -334,7 +376,7 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
 <h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 24 November 2026.</p>
 </div></section></main>`;
-write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', body: privacyBody }));
+write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', ads: false, body: privacyBody }));
 
 const termsBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Terms of use</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Using the site</span><h1>Terms of Use</h1><p>Short, plain-language terms for a free browser-based study tool.</p></section>
@@ -371,7 +413,7 @@ const contactBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 </form></div>
 <aside class="card"><h2>Privacy note</h2><p>This form builds an email in your own mail application. Nothing is submitted to a StudentHub server, and no copy is kept here.</p><div class="notice">Before publishing, set <code>StudentHub.config.contactEmail</code> in <code>/assets/js/config.js</code> to your own address.</div><h3>Other useful pages</h3><div class="chip-list"><a href="/about/">About</a><a href="/privacy-policy/">Privacy policy</a><a href="/terms/">Terms</a></div></aside>
 </div></section></main>`;
-write('contact.html', staticPage({ title: 'Contact StudentHub — Bug Reports and Suggestions', desc: 'Send feedback or report a problem. The contact form opens your own email app and does not transmit data to StudentHub.', path: '/contact/', body: contactBody, scripts: '<script src="/assets/js/config.js" defer></script>\n<script src="/assets/js/contact.js" defer></script>' }));
+write('contact.html', staticPage({ title: 'Contact StudentHub — Bug Reports and Suggestions', desc: 'Send feedback or report a problem. The contact form opens your own email app and does not transmit data to StudentHub.', path: '/contact/', ads: false, body: contactBody, scripts: '<script src="/assets/js/config.js" defer></script>\n<script src="/assets/js/contact.js" defer></script>' }));
 
 const workspaceBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">My workspace</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Local personal space</span><h1>My Workspace</h1><p>A private dashboard for your saved tools, study progress and local data. Everything here stays on this device.</p></section>
@@ -386,7 +428,7 @@ const workspaceBody = `<main id="main"><nav class="breadcrumbs container" aria-l
     <p class="field-hint" id="ws-status" role="status" aria-live="polite" style="margin-top:.8rem"></p>
   </div>
 </div></section></main>`;
-write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', robots: 'noindex,follow', body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
+write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', robots: 'noindex,follow', ads: false, body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
 
 const offlineBody = `<main id="main"><section class="page-hero container"><span class="eyebrow">Offline</span><h1>You are offline</h1><p>The page you requested is not available in this browser’s cache yet. Previously visited tools still work, and any data you saved locally is safe.</p><div class="btn-row"><a class="btn btn-primary" href="/">Go to the offline homepage</a><button class="btn btn-secondary" type="button" data-reload>Try again</button></div></section></main>`;
 write('offline.html', staticPage({ title: 'Offline — StudentHub', desc: 'StudentHub offline fallback page.', path: '/offline/', robots: 'noindex', body: offlineBody }));

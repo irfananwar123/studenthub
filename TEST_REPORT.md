@@ -8,7 +8,7 @@ Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via 
 | Command | Result |
 | --- | --- |
 | `node --test tests` | **18/18 passed** |
-| `node tests/browser-smoke.js` | **43/43 passed** |
+| `node tests/browser-smoke.js` | **44/44 passed** |
 
 ### Unit tests (10 suites)
 
@@ -34,9 +34,9 @@ Independent calculation checks compare output against separately calculated expe
 - Sitemap includes every tool; robots.txt points to the sitemap; manifest icons exist.
 - Service worker precaches the app shell and all tool pages with a content-derived cache version.
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
-- All five approved ad tags are configured, the native container id and sponsored link attributes are correct, real slots exist on home/tool/article pages, the privacy policy discloses every network, and no unrelated ad-network tags are present.
+- All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). `ads.js` holds the same URLs but never injects duplicate scripts. Ad-free pages contain no ad tags, the privacy policy discloses every network, and no unrelated ad-network tags are present.
 
-### Real-browser smoke tests (43 checks)
+### Real-browser smoke tests (44 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
@@ -49,7 +49,7 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 7. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
 8. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page.
 9. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
-10. With ads enabled, the homepage contains an active 468×60 slot, the correct `atOptions` key, the pop-under, social-bar and SmartLink tags, and a sponsored footer link. A tool page contains the native banner container and its tag. External ad domains are blocked during this check, so no live creative is required.
+10. With ads enabled, the homepage contains an active 468×60 slot, the correct `atOptions` key, exactly one pop-under, social-bar and banner script, and a sponsored footer link. A tool page contains the native script immediately before its container. With ad domains blocked, a clearly labelled sponsored fallback appears after four seconds. No live creative is required for these checks.
 
 No JavaScript console exceptions were observed in any passing check.
 
@@ -67,7 +67,7 @@ No JavaScript console exceptions were observed in any passing check.
 ## Not measured in this environment
 
 - Lighthouse LCP/INP/CLS scores: Chrome headless here was driven through CDP without the Lighthouse package; no scores are claimed.
-- Live ad delivery, viewability, earnings and referral traffic: only our injection code was verified with external ad domains blocked. Real creatives, network approval and revenue depend on the provider accounts.
+- Live ad delivery, viewability, earnings and referral traffic: only the static tags and the sponsored fallback were verified with external ad domains blocked. Real creatives, network approval and revenue depend on the provider accounts; the supplied snippets also render no creative on a bare HTTPS test page, so the network itself must be checked.
 - Real AdSense behaviour: not used; the supplied third-party network tags were integrated instead.
 - Device-specific audio behaviour for Pomodoro: sound is opt-in and browser-dependent.
 - Cross-browser manual review beyond headless Chrome (Firefox/Safari layout should still be checked before a public launch).

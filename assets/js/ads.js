@@ -1,11 +1,15 @@
-/* Advertising placements.
-   Approved network tags are configured here, not hard-coded into every page.
-   Ads are skipped on privacy-sensitive pages and when ?noads=1 is present. */
+/* Advertising configuration and graceful fallback.
+   The network tags are emitted as static, parse-time HTML by scripts/generate.js.
+   That is required for the 468x60 tag, which uses document.write and cannot be
+   injected after the page has loaded. This file never duplicates those tags:
+   it only hides slots on ad-free pages / ?noads=1 and, if a network returns no
+   creative, shows a clearly labelled sponsored fallback link. */
 (function (global) {
   'use strict';
   var config = {
     enabled: true,
     pagesWithoutAds: ['/privacy-policy/', '/contact/', '/workspace/'],
+    fallbackDelay: 4000,
     placements: {
       popunder: {
         enabled: true,
@@ -14,7 +18,7 @@
       smartlink: {
         enabled: true,
         href: 'https://arwf.org/4/f9c719598061c9d7137f077570fe38b1',
-        label: 'Sponsored suggestion',
+        label: 'Sponsored · Support StudentHub',
         rel: 'sponsored noopener noreferrer'
       },
       native: {
@@ -33,8 +37,7 @@
         height: 60,
         src: 'https://bicea.org/22/96d3c3868be22016392b6676ae58d572'
       }
-    },
-    slotMap: { home: 'banner468', article: 'native', tool: 'native' }
+    }
   };
 
   function blockedPage() {
@@ -44,73 +47,52 @@
     });
   }
 
-  function addScript(src, parent) {
-    var script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    (parent || document.head).appendChild(script);
-    return script;
-  }
-
-  function activateSlot(slot, type) {
-    slot.hidden = false;
-    slot.classList.add('ad-slot-active');
-    slot.setAttribute('aria-label', 'Advertisement');
-    slot.textContent = '';
-    if (type === 'native') {
-      var box = document.createElement('div');
-      box.id = config.placements.native.containerId;
-      slot.appendChild(box);
-      addScript(config.placements.native.src, slot);
-    } else {
-      var holder = document.createElement('div');
-      holder.className = 'ad-unit-banner';
-      global.atOptions = {
-        key: config.placements.banner468.key,
-        format: 'iframe',
-        height: config.placements.banner468.height,
-        width: config.placements.banner468.width,
-        params: {}
-      };
-      slot.appendChild(holder);
-      addScript(config.placements.banner468.src, holder);
+  function hasCreative(slot) {
+    if (slot.querySelector('iframe')) return true;
+    var box = slot.querySelector('[id^="container-"]');
+    if (box && box.children.length) return true;
+    var unit = slot.querySelector('.ad-unit-banner');
+    if (unit) {
+      return Array.prototype.some.call(unit.children, function (child) {
+        return child.tagName !== 'SCRIPT';
+      });
     }
+    return false;
   }
 
-  function addSmartLink() {
+  function addFallback(slot) {
+    if (hasCreative(slot) || slot.querySelector('.ad-fallback')) return;
     var p = config.placements.smartlink;
-    var wrap = document.createElement('span');
-    wrap.className = 'sponsored-links';
     var link = document.createElement('a');
+    link.className = 'ad-fallback';
     link.href = p.href;
     link.target = '_blank';
     link.rel = p.rel;
     link.textContent = p.label;
-    wrap.appendChild(link);
-    wrap.appendChild(document.createTextNode(' · '));
-    var footer = document.querySelector('.footer-bottom');
-    if (footer) footer.insertBefore(wrap, footer.firstChild);
-    else document.body.appendChild(wrap);
+    slot.appendChild(link);
+    if (global.MutationObserver) {
+      var observer = new MutationObserver(function () {
+        if (hasCreative(slot) && link.parentNode) {
+          link.parentNode.removeChild(link);
+          observer.disconnect();
+        }
+      });
+      observer.observe(slot, { childList: true, subtree: true });
+    }
   }
 
   function init() {
-    var testMode = /[?&]noads=1(?:&|$)/.test(location.search);
-    if (!config.enabled || testMode || blockedPage()) {
-      document.querySelectorAll('[data-ad-slot]').forEach(function (slot) { slot.hidden = true; });
-      return;
-    }
+    var suppressed = !config.enabled || /[?&]noads=1(?:&|$)/.test(location.search) || blockedPage();
     document.querySelectorAll('[data-ad-slot]').forEach(function (slot) {
-      var type = config.slotMap[slot.getAttribute('data-ad-slot')];
-      if (!type || !config.placements[type] || !config.placements[type].enabled) {
+      if (suppressed) {
         slot.hidden = true;
+        slot.classList.remove('ad-slot-active');
         return;
       }
-      activateSlot(slot, type);
+      slot.hidden = false;
+      slot.classList.add('ad-slot-active');
+      global.setTimeout(function () { addFallback(slot); }, config.fallbackDelay);
     });
-    if (config.placements.popunder.enabled) addScript(config.placements.popunder.src, document.head);
-    if (config.placements.socialBar.enabled) addScript(config.placements.socialBar.src, document.head);
-    if (config.placements.smartlink.enabled) addSmartLink();
   }
 
   global.StudentHub = global.StudentHub || {};
