@@ -22,11 +22,20 @@
         if (e.target.closest('a')) setOpen(false);
       });
     }
-    var path = location.pathname.replace(/\/index\.html$/, '/');
+    function normalized(url) {
+      try {
+        return new URL(url, location.href).pathname.replace(/\\/g, '/')
+          .replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
+      } catch (e) { return ''; }
+    }
+    var current = normalized(location.href);
+    var home = normalized(SH.rootUrl('index.html'));
     document.querySelectorAll('#primary-navigation a[href]').forEach(function (link) {
       var href = link.getAttribute('href');
-      if (!href || href === '/' || href === '#') return;
-      if (path === href || (href !== '/' && path.indexOf(href) === 0)) {
+      if (!href || href.charAt(0) === '#') return;
+      var target = normalized(href.split('#')[0]);
+      if (!target || target === home) return;
+      if (current === target || current.indexOf(target + '/') === 0) {
         link.setAttribute('aria-current', 'page');
       }
     });

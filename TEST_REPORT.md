@@ -8,7 +8,7 @@ Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via 
 | Command | Result |
 | --- | --- |
 | `node --test tests` | **18/18 passed** |
-| `node tests/browser-smoke.js` | **37/37 passed** |
+| `node tests/browser-smoke.js` | **41/41 passed** |
 
 ### Unit tests (10 suites)
 
@@ -36,7 +36,7 @@ Independent calculation checks compare output against separately calculated expe
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
 - Ad slots are disabled by default and no ad-network code is present.
 
-### Real-browser smoke tests (37 checks)
+### Real-browser smoke tests (41 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
@@ -48,6 +48,7 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 6. Instant search finds the right tool; theme toggle changes `data-theme`; offline page renders.
 7. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
 8. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page.
+9. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
 
 No JavaScript console exceptions were observed in any passing check.
 
@@ -60,6 +61,7 @@ No JavaScript console exceptions were observed in any passing check.
 - Importing a backup with null preference values broke search and favourites; getters now coerce to safe arrays.
 - Service workers were only registered on HTTPS, preventing local preview registration on `127.0.0.1`.
 - `/about/`, `/workspace/` etc. needed directory `index.html` copies to work on plain static servers.
+- Pages used root-relative paths (`/assets/...`), so opening the files directly from disk resolved CSS/JS to `C:\assets\...` and the UI appeared unstyled. The generator now emits folder-relative URLs plus a `data-base` marker; tool links point to explicit `index.html` files; the service worker also caches those URLs. The manifest is injected only for HTTP(S) to avoid a harmless `file://` CORS warning.
 
 ## Not measured in this environment
 

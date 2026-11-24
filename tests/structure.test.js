@@ -60,23 +60,20 @@ test('tool pages contain instructions, formulas, FAQs, related links and structu
   });
 });
 
-test('all internal links resolve to a generated file', () => {
-  const routeToFile = route => {
-    const clean = route.split('#')[0] || '/';
-    if (clean === '/' || clean === '') return 'index.html';
-    if (clean === '/sitemap.xml') return 'sitemap.xml';
-    if (clean === '/manifest.webmanifest') return 'manifest.webmanifest';
-    const without = clean.replace(/^\//, '').replace(/\/$/, '');
-    if (exists(without) && fs.statSync(path.join(ROOT, without)).isFile()) return without;
-    if (exists(path.join(without, 'index.html'))) return path.join(without, 'index.html');
-    if (exists(without + '.html')) return without + '.html';
-    return null;
-  };
-  PAGES.forEach(page => {
+const DIR_PAGES = ['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace'].map(name => `${name}/index.html`);
+
+test('all internal links and asset paths resolve to generated files', () => {
+  // Pages use paths relative to their own folder so they work from disk too.
+  PAGES.concat(DIR_PAGES).forEach(page => {
     const html = read(page);
-    const hrefs = Array.from(html.matchAll(/href="(\/[^"]*)"/g)).map(m => m[1]);
-    hrefs.forEach(href => {
-      assert.ok(routeToFile(href), `${page}: broken internal link ${href}`);
+    const dir = path.posix.dirname(page.replace(/\\/g, '/'));
+    const paths = Array.from(html.matchAll(/(?:href|src)="([^"]*)"/g)).map(m => m[1])
+      .filter(value => value && !/^(https?:|mailto:|data:|#)/.test(value));
+    paths.forEach(value => {
+      const relative = value.split('#')[0];
+      if (!relative) return;
+      const resolved = path.posix.normalize(path.posix.join(dir, relative));
+      assert.ok(exists(resolved) && fs.statSync(path.join(ROOT, resolved)).isFile(), `${page}: broken local path ${value}`);
     });
   });
 });
@@ -95,7 +92,10 @@ test('sitemap, robots, manifest and icons are complete', () => {
 test('service worker precaches every tool page and app shell', () => {
   const sw = read('sw.js');
   assert.ok(/var CACHE = 'studenthub-[a-f0-9]{12}'/.test(sw));
-  IDS.forEach(id => assert.ok(sw.includes(`/tools/${id}/`), `${id} precached`));
+  IDS.forEach(id => {
+    assert.ok(sw.includes(`/tools/${id}/`), `${id} precached`);
+    assert.ok(sw.includes(`/tools/${id}/index.html`), `${id}/index.html precached`);
+  });
   ['/offline/', '/assets/css/main.css', '/assets/js/core.js', '/assets/js/calculations.js'].forEach(u => assert.ok(sw.includes(u), `${u} precached`));
 });
 

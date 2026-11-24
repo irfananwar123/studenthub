@@ -82,7 +82,7 @@
       if (!q) return;
       if (SH.storage) SH.storage.prefs.addRecentSearch(q);
       var first = SH.searchTools(q)[0];
-      location.href = first ? SH.toolUrl(first.id) : '/#all-tools';
+      location.href = first ? SH.toolUrl(first.id) : SH.homeUrl('#all-tools');
     });
     document.addEventListener('click', function (e) {
       if (!container.contains(e.target)) { list.classList.add('is-hidden'); }

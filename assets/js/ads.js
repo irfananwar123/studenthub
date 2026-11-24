@@ -14,7 +14,10 @@
   function init() {
     document.querySelectorAll('[data-ad-slot]').forEach(function (node) {
       var name = node.getAttribute('data-ad-slot');
-      var allowed = config.pagesWithoutAds.indexOf(location.pathname) === -1;
+      var path = location.pathname.replace(/\\/g, '/').toLowerCase();
+      var allowed = !config.pagesWithoutAds.some(function (p) {
+        return path.indexOf(p.replace(/^\//, '')) !== -1;
+      });
       if (!config.enabled || !allowed || !config.slots[name]) {
         node.hidden = true;
         return;

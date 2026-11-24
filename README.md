@@ -55,6 +55,8 @@ python -m http.server 8765
 
 Open `http://127.0.0.1:8765/`. Service workers are enabled on localhost/127.0.0.1 and on HTTPS.
 
+You can also open `index.html` directly (double-click it) and browse the whole site from disk. Every page uses URLs relative to its own folder, so CSS, JavaScript, tools and internal links all work without a server. Only install/offline features (service worker and web manifest) require HTTP(S) or localhost.
+
 ---
 
 ## 3. Before publishing
@@ -77,10 +79,10 @@ Open `http://127.0.0.1:8765/`. Service workers are enabled on localhost/127.0.0.
 
 ```bash
 node --test tests          # 18 calculation + structure checks
-node tests/browser-smoke.js # 37 real Chrome checks (needs Google Chrome installed)
+node tests/browser-smoke.js # 41 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, theme switching and mobile overflow. It closes both processes when finished.
+The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, theme switching and mobile overflow. It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
 
 See `TEST_REPORT.md` for the latest results and known limits.
 

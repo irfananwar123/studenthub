@@ -109,16 +109,22 @@ async function main() {
     const check = async (name, url, expression, expected) => {
       exceptions = [];
       try {
-        await send('Page.navigate', { url: BASE + url });
+        const target = /^(https?:|file:)\/\//.test(url) ? url : BASE + url;
+        await send('Page.navigate', { url: target });
         await waitFor(async () => {
           const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
           return r.result.value === 'complete';
-        }, 15000, 'load ' + url);
+        }, 15000, 'load ' + target);
         await sleep(150);
         const r = await send('Runtime.evaluate', {
           expression: `(async()=>{${HELPERS}\n${expression}})()`, awaitPromise: true, returnByValue: true
         });
         if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
+        // Chrome cannot fetch a web manifest from file:// (origin null). The UI,
+        // tools and styles are unaffected, so ignore that specific browser note.
+        if (target.startsWith('file:') && exceptions.some(e => /Access to manifest/.test(e))) {
+          exceptions = exceptions.filter(e => !/Access to manifest|Failed to load resource/.test(e));
+        }
         const text = String(r.result.value || '');
         const ok = expected ? text.includes(expected) && exceptions.length === 0
           : !!text && !/Check your input|Enter (a |both |at least |two )/i.test(text) && exceptions.length === 0;
@@ -132,6 +138,7 @@ async function main() {
       await check(id, `/tools/${id}/`, expression);
     }
     await check('homepage-search', '/', `set('home-search','attendance');await wait(50);return document.getElementById('home-search-results').textContent.includes('Attendance Calculator')?'search ok':'search failed';`);
+    await check('manifest-http', '/', `const l=document.querySelector('link[rel=manifest]');return l?l.getAttribute('href'):'missing';`, 'manifest.webmanifest');
     await check('theme-switch', '/', `const before=document.documentElement.dataset.theme;document.querySelector('[data-theme-toggle]').click();const after=document.documentElement.dataset.theme;return before!==after?'theme '+before+'->'+after:'theme failed';`);
     await check('workspace', '/workspace/', `click('ws-export');await wait(600);return document.getElementById('ws-status').textContent.length>0?'export ok':'export failed';`);
     await check('contact', '/contact/', `set('ct-subject','Hello');set('ct-message','Test message');click('ct-copy');return 'contact loaded';`);
@@ -143,6 +150,12 @@ async function main() {
     await check('edge-invalid-date', '/tools/age-calculator/', `set('age-birth','2023-02-29');set('age-asof','2024-01-01');submit('age-calculator-form');return R();`, 'valid birth date');
     await check('storage-roundtrip', '/workspace/', `const json=await StudentHub.storage.exportData();await StudentHub.storage.importData(json);return 'roundtrip ok';`, 'roundtrip ok');
     await check('service-worker', '/', `await wait(1800);const r=await navigator.serviceWorker.getRegistration();return r?'sw registered':'no registration';`, 'sw registered');
+
+    // Opening the HTML files directly from disk (file://) must keep the full UI.
+    const FILE_ROOT = 'file:///' + ROOT.replace(/\\/g, '/');
+    await check('file-homepage-styled', `${FILE_ROOT}/index.html`, `const l=[...document.querySelectorAll('link[rel=stylesheet]')];return (l.length===4 && l.every(x=>x.href.indexOf('/assets/css/')>-1) && !document.querySelector('link[rel=manifest]') && getComputedStyle(document.body).backgroundColor!=='rgba(0, 0, 0, 0)')?'styled from disk':'unstyled';`, 'styled from disk');
+    await check('file-tool-styled-and-working', `${FILE_ROOT}/tools/percentage-calculator/index.html`, `set('p-percent',15);set('p-whole',200);submit('percentage-calculator-form');const styled=getComputedStyle(document.body).backgroundColor!=='rgba(0, 0, 0, 0)';return styled?R():'unstyled';`, '30');
+    await check('file-relative-links', `${FILE_ROOT}/tools/percentage-calculator/index.html`, `return document.querySelector('.site-header .brand').getAttribute('href')+'|'+StudentHub.toolUrl('quiz-maker')+'|'+StudentHub.homeUrl('#all-tools');`, '../../index.html|../../tools/quiz-maker/index.html|../../index.html#all-tools');
 
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
     await check('mobile-homepage-no-overflow', '/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');

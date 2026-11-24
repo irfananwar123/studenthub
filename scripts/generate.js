@@ -16,10 +16,36 @@ const content = Object.assign({},
   require('./content-academic'), require('./content-planning'),
   require('./content-learning'), require('./content-writing'), require('./content-utils'));
 
+const generated = {};
+/* Pages live at different depths (root, /about/, /tools/<id>/). Absolute site
+   paths such as /assets/... only work at the domain root, so every generated
+   page receives URLs relative to its own folder. This also makes the site work
+   when index.html files are opened directly from disk (file://). */
+function baseFor(rel) {
+  const dir = path.posix.dirname(rel.replace(/\\/g, '/'));
+  if (dir === '.' || dir === '/') return '';
+  return '../'.repeat(dir.split('/').filter(Boolean).length);
+}
+function relativize(text, rel) {
+  const base = baseFor(rel);
+  let out = text.replace(/(href|src)="(\/[^"]*)"/g, function (_, attr, url) {
+    let target;
+    if (url === '/') target = base + 'index.html';
+    else if (url.charAt(1) === '#') target = base + 'index.html' + url.slice(1);
+    else if (url.slice(-1) === '/') target = base + url.slice(1) + 'index.html';
+    else target = base + url.slice(1);
+    return attr + '="' + target + '"';
+  });
+  out = out.replace(/<html([^>]*)>/, function (_, attrs) {
+    return '<html' + attrs.replace(/\sdata-base="[^"]*"/, '') + ' data-base="' + base + '">';
+  });
+  return out;
+}
 function write(rel, text) {
   const full = path.join(ROOT, rel);
   fs.mkdirSync(path.dirname(full), { recursive: true });
-  fs.writeFileSync(full, text, 'utf8');
+  generated[rel] = text;
+  fs.writeFileSync(full, rel.endsWith('.html') ? relativize(text, rel) : text, 'utf8');
 }
 function jsonLd(obj) {
   return `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
@@ -42,7 +68,7 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <meta property="og:title" content="${opts.title}">
 <meta property="og:description" content="${opts.desc}">
 <meta property="og:url" content="${canonical}">
-<link rel="manifest" href="/manifest.webmanifest">
+<script>(function(){if(location.protocol==='file:')return;var l=document.createElement('link');l.rel='manifest';l.href=(document.documentElement.getAttribute('data-base')||'')+'manifest.webmanifest';document.head.appendChild(l);})();</script>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/themes.css">
 <link rel="stylesheet" href="/assets/css/main.css">
@@ -369,7 +395,7 @@ write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc:
 
 // Pretty URLs work on any static host: /about/ and /about.html both resolve.
 ['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace'].forEach(function (name) {
-  write(`${name}/index.html`, fs.readFileSync(path.join(ROOT, `${name}.html`), 'utf8'));
+  write(`${name}/index.html`, generated[`${name}.html`]);
 });
 
 // Sitemap
@@ -394,6 +420,9 @@ const precache = [
   ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace'].map(n => `/assets/js/${n}.js`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];
+/* Links now point at explicit index.html files so they work from disk too;
+   cache those URLs as well, otherwise offline navigation would miss. */
+precache.push(...precache.filter(u => u.endsWith('/')).map(u => u + 'index.html'));
 const hash = crypto.createHash('sha256');
 function localFile(u) {
   if (u.endsWith('/')) {

@@ -6,7 +6,7 @@
     var secureLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || secureLocal)) {
       global.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
+        navigator.serviceWorker.register(SH.rootUrl('sw.js'), { scope: SH.base() || '/' }).catch(function () {});
       });
     }
     var indicator = document.getElementById('offline-indicator');

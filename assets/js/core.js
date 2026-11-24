@@ -95,7 +95,13 @@
     });
     return node;
   }
-  function toolUrl(id) { return '/tools/' + id + '/'; }
+  /* Each page carries data-base (empty at the root, ../../ in tool folders).
+     Building URLs from it keeps links working on a static host, under a
+     subpath and when the HTML files are opened directly from disk. */
+  function base() { return document.documentElement.getAttribute('data-base') || ''; }
+  function rootUrl(p) { return base() + String(p || '').replace(/^\//, ''); }
+  function homeUrl(hash) { return rootUrl('index.html') + (hash || ''); }
+  function toolUrl(id) { return rootUrl('tools/' + id + '/index.html'); }
   function findTool(id) { return TOOLS.find(function (t) { return t.id === id; }) || null; }
   function searchTools(query) {
     var q = String(query || '').trim().toLowerCase();
@@ -125,6 +131,7 @@
   global.StudentHub = global.StudentHub || {};
   Object.assign(global.StudentHub, {
     SITE: SITE, TOOLS: TOOLS, ICONS: ICONS, icon: icon, el: el,
+    base: base, rootUrl: rootUrl, homeUrl: homeUrl,
     toolUrl: toolUrl, findTool: findTool, searchTools: searchTools,
     related: related, categories: categories
   });
