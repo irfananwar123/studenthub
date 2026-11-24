@@ -120,11 +120,24 @@ test('shipped JavaScript has no eval, innerHTML or external service calls', () =
   });
 });
 
-test('ad slots are disabled by default and no ad network code is present', () => {
+test('approved ad tags are configured, disclosed and placed in real slots', () => {
   const ads = read('assets/js/ads.js');
-  assert.ok(ads.includes('enabled: false'));
+  assert.ok(ads.includes('enabled: true'), 'ads are live');
+  [
+    'https://afders.org/1/3c0e12112693371a49e8da1ecaf03499',
+    'https://arwf.org/4/f9c719598061c9d7137f077570fe38b1',
+    'https://bicea.org/21/9b5ea66616f3e02be4f9a4fe968d7547',
+    'https://bicea.org/14/3d7fa5667db565ec11331c4b0846ee9b',
+    'https://bicea.org/22/96d3c3868be22016392b6676ae58d572'
+  ].forEach(url => assert.ok(ads.includes(url), `tag configured: ${url}`));
+  assert.ok(ads.includes("containerId: 'container-9b5ea66616f3e02be4f9a4fe968d7547'"), 'native container id');
+  assert.ok(ads.includes("rel: 'sponsored noopener noreferrer'"), 'sponsored smart link rel');
+  assert.ok(read('index.html').includes('data-ad-slot="home"'), 'home slot');
+  assert.ok(read('tools/percentage-calculator/index.html').includes('data-ad-slot="tool"'), 'tool slot');
+  assert.ok(read('articles/study-tips/index.html').includes('data-ad-slot="article"'), 'article slot');
+  const privacy = read('privacy-policy.html');
+  ['afders.org', 'arwf.org', 'bicea.org', 'Advertising and third parties'].forEach(s => assert.ok(privacy.includes(s), `privacy discloses ${s}`));
   PAGES.forEach(page => {
-    const html = read(page);
-    assert.ok(!/adsbygoogle|googlesyndication|pagead2/.test(html), `${page}: no ad network tags`);
+    assert.ok(!/adsbygoogle|googlesyndication|pagead2/.test(read(page)), `${page}: no unrelated ad network tags`);
   });
 });

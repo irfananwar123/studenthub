@@ -99,7 +99,7 @@ function header() {
 function footer() {
   return `<footer class="site-footer"><div class="container">
     <div class="footer-grid">
-      <div class="footer-brand"><a class="brand" href="/" style="color:#fff">${brand.replace(/<a[^>]*>|<\/a>/g, '')}</a><p>Free, private study tools that work in your browser. No account, no subscription, no tracking.</p></div>
+      <div class="footer-brand"><a class="brand" href="/" style="color:#fff">${brand.replace(/<a[^>]*>|<\/a>/g, '')}</a><p>Free, private study tools that work in your browser. No account, no subscription. Adverts help keep it free.</p></div>
       <div><h3>Tools</h3><ul><li><a href="/tools/percentage-calculator/">Calculators</a></li><li><a href="/tools/pomodoro-timer/">Study planning</a></li><li><a href="/tools/flashcard-maker/">Learning tools</a></li><li><a href="/tools/word-counter/">Writing tools</a></li></ul></div>
       <div><h3>Learn</h3><ul><li><a href="/articles/study-tips/">Study tips</a></li><li><a href="/articles/active-recall/">Active recall</a></li><li><a href="/articles/spaced-repetition/">Spaced repetition</a></li><li><a href="/articles/exam-preparation/">Exam preparation</a></li></ul></div>
       <div><h3>StudentHub</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy-policy/">Privacy policy</a></li><li><a href="/terms/">Terms</a></li></ul></div>
@@ -147,7 +147,7 @@ function toolPage(t) {
     <div class="page-hero-head"><div><span class="eyebrow">${t.category}</span><h1>${c.h1}</h1><p>${c.intro}</p></div>
       <div class="btn-row"><button class="btn btn-secondary btn-small" type="button" data-favorite aria-pressed="false">${icon('star', 16)} <span data-favorite-label>Save</span></button><button class="btn btn-secondary btn-small" type="button" data-print>${icon('print', 16)} Print</button></div>
     </div>
-    <div class="ad-slot" data-ad-slot="tool" hidden aria-label="Reserved advertisement placement">Reserved advertising space — disabled</div>
+    <div class="ad-slot" data-ad-slot="tool" hidden aria-label="Reserved advertisement placement">Advertisement</div>
   </section>
   <section class="section" style="padding-top:.5rem"><div class="container tool-layout">
     <div class="card tool-panel"><h2>Use the tool</h2><form id="${t.id}-form" novalidate>${c.form}</form></div>
@@ -208,7 +208,7 @@ function homepage() {
       <div class="hero-panel-head"><span>WEEKLY STUDY SNAPSHOT</span><span>Private · on this device</span></div>
       <div class="mini-bars" aria-hidden="true"><span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:20%"></span></div>
       <div class="mini-stats"><div class="mini-stat"><strong>12.5h</strong><span>Studied this week</span></div><div class="mini-stat"><strong>8</strong><span>Sessions logged</span></div><div class="mini-stat"><strong>4</strong><span>Subjects tracked</span></div></div>
-    </div><div class="float-card">${icon('shield', 20)} No data leaves your device</div></div>
+    </div><div class="float-card">${icon('shield', 20)} Your notes stay on your device</div></div>
   </div></section>
 
   <section class="section section-soft" aria-labelledby="featured-heading"><div class="container"><div class="section-head"><span class="eyebrow">Start here</span><h2 id="featured-heading">Featured tools</h2><p>The tools students open most often, ready to use without setup.</p></div><div class="grid tool-grid">${featured.map(id => toolCard(find(id))).join('')}</div></div></section>
@@ -229,13 +229,13 @@ function homepage() {
 
   <section class="section section-soft" id="articles" aria-labelledby="articles-heading"><div class="container"><div class="section-head"><span class="eyebrow">Guides</span><h2 id="articles-heading">Helpful educational articles</h2><p>Short, practical reading — no paid content or pop-ups.</p></div><div class="grid grid-2">${articles.map(([slug, title, desc]) => `<article class="article-card"><div class="card-icon">${icon('pencil', 20)}</div><h3><a href="/articles/${slug}/">${title}</a></h3><p>${desc}</p><span class="card-link">Read guide →</span></article>`).join('')}</div></div></section>
 
-  <div class="container"><div class="ad-slot" data-ad-slot="home" hidden aria-label="Reserved advertisement placement">Reserved advertising space — disabled</div></div>
+  <div class="container"><div class="ad-slot" data-ad-slot="home" hidden aria-label="Reserved advertisement placement">Advertisement</div></div>
 
   <section class="section" aria-labelledby="faq-heading"><div class="container prose"><h2 id="faq-heading">Frequently asked questions</h2>${faq([
     ['Is StudentHub really free?', 'Yes. All tools are free to use, with no subscription and no paid API. The project is built with plain HTML, CSS and JavaScript.'],
     ['Do I need an account?', 'No. Everything works without signing in. Your notes, cards and progress are stored on your own device.'],
     ['Can I use StudentHub offline?', 'Yes. After a first visit, the app shell and tool pages are cached by the service worker so you can open them offline.'],
-    ['Where is my data stored?', 'Small preferences are kept in LocalStorage and larger collections in IndexedDB on your device. Nothing is sent to a server by StudentHub.'],
+    ['Where is my data stored?', 'Small preferences are kept in LocalStorage and larger collections in IndexedDB on your device. StudentHub itself does not upload them. Third-party ad scripts may collect standard browser information as described in the privacy policy.'],
     ['Can I use these tools for school submissions?', 'You can use the results as a guide, but always follow your institution’s rules and verify official grades and references.']
   ])}</div></section>
 </main>`;
@@ -311,7 +311,7 @@ function articlePage(slug, a) {
       <div class="notice">These are general study suggestions, not official exam regulations. Follow your institution’s guidance for exams and assessments.</div>
       <h2>Related tools</h2><div class="chip-list"><a href="/tools/study-timetable-maker/">Study Timetable Maker</a><a href="/tools/flashcard-maker/">Flashcard Maker</a><a href="/tools/pomodoro-timer/">Pomodoro Timer</a><a href="/tools/exam-countdown/">Exam Countdown</a></div>
     </article>
-    <aside class="card"><h2>Try a related tool</h2><p>Use the plan below to turn advice into action.</p><div class="grid">${['study-timetable-maker', 'flashcard-maker', 'pomodoro-timer'].map(id => toolCard(TOOLS.find(t => t.id === id))).join('')}</div><div class="ad-slot" data-ad-slot="article" hidden aria-label="Reserved advertisement placement">Reserved advertising space — disabled</div></aside>
+    <aside class="card"><h2>Try a related tool</h2><p>Use the plan below to turn advice into action.</p><div class="grid">${['study-timetable-maker', 'flashcard-maker', 'pomodoro-timer'].map(id => toolCard(TOOLS.find(t => t.id === id))).join('')}</div><div class="ad-slot" data-ad-slot="article" hidden aria-label="Reserved advertisement placement">Advertisement</div></aside>
   </div></section>
 </main>`;
   return shell({ title: `${a.title} | StudentHub`, desc: a.desc, path: `/articles/${slug}/`, body });
@@ -327,10 +327,10 @@ Object.keys(articleData).forEach(slug => write(`articles/${slug}/index.html`, ar
 const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Privacy policy</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Your data</span><h1>Privacy Policy</h1><p>StudentHub is designed so that your study data stays on your device. This page explains exactly what is stored and what is not.</p></section>
 <section class="section" style="padding-top:0"><div class="container prose">
-<h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service, no advertising code and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell or share personal information.</p>
+<h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
 <h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools and recent searches.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
-<h2>Third parties</h2><p>The site uses no external scripts, fonts or tracking pixels. If advertising is enabled in a future release, it will be disclosed here first and will not be placed on privacy-sensitive interfaces.</p>
+<h2>Advertising and third parties</h2><p>To keep StudentHub free, general pages load ad scripts from third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>They do not receive your notes, flashcards, quizzes or other workspace collections. Ads are not placed on the privacy policy, contact or workspace pages. You can block these domains with a browser extension if you prefer; all tools will keep working. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
 <h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 24 November 2026.</p>
 </div></section></main>`;
@@ -339,10 +339,11 @@ write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', 
 const termsBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Terms of use</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Using the site</span><h1>Terms of Use</h1><p>Short, plain-language terms for a free browser-based study tool.</p></section>
 <section class="section" style="padding-top:0"><div class="container prose">
-<h2>Free to use</h2><p>StudentHub is provided free of charge for personal study and educational use. There is no subscription, and no account is required.</p>
+<h2>Free to use</h2><p>StudentHub is provided free of charge for personal study and educational use. There is no subscription, and no account is required. Advertising from third-party networks funds the site; see the privacy policy for the domains involved.</p>
 <h2>Results are guides, not official outcomes</h2><p>Calculators, predictors and citation output are based only on what you enter. They are not official grades, predictions guaranteed to happen, or verified bibliographic records. Always confirm results with your school, university or style guide.</p>
 <h2>Your responsibilities</h2><p>Enter accurate information, keep backups of important notes, and do not use the tools for unlawful purposes. You are responsible for decisions you make using the results.</p>
 <h2>Data and availability</h2><p>Data is stored locally on your device. We aim to keep the site available but provide no guarantee of uninterrupted service. Browser storage can be cleared by you or by device maintenance.</p>
+<h2>Third-party advertisements</h2><p>Adverts are supplied by external networks and are not controlled by StudentHub. Clicking an advert takes you to a third-party site with its own terms and privacy practices. StudentHub is not responsible for the content of those sites or for advertiser claims.</p>
 <h2>Changes</h2><p>Tools and these terms may change over time. Continued use after a change means you accept the updated terms.</p>
 </div></section></main>`;
 write('terms.html', staticPage({ title: 'Terms of Use | StudentHub', desc: 'Plain-language terms for using the free StudentHub study tools and understanding their limitations.', path: '/terms/', body: termsBody }));
@@ -351,7 +352,7 @@ const aboutBody = `<main id="main"><nav class="breadcrumbs container" aria-label
 <section class="page-hero container"><span class="eyebrow">About the project</span><h1>About StudentHub</h1><p>A free, independent study workspace built with plain web technologies and designed to work on ordinary phones and laptops.</p></section>
 <section class="section" style="padding-top:0"><div class="container prose">
 <h2>Why it exists</h2><p>Students often need a calculator, a planner and a place for revision notes, but end up juggling several sites that require accounts or subscriptions. StudentHub puts a focused set of tools in one place and keeps the data on the device.</p>
-<h2>How it is built</h2><p>HTML5, modern CSS and vanilla JavaScript. Calculations happen locally. A service worker caches public files for offline use, and larger collections are stored in IndexedDB. There are no paid APIs, no external font service and no tracking scripts.</p>
+<h2>How it is built</h2><p>HTML5, modern CSS and vanilla JavaScript. Calculations happen locally. A service worker caches public files for offline use, and larger collections are stored in IndexedDB. There are no paid APIs and no external font service. The site's own code has no analytics; third-party ad scripts are disclosed in the privacy policy.</p>
 <h2>What it is not</h2><p>StudentHub is not an official university system, an AI tutor, or a guarantee of academic results. It does not check the factual accuracy of your notes or citations.</p>
 <h2>Privacy first</h2><p>There is no login and no server-side storage of your study material. Read the <a href="/privacy-policy/">privacy policy</a> for details.</p>
 <h2>Get involved</h2><p>Bug reports and suggestions are welcome through the <a href="/contact/">contact page</a>.</p>

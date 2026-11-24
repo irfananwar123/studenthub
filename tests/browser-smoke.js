@@ -103,18 +103,20 @@ async function main() {
       const id = nextId++; pending.set(id, { resolve, reject });
       ws.send(JSON.stringify({ id, method, params }));
     });
-    await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable');
+    await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable'); await send('Network.enable');
 
     const results = [];
-    const check = async (name, url, expression, expected) => {
+    const check = async (name, url, expression, expected, opts = {}) => {
       exceptions = [];
       try {
         const target = /^(https?:|file:)\/\//.test(url) ? url : BASE + url;
-        await send('Page.navigate', { url: target });
+        // Normal checks run with ads suppressed; the dedicated ad check opts in.
+        const navUrl = opts.ads ? target : target + (target.indexOf('?') === -1 ? '?noads=1' : '&noads=1');
+        await send('Page.navigate', { url: navUrl });
         await waitFor(async () => {
           const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
-          return r.result.value === 'complete';
-        }, 15000, 'load ' + target);
+          return opts.ads ? r.result.value === 'interactive' || r.result.value === 'complete' : r.result.value === 'complete';
+        }, 15000, 'load ' + navUrl);
         await sleep(150);
         const r = await send('Runtime.evaluate', {
           expression: `(async()=>{${HELPERS}\n${expression}})()`, awaitPromise: true, returnByValue: true
@@ -125,6 +127,9 @@ async function main() {
         if (target.startsWith('file:') && exceptions.some(e => /Access to manifest/.test(e))) {
           exceptions = exceptions.filter(e => !/Access to manifest|Failed to load resource/.test(e));
         }
+        // Ad domains are deliberately blocked in the ad check; their failed
+        // resource requests are expected and do not indicate a site error.
+        if (opts.ads) exceptions = exceptions.filter(e => !/Failed to load resource|net::ERR/.test(e));
         const text = String(r.result.value || '');
         const ok = expected ? text.includes(expected) && exceptions.length === 0
           : !!text && !/Check your input|Enter (a |both |at least |two )/i.test(text) && exceptions.length === 0;
@@ -150,6 +155,13 @@ async function main() {
     await check('edge-invalid-date', '/tools/age-calculator/', `set('age-birth','2023-02-29');set('age-asof','2024-01-01');submit('age-calculator-form');return R();`, 'valid birth date');
     await check('storage-roundtrip', '/workspace/', `const json=await StudentHub.storage.exportData();await StudentHub.storage.importData(json);return 'roundtrip ok';`, 'roundtrip ok');
     await check('service-worker', '/', `await wait(1800);const r=await navigator.serviceWorker.getRegistration();return r?'sw registered':'no registration';`, 'sw registered');
+
+    // Ads are live by default. Block the external domains so the check is
+    // deterministic, then verify our own injection code built the right DOM.
+    await send('Network.setBlockedURLs', { urls: ['*://*afders.org/*', '*://*arwf.org/*', '*://*bicea.org/*'] });
+    await check('ads-live-dom', '/', `const slot=document.querySelector('[data-ad-slot="home"]');const link=document.querySelector('.sponsored-links a');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src);const ok=slot&&!slot.hidden&&slot.classList.contains('ad-slot-active')&&slot.textContent.trim()===''&&window.atOptions&&window.atOptions.key==='96d3c3868be22016392b6676ae58d572'&&link&&link.rel.indexOf('sponsored')>-1&&link.href.indexOf('arwf.org/4/')>-1&&s.some(x=>x.indexOf('afders.org/1/')>-1)&&s.some(x=>x.indexOf('bicea.org/14/')>-1)&&s.some(x=>x.indexOf('bicea.org/22/')>-1);return ok?'ads ready':'ads missing';`, 'ads ready', { ads: true });
+    await check('ads-native-dom', '/tools/percentage-calculator/', `const slot=document.querySelector('[data-ad-slot="tool"]');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src);const ok=slot&&!slot.hidden&&slot.querySelector('#container-9b5ea66616f3e02be4f9a4fe968d7547')&&s.some(x=>x.indexOf('bicea.org/21/')>-1);return ok?'native ready':'native missing';`, 'native ready', { ads: true });
+    await send('Network.setBlockedURLs', { urls: [] });
 
     // Opening the HTML files directly from disk (file://) must keep the full UI.
     const FILE_ROOT = 'file:///' + ROOT.replace(/\\/g, '/');

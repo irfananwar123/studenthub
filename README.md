@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 25 working tools, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account, no external scripts.
+A complete, free, browser-based student productivity platform: 25 working tools, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Default production URL used for canonical tags:** `https://studenthub.pages.dev`
 
@@ -71,7 +71,17 @@ You can also open `index.html` directly (double-click it) and browse the whole s
    ```
    No secrets belong in this file. The contact form only opens the visitor's email app; it never sends data to a server.
 3. **Check the privacy policy** and update the contact details if needed.
-4. **Advertising stays off.** It is disabled in `assets/js/ads.js` (`enabled: false`). Do not enable it until an approved publisher account exists. Replace the placeholder renderer with that platform's official tag, keep reserved slots hidden otherwise, and never place ads on `/privacy-policy/`, `/contact/` or `/workspace/`.
+4. **Advertising is live.** All supplied network tags are configured in `assets/js/ads.js`:
+
+   | Placement | Where it appears | Where to change it |
+   | --- | --- | --- |
+   | 468×60 display banner | Homepage slot | `placements.banner468` + `slotMap.home` |
+   | Native banner | Tool and article slots | `placements.native` + `slotMap.tool/article` |
+   | Social bar | All general pages | `placements.socialBar` |
+   | Pop-under | Every page view, including mobile | `placements.popunder` |
+   | Sponsored SmartLink | Footer of general pages | `placements.smartlink` |
+
+   Set `enabled: false` on any individual placement, or `config.enabled: false` to turn every ad off. Ads are intentionally skipped on `/privacy-policy/`, `/contact/` and `/workspace/`. Appending `?noads=1` to any URL also suppresses them (used by the automated tests). If a network replaces a tag, update only its URL/key in `ads.js` — the page HTML does not need changing.
 
 ---
 
@@ -141,12 +151,12 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - **25 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference and unit converter.
 - **Personal workspace**: favourites, recent tools, progress, all local collections, JSON export/import and clear-all.
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
-- **Privacy**: no analytics, no external scripts, no server storage, no login. LocalStorage for small preferences; IndexedDB for collections.
+- **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for small preferences; IndexedDB for collections.
 - **PWA**: manifest, installable icons, versioned service worker, offline fallback, offline indicator and automatic cache cleanup.
 - **SEO**: unique titles/descriptions/canonical/OG tags, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, sitemap and robots.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.
 - **Performance**: system fonts, no dependencies, small vanilla scripts, deferred JS, tiny PNG/SVG assets, no layout-shifting imagery, simple CSS animations only.
-- **Ad readiness**: three labelled, disabled-by-default reserved slots with a single configuration point.
+- **Advertising**: five live placements (banner, native, social bar, pop-under, SmartLink) configured in one file, with per-placement switches and three ad-free pages.
 
 ---
 
@@ -159,7 +169,7 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - Revision notes are plain text; there is no rich-text formatting.
 - Flashcard tracking marks known/difficult but does not schedule spaced-review dates.
 - There are no push notifications; deadline reminders must be added to a personal calendar.
-- Google AdSense is not integrated. Nothing is promised about approval or revenue.
+- Google AdSense is not integrated; the supplied third-party network tags are used instead. Earnings and referral traffic are not guaranteed, and ad networks can change or block tags without notice.
 - Core Web Vitals were not measured with Lighthouse in this environment; real-world values depend on hosting, device and network.
 
 The site is otherwise fully functional; no buttons are decorative or non-functional.
