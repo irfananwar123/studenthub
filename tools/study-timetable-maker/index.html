@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Timetable Maker — Editable Weekly Plan with Conflict Checks | StudentHub</title>
+<meta name="description" content="Create an editable weekly study timetable from your subjects, available hours and preferred times. Detect conflicts, save locally and print.">
+<link rel="canonical" href="https://studenthub.pages.dev/tools/study-timetable-maker/">
+<meta name="theme-color" content="#0a1c3d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="StudentHub">
+<meta property="og:title" content="Study Timetable Maker — Editable Weekly Plan with Conflict Checks | StudentHub">
+<meta property="og:description" content="Create an editable weekly study timetable from your subjects, available hours and preferred times. Detect conflicts, save locally and print.">
+<meta property="og:url" content="https://studenthub.pages.dev/tools/study-timetable-maker/">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/themes.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<link rel="stylesheet" href="/assets/css/responsive.css">
+<script>(function(){try{var t=JSON.parse(localStorage.getItem('studenthub:theme')||'"auto"');var d=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://studenthub.pages.dev/"},{"@type":"ListItem","position":2,"name":"Study Planning","item":"https://studenthub.pages.dev/#categories"},{"@type":"ListItem","position":3,"name":"Study Timetable Maker","item":"https://studenthub.pages.dev/tools/study-timetable-maker/"}]}</script>
+</head>
+<body data-page="tool" data-tool-id="study-timetable-maker">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header"><div class="container header-inner">
+    <a class="brand" href="/" aria-label="StudentHub home"><span class="brand-mark"><svg class="sh-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></span><span>Student<span class="accent">Hub</span></span></a>
+    <button class="icon-button menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="primary-navigation" aria-label="Open navigation"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></button>
+    <nav id="primary-navigation" aria-label="Primary navigation"><ul class="nav-list">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#all-tools">All tools</a></li>
+      <li><a href="/#categories">Categories</a></li>
+      <li><a href="/workspace/">My workspace</a></li>
+      <li><a href="/#articles">Articles</a></li>
+      <li><a href="/about/">About</a></li>
+    </ul></nav>
+    <div class="header-actions">
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Switch theme"><svg class="sh-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg><span class="visually-hidden" data-theme-label>Dark</span></button>
+    </div>
+  </div></header>
+<div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
+<main id="main" data-page="tool" data-tool-id="study-timetable-maker">
+  <nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/#categories">Study Planning</a></li><li aria-current="page">Study Timetable Maker</li></ol></nav>
+  <section class="page-hero container">
+    <div class="page-hero-head"><div><span class="eyebrow">Study Planning</span><h1>Study Timetable Maker</h1><p>Build a realistic weekly plan instead of a wish list. Add subjects with preferred days and time slots, set how many hours you can study, and the planner places sessions while flagging overlaps. Your schedule stays in this browser and can be printed.</p></div>
+      <div class="btn-row"><button class="btn btn-secondary btn-small" type="button" data-favorite aria-pressed="false"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.3-6.2 3.3L7 14.2 2 9.3l6.9-1Z"></path></svg> <span data-favorite-label>Save</span></button><button class="btn btn-secondary btn-small" type="button" data-print><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg> Print</button></div>
+    </div>
+    <div class="ad-slot" data-ad-slot="tool" hidden aria-label="Reserved advertisement placement">Reserved advertising space — disabled</div>
+  </section>
+  <section class="section" style="padding-top:.5rem"><div class="container tool-layout">
+    <div class="card tool-panel"><h2>Use the tool</h2><form id="study-timetable-maker-form" novalidate>
+      <div class="form-grid">
+        <div class="field"><label for="st-hours">Study hours available per day</label><input id="st-hours" name="st-hours" type="number" min="0" max="24" step="0.5" value="2"></div>
+        <div class="field"><label for="st-days">Study days per week</label><input id="st-days" name="st-days" type="number" min="1" max="7" step="1" value="5"></div>
+        <div class="field"><label for="st-start">Preferred start time</label><input id="st-start" name="st-start" type="time" value="16:00"></div>
+      </div>
+      <div class="form-grid" style="margin-top:1rem">
+        <div class="field"><label for="st-name">Subject name</label><input id="st-name" name="st-name" type="text" placeholder="e.g. Biology"></div>
+        <div class="field"><label for="st-priority">Hours wanted this week</label><input id="st-priority" type="number" min="0.5" max="40" step="0.5" value="4"></div>
+        <div class="field"><label for="st-when">Preferred time</label><select id="st-when"><option value="any">Any time</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening</option></select></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-secondary" type="button" id="st-add-subject"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg> Add subject</button><button class="btn btn-primary" type="button" id="st-generate">Generate timetable</button></div>
+      <div style="margin-top:1rem"><h3>Subjects</h3><div id="st-subject-list"></div></div>
+      <div style="margin-top:1rem"><h3>Generated timetable</h3><div class="week-grid" id="st-grid"></div></div>
+      <div class="notice notice-warning" id="st-conflicts" hidden></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button class="btn btn-secondary btn-small" type="button" id="st-save">Save timetable</button><button class="btn btn-secondary btn-small" type="button" id="st-print"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg> Print</button><button class="btn btn-secondary btn-small" type="button" id="st-load">Load saved</button></div></form></div>
+    <aside class="card tool-panel output-panel" aria-labelledby="result-heading"><h2 id="result-heading">Results</h2><div id="result" data-autoscroll="false" aria-live="polite" aria-atomic="true"><div class="empty-state"><svg class="sh-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M22 20H2"></path></svg><strong>Your results appear here</strong><span>Fill in the fields and choose the calculate button.</span></div></div></aside>
+  </div></section>
+  <section class="section section-soft"><div class="container prose">
+    <h2>How the calculation works</h2><p>There is no single formula for a good timetable. This planner uses a simple rule: allocate each subject in blocks of up to one hour, starting with subjects that request the most time, within your daily hour limit and preferred time band.</p>
+      <p>A conflict is reported when two saved sessions occupy the same day and hour slot, or when requested hours exceed the hours you marked as available.</p>
+    <h2>Worked example</h2><p><strong>Example:</strong> with 2 hours per day on 5 days you have 10 study hours. Requesting 6 hours of Chemistry, 4 of Maths and 4 of English needs 14 hours, so the planner warns that 4 hours cannot fit and suggests extending your available hours or reducing requests.</p>
+    <h2>How to use this page</h2><ol><li>Set your available hours, days and typical start time.</li><li>Add subjects with the weekly hours you want and a preferred time band.</li><li>Generate the plan, resolve any conflicts, then save or print it.</li></ol>
+    <div class="notice"><svg class="sh-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg> Everything on this page runs in your browser. Your entries are not uploaded or stored on a server.</div>
+  </div></section>
+  <section class="section" aria-labelledby="related-heading"><div class="container"><div class="section-head"><span class="eyebrow">Keep learning</span><h2 id="related-heading">Related tools</h2><p>More free tools students use alongside this one.</p></div><div class="grid tool-grid"><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/pomodoro-timer/">Pomodoro Timer</a></h3><p>Focus sessions with custom work and break lengths.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/exam-countdown/">Exam Countdown</a></h3><p>Track multiple exams with a live, time-zone-safe countdown.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/study-tracker/">Daily Study Tracker</a></h3><p>Log study sessions and see daily and weekly progress.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/assignment-planner/">Assignment Planner</a></h3><p>Organise tasks by deadline and priority, and edit as you go.</p><span class="card-link">Open tool →</span></article></div></div></section>
+  <section class="section section-soft"><div class="container prose"><h2>Frequently asked questions</h2><div class="faq-list"><details class="faq-item"><summary>Is my timetable uploaded?</summary><p>No. Saved timetables live in your browser storage and can be removed at any time.</p></details><details class="faq-item"><summary>Can I move a session to another day?</summary><p>Yes. Each generated block has day and time selectors so you can edit it before saving or printing.</p></details><details class="faq-item"><summary>What does a conflict warning mean?</summary><p>It means sessions overlap or your requested hours exceed the hours you said were available. Adjust either side and generate again.</p></details></div></div></section>
+</main>
+<footer class="site-footer"><div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="/" style="color:#fff"><span class="brand-mark"><svg class="sh-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></span><span>Student<span class="accent">Hub</span></span></a><p>Free, private study tools that work in your browser. No account, no subscription, no tracking.</p></div>
+      <div><h3>Tools</h3><ul><li><a href="/tools/percentage-calculator/">Calculators</a></li><li><a href="/tools/pomodoro-timer/">Study planning</a></li><li><a href="/tools/flashcard-maker/">Learning tools</a></li><li><a href="/tools/word-counter/">Writing tools</a></li></ul></div>
+      <div><h3>Learn</h3><ul><li><a href="/articles/study-tips/">Study tips</a></li><li><a href="/articles/active-recall/">Active recall</a></li><li><a href="/articles/spaced-repetition/">Spaced repetition</a></li><li><a href="/articles/exam-preparation/">Exam preparation</a></li></ul></div>
+      <div><h3>StudentHub</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy-policy/">Privacy policy</a></li><li><a href="/terms/">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© <span data-current-year>2026</span> StudentHub. All tools run locally in your browser.</span><span><a href="/sitemap.xml">Sitemap</a> · Built for students, everywhere.</span></div>
+  </div></footer>
+<script src="/assets/js/core.js" defer></script>
+<script src="/assets/js/storage.js" defer></script>
+<script src="/assets/js/calculations.js" defer></script>
+<script src="/assets/js/theme.js" defer></script>
+<script src="/assets/js/navigation.js" defer></script>
+<script src="/assets/js/search.js" defer></script>
+<script src="/assets/js/tool-base.js" defer></script>
+<script src="/assets/js/pwa.js" defer></script>
+<script src="/assets/js/ads.js" defer></script>
+<script src="/assets/js/app.js" defer></script>
+<script src="/tools/study-timetable-maker/tool.js" defer></script>
+</body>
+</html>

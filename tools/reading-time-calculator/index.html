@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Time Calculator — Words per Minute and Time Estimate | StudentHub</title>
+<meta name="description" content="Estimate reading time from word count and an adjustable reading speed in words per minute, with a clear explanation of the assumptions.">
+<link rel="canonical" href="https://studenthub.pages.dev/tools/reading-time-calculator/">
+<meta name="theme-color" content="#0a1c3d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="StudentHub">
+<meta property="og:title" content="Reading Time Calculator — Words per Minute and Time Estimate | StudentHub">
+<meta property="og:description" content="Estimate reading time from word count and an adjustable reading speed in words per minute, with a clear explanation of the assumptions.">
+<meta property="og:url" content="https://studenthub.pages.dev/tools/reading-time-calculator/">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/themes.css">
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<link rel="stylesheet" href="/assets/css/responsive.css">
+<script>(function(){try{var t=JSON.parse(localStorage.getItem('studenthub:theme')||'"auto"');var d=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://studenthub.pages.dev/"},{"@type":"ListItem","position":2,"name":"Writing Tools","item":"https://studenthub.pages.dev/#categories"},{"@type":"ListItem","position":3,"name":"Reading Time Calculator","item":"https://studenthub.pages.dev/tools/reading-time-calculator/"}]}</script>
+</head>
+<body data-page="tool" data-tool-id="reading-time-calculator">
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header"><div class="container header-inner">
+    <a class="brand" href="/" aria-label="StudentHub home"><span class="brand-mark"><svg class="sh-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></span><span>Student<span class="accent">Hub</span></span></a>
+    <button class="icon-button menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="primary-navigation" aria-label="Open navigation"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></button>
+    <nav id="primary-navigation" aria-label="Primary navigation"><ul class="nav-list">
+      <li><a href="/">Home</a></li>
+      <li><a href="/#all-tools">All tools</a></li>
+      <li><a href="/#categories">Categories</a></li>
+      <li><a href="/workspace/">My workspace</a></li>
+      <li><a href="/#articles">Articles</a></li>
+      <li><a href="/about/">About</a></li>
+    </ul></nav>
+    <div class="header-actions">
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Switch theme"><svg class="sh-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg><span class="visually-hidden" data-theme-label>Dark</span></button>
+    </div>
+  </div></header>
+<div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
+<main id="main" data-page="tool" data-tool-id="reading-time-calculator">
+  <nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/#categories">Writing Tools</a></li><li aria-current="page">Reading Time Calculator</li></ol></nav>
+  <section class="page-hero container">
+    <div class="page-hero-head"><div><span class="eyebrow">Writing Tools</span><h1>Reading Time Calculator</h1><p>Estimate how long an article, chapter or essay will take to read. Enter a word count or paste text, set a reading speed, and see the result in minutes and seconds.</p></div>
+      <div class="btn-row"><button class="btn btn-secondary btn-small" type="button" data-favorite aria-pressed="false"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.3-6.2 3.3L7 14.2 2 9.3l6.9-1Z"></path></svg> <span data-favorite-label>Save</span></button><button class="btn btn-secondary btn-small" type="button" data-print><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg> Print</button></div>
+    </div>
+    <div class="ad-slot" data-ad-slot="tool" hidden aria-label="Reserved advertisement placement">Reserved advertising space — disabled</div>
+  </section>
+  <section class="section" style="padding-top:.5rem"><div class="container tool-layout">
+    <div class="card tool-panel"><h2>Use the tool</h2><form id="reading-time-calculator-form" novalidate>
+      <div class="form-grid">
+        <div class="field"><label for="rt-words">Word count</label><input id="rt-words" name="rt-words" type="number" min="0" step="1" placeholder="e.g. 1200"></div>
+        <div class="field"><label for="rt-wpm">Reading speed (words per minute)</label><input id="rt-wpm" name="rt-wpm" type="number" min="1" step="1" value="200"></div>
+      </div>
+      <div class="field" style="margin-top:1rem"><label for="rt-text">Or paste text to count words</label><textarea id="rt-text" rows="5" placeholder="Optional: paste text instead of typing a word count"></textarea></div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Estimate reading time</button><button class="btn btn-secondary" type="reset">Clear</button></div></form></div>
+    <aside class="card tool-panel output-panel" aria-labelledby="result-heading"><h2 id="result-heading">Results</h2><div id="result" data-autoscroll="false" aria-live="polite" aria-atomic="true"><div class="empty-state"><svg class="sh-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M22 20H2"></path></svg><strong>Your results appear here</strong><span>Fill in the fields and choose the calculate button.</span></div></div></aside>
+  </div></section>
+  <section class="section section-soft"><div class="container prose">
+    <h2>How the calculation works</h2><p><code>minutes = word count ÷ words per minute</code>. Common adult reading speeds are around 200–250 words per minute; technical material is often slower.</p>
+    <h2>Worked example</h2><p><strong>Example:</strong> 1,200 words at 200 words per minute takes 6 minutes. At 250 wpm it takes 4.8 minutes, about 4 minutes 48 seconds.</p>
+    <h2>How to use this page</h2><ol><li>Enter a word count or paste text.</li><li>Set a realistic reading speed.</li><li>Select Estimate reading time.</li></ol>
+    <div class="notice"><svg class="sh-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg> Everything on this page runs in your browser. Your entries are not uploaded or stored on a server.</div>
+  </div></section>
+  <section class="section" aria-labelledby="related-heading"><div class="container"><div class="section-head"><span class="eyebrow">Keep learning</span><h2 id="related-heading">Related tools</h2><p>More free tools students use alongside this one.</p></div><div class="grid tool-grid"><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/word-counter/">Word Counter</a></h3><p>Words, characters, sentences, paragraphs and reading time.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/character-counter/">Character Counter</a></h3><p>Live character count with spaces included or excluded.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/text-case-converter/">Text Case Converter</a></h3><p>Uppercase, lowercase, title case and sentence case.</p><span class="card-link">Open tool →</span></article><article class="tool-card"><div class="card-icon"><svg class="sh-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></div><h3><a href="/tools/citation-formatter/">Citation Formatter</a></h3><p>Format basic APA, MLA and Chicago references from your details.</p><span class="card-link">Open tool →</span></article></div></div></section>
+  <section class="section section-soft"><div class="container prose"><h2>Frequently asked questions</h2><div class="faq-list"><details class="faq-item"><summary>What is a typical reading speed?</summary><p>Around 200–250 words per minute for general text; use a lower value for dense or technical material.</p></details><details class="faq-item"><summary>Does this measure comprehension time?</summary><p>No. It only estimates time to read the words, not time to think or take notes.</p></details><details class="faq-item"><summary>Can I use it for a presentation?</summary><p>Yes, set your own speed to plan roughly how long a script will take to deliver.</p></details></div></div></section>
+</main>
+<footer class="site-footer"><div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a class="brand" href="/" style="color:#fff"><span class="brand-mark"><svg class="sh-icon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></span><span>Student<span class="accent">Hub</span></span></a><p>Free, private study tools that work in your browser. No account, no subscription, no tracking.</p></div>
+      <div><h3>Tools</h3><ul><li><a href="/tools/percentage-calculator/">Calculators</a></li><li><a href="/tools/pomodoro-timer/">Study planning</a></li><li><a href="/tools/flashcard-maker/">Learning tools</a></li><li><a href="/tools/word-counter/">Writing tools</a></li></ul></div>
+      <div><h3>Learn</h3><ul><li><a href="/articles/study-tips/">Study tips</a></li><li><a href="/articles/active-recall/">Active recall</a></li><li><a href="/articles/spaced-repetition/">Spaced repetition</a></li><li><a href="/articles/exam-preparation/">Exam preparation</a></li></ul></div>
+      <div><h3>StudentHub</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy-policy/">Privacy policy</a></li><li><a href="/terms/">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© <span data-current-year>2026</span> StudentHub. All tools run locally in your browser.</span><span><a href="/sitemap.xml">Sitemap</a> · Built for students, everywhere.</span></div>
+  </div></footer>
+<script src="/assets/js/core.js" defer></script>
+<script src="/assets/js/storage.js" defer></script>
+<script src="/assets/js/calculations.js" defer></script>
+<script src="/assets/js/theme.js" defer></script>
+<script src="/assets/js/navigation.js" defer></script>
+<script src="/assets/js/search.js" defer></script>
+<script src="/assets/js/tool-base.js" defer></script>
+<script src="/assets/js/pwa.js" defer></script>
+<script src="/assets/js/ads.js" defer></script>
+<script src="/assets/js/app.js" defer></script>
+<script src="/tools/reading-time-calculator/tool.js" defer></script>
+</body>
+</html>

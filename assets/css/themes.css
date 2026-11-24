@@ -1,0 +1,61 @@
+/* Design tokens and themes */
+:root {
+  color-scheme: light;
+  --navy-950: #06122a;
+  --navy-900: #0a1c3d;
+  --navy-800: #102852;
+  --navy-700: #17386b;
+  --blue-700: #1d4ed8;
+  --blue-600: #2563eb;
+  --blue-500: #3b82f6;
+  --sky-500: #0ea5e9;
+  --teal-500: #14b8a6;
+  --amber-500: #f59e0b;
+  --red-600: #dc2626;
+  --green-600: #059669;
+
+  --bg: #f4f7fd;
+  --bg-soft: #eaf1fc;
+  --surface: #ffffff;
+  --surface-2: #f8fbff;
+  --text: #0c1c35;
+  --text-soft: #3c4f6b;
+  --muted: #63748f;
+  --border: #dbe5f3;
+  --border-strong: #bfd0e8;
+  --brand: var(--blue-600);
+  --brand-strong: var(--blue-700);
+  --brand-soft: #e8f0ff;
+  --accent: var(--sky-500);
+  --ring: rgba(37, 99, 235, .35);
+  --shadow-sm: 0 1px 2px rgba(10, 28, 61, .06), 0 4px 12px rgba(10, 28, 61, .04);
+  --shadow-md: 0 10px 30px rgba(10, 28, 61, .09);
+  --shadow-lg: 0 24px 60px rgba(10, 28, 61, .14);
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --max: 1180px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #07142c;
+  --bg-soft: #0b1d3d;
+  --surface: #0e2245;
+  --surface-2: #122a52;
+  --text: #eaf2ff;
+  --text-soft: #c6d6ee;
+  --muted: #9db1d0;
+  --border: #24406d;
+  --border-strong: #35578c;
+  --brand: #60a5fa;
+  --brand-strong: #93c5fd;
+  --brand-soft: #153561;
+  --accent: #38bdf8;
+  --ring: rgba(96, 165, 250, .45);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .25);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, .3);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, .4);
+}
