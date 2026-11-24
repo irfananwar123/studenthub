@@ -20,7 +20,7 @@
         if (!C.isNum(p) || !C.isNum(n)) return T.error(out, 'Enter a percentage and a number.');
         if (p < 0) return T.error(out, 'The percentage cannot be negative here.');
         if (n === 0) return T.error(out, 'The base number must not be zero.');
-        var v = C.percentOf(p, n);
+        var v = C.percentAmount(p, n);
         T.result(out, p + '% of ' + T.fmt(n) + ' = ' + T.fmt(v, 6), [
           { label: 'Result', value: T.fmt(v, 6) },
           { label: 'Calculation', value: T.fmt(n) + ' × ' + T.fmt(p) + ' ÷ 100' }

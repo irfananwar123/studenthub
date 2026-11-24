@@ -8,8 +8,10 @@ const near = (actual, expected, dp = 4) => {
   assert.ok(Math.abs(actual - expected) < Math.pow(10, -dp) / 2, `${actual} is not near ${expected}`);
 };
 
-test('percentage: part of whole, change and reverse', () => {
-  near(C.percentOf(15, 200), 30);
+test('percentage: amount, part of whole, change and reverse', () => {
+  near(C.percentAmount(15, 200), 30);
+  near(C.percentAmount(12.5, 80), 10);
+  near(C.percentOf(15, 200), 7.5);
   near(C.percentOf(3, 8), 37.5);
   near(C.percentChange(50, 60), 20);
   near(C.percentChange(60, 50), -16.6666667, 6);
@@ -59,7 +61,7 @@ test('attendance: below and above target, zero and invalid values', () => {
   assert.equal(low.needed, 30);
   assert.equal(low.maxMissed, 0);
   assert.equal(C.attendance(0, 50, 75).needed, 150);
-  assert.equal(C.attendance(10, 0, 75).percent, null);
+  assert.equal(C.attendance(0, 0, 75).percent, null);
   assert.equal(C.attendance(60, 50, 75), null);
   assert.equal(C.attendance(50, 50, 100).achieved, true);
   assert.equal(C.attendance(49, 50, 100).possible, false);
@@ -81,7 +83,7 @@ test('text statistics and reading time', () => {
   const s = C.textStats('Study smarter. Achieve more.');
   assert.equal(s.words, 4);
   assert.equal(s.characters, 28);
-  assert.equal(s.charactersNoSpaces, 24);
+  assert.equal(s.charactersNoSpaces, 25);
   assert.equal(s.sentences, 2);
   assert.equal(s.paragraphs, 1);
   assert.equal(C.textStats('').words, 0);

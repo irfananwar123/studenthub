@@ -20,9 +20,15 @@
     return arr.reduce(function (a, b) { return a + b; }, 0);
   }
 
+  /* What percentage is `part` of `whole`. */
   function percentOf(part, whole) {
     if (!isNum(part) || !isNum(whole) || whole === 0) return null;
     return (part / whole) * 100;
+  }
+  /* The amount that is `percent` of `whole` (e.g. 15% of 200 = 30). */
+  function percentAmount(percent, whole) {
+    if (!isNum(percent) || !isNum(whole)) return null;
+    return whole * percent / 100;
   }
   function percentChange(original, next) {
     if (!isNum(original) || !isNum(next) || original === 0) return null;
@@ -176,7 +182,7 @@
     } }
   };
   function convertUnit(group, from, to, value) {
-    if (!isNum(value) || !UNIT_GROUPS[group]) return null;
+    if (!isNum(value) || (group !== 'temperature' && !UNIT_GROUPS[group])) return null;
     if (group === 'temperature') {
       var c;
       if (from === 'C') c = value;
@@ -194,10 +200,10 @@
   }
 
   function formatCitation(style, data) {
-    var author = (data.author || '').trim();
+    var author = (data.author || '').trim().replace(/\.+$/, '');
     var year = (data.year || '').trim();
-    var title = (data.title || '').trim();
-    var publisher = (data.publisher || '').trim();
+    var title = (data.title || '').trim().replace(/\.+$/, '');
+    var publisher = (data.publisher || '').trim().replace(/\.+$/, '');
     var edition = (data.edition || '').trim();
     var warnings = [];
     if (!author) warnings.push('Author is missing.');
@@ -218,7 +224,7 @@
 
   var api = {
     isNum: isNum, round: round, sum: sum,
-    percentOf: percentOf, percentChange: percentChange, originalFromPercent: originalFromPercent,
+    percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
     weightedAverage: weightedAverage, gradeFromPercent: gradeFromPercent, marksSummary: marksSummary,
     attendance: attendance, scorePredictor: scorePredictor,
     textStats: textStats, readingTime: readingTime,

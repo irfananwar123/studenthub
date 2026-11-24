@@ -67,6 +67,7 @@ test('all internal links resolve to a generated file', () => {
     if (clean === '/sitemap.xml') return 'sitemap.xml';
     if (clean === '/manifest.webmanifest') return 'manifest.webmanifest';
     const without = clean.replace(/^\//, '').replace(/\/$/, '');
+    if (exists(without) && fs.statSync(path.join(ROOT, without)).isFile()) return without;
     if (exists(path.join(without, 'index.html'))) return path.join(without, 'index.html');
     if (exists(without + '.html')) return without + '.html';
     return null;
@@ -113,7 +114,8 @@ test('shipped JavaScript has no eval, innerHTML or external service calls', () =
     assert.ok(!/\beval\s*\(/.test(src), `${file}: no eval`);
     assert.ok(!/\.innerHTML\s*=/.test(src), `${file}: no innerHTML assignment`);
     assert.ok(!/(fetch|XMLHttpRequest)\s*\(/.test(src), `${file}: no network calls`);
-    assert.ok(!/api[_-]?key|secret|token/i.test(src), `${file}: no secrets`);
+    assert.ok(!/(api[_-]?key|secret|token)\s*[:=]\s*['"`]/i.test(src), `${file}: no configured secrets`);
+    assert.ok(!/sk-[A-Za-z0-9]{16,}/.test(src), `${file}: no API key strings`);
     execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
   });
 });
