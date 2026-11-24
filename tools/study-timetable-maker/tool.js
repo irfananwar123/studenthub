@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var SH = window.StudentHub, T = SH.tool;
+  var SH = window.StudentHub, T = SH.tool, C = window.SHC;
   var DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   document.addEventListener('DOMContentLoaded', function () {
     T.init('study-timetable-maker');
@@ -128,6 +128,8 @@
       });
     });
     document.getElementById('st-print').addEventListener('click', function () { window.print(); });
+    subjects.push({ name: 'Mathematics', hours: 4, when: 'evening' });
+    subjects.push({ name: 'Biology', hours: 3, when: 'morning' });
     renderSubjects(); renderGrid();
   });
 })();

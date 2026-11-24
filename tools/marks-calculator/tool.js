@@ -21,9 +21,9 @@
     }
     document.getElementById('mk-add').addEventListener('click', function () { addRow('', '', ''); });
     document.getElementById('mk-demo').addEventListener('click', function () {
-      body.textContent = ''; addRow('Mathematics', 85, 100); addRow('Science', 72, 80); addRow('English', 91, 100);
+      body.textContent = ''; addRow('Mathematics', 85, 100); addRow('Science', 72, 80);
     });
-    addRow('Mathematics', 85, 100); addRow('Science', 72, 80); addRow('English', 91, 100);
+    addRow('Mathematics', 85, 100); addRow('Science', 72, 80);
     document.getElementById('marks-calculator-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var rows = Array.prototype.map.call(body.querySelectorAll('tr'), function (tr) {

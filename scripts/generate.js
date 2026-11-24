@@ -34,6 +34,7 @@ function head(opts) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${opts.title}</title>
 <meta name="description" content="${opts.desc}">
+${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="canonical" href="${canonical}">
 <meta name="theme-color" content="#0a1c3d">
 <meta property="og:type" content="website">
@@ -358,18 +359,23 @@ const workspaceBody = `<main id="main"><nav class="breadcrumbs container" aria-l
     <p class="field-hint" id="ws-status" role="status" aria-live="polite" style="margin-top:.8rem"></p>
   </div>
 </div></section></main>`;
-write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
+write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', robots: 'noindex,follow', body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
 
 const offlineBody = `<main id="main"><section class="page-hero container"><span class="eyebrow">Offline</span><h1>You are offline</h1><p>The page you requested is not available in this browser’s cache yet. Previously visited tools still work, and any data you saved locally is safe.</p><div class="btn-row"><a class="btn btn-primary" href="/">Go to the offline homepage</a><button class="btn btn-secondary" type="button" data-reload>Try again</button></div></section></main>`;
-write('offline.html', staticPage({ title: 'Offline — StudentHub', desc: 'StudentHub offline fallback page.', path: '/offline/', body: offlineBody }));
+write('offline.html', staticPage({ title: 'Offline — StudentHub', desc: 'StudentHub offline fallback page.', path: '/offline/', robots: 'noindex', body: offlineBody }));
 
 const notFoundBody = `<main id="main"><section class="page-hero container"><span class="eyebrow">404</span><h1>That page does not exist</h1><p>The link may be out of date, or the page may have moved. You can search all tools from the homepage or open the sitemap.</p><div data-search class="search-wrap" style="margin-top:1.2rem"><form class="search-box" data-search-form role="search"><label class="visually-hidden" for="404-search">Search tools</label>${icon('search', 20)}<input id="404-search" data-search-input type="search" placeholder="Search for a tool" aria-autocomplete="list" aria-controls="404-results" aria-expanded="true"><button class="btn btn-primary btn-small" type="submit">Search</button></form><div class="search-results" id="404-results" data-search-results role="listbox" aria-label="Tool search results"></div></div><div class="btn-row" style="margin-top:1.4rem"><a class="btn btn-primary" href="/">Back to StudentHub</a><a class="btn btn-secondary" href="/sitemap.xml">View sitemap</a></div></section></main>`;
-write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc: 'The requested StudentHub page could not be found. Search the 25 free tools instead.', path: '/404/', body: notFoundBody }));
+write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc: 'The requested StudentHub page could not be found. Search the 25 free tools instead.', path: '/404/', robots: 'noindex', body: notFoundBody }));
+
+// Pretty URLs work on any static host: /about/ and /about.html both resolve.
+['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace'].forEach(function (name) {
+  write(`${name}/index.html`, fs.readFileSync(path.join(ROOT, `${name}.html`), 'utf8'));
+});
 
 // Sitemap
 const urls = [
   ['/', '1.0', 'weekly'], ['/about/', '0.7', 'monthly'], ['/contact/', '0.5', 'monthly'],
-  ['/privacy-policy/', '0.4', 'yearly'], ['/terms/', '0.4', 'yearly'], ['/workspace/', '0.8', 'monthly'],
+  ['/privacy-policy/', '0.4', 'yearly'], ['/terms/', '0.4', 'yearly'],
   ...Object.keys(articleData).map(s => ['/articles/' + s + '/', '0.7', 'monthly']),
   ...TOOLS.map(t => ['/tools/' + t.id + '/', '0.9', 'monthly'])
 ];

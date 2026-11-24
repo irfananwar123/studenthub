@@ -114,9 +114,16 @@
     prefs: {
       get: lsGet,
       set: lsSet,
-      getTheme: function () { return lsGet('theme', 'auto'); },
+      getTheme: function () {
+        var value = lsGet('theme', 'auto');
+        return value === 'dark' || value === 'light' || value === 'auto' ? value : 'auto';
+      },
       setTheme: function (value) { return lsSet('theme', value); },
-      getFavorites: function () { return lsGet('favorites', []); },
+      arrayPref: function (key) {
+        var value = lsGet(key, []);
+        return Array.isArray(value) ? value : [];
+      },
+      getFavorites: function () { return storage.prefs.arrayPref('favorites'); },
       isFavorite: function (id) { return storage.prefs.getFavorites().indexOf(id) !== -1; },
       toggleFavorite: function (id) {
         var list = storage.prefs.getFavorites();
@@ -125,13 +132,13 @@
         lsSet('favorites', list);
         return i === -1;
       },
-      getRecentTools: function () { return lsGet('recentTools', []); },
+      getRecentTools: function () { return storage.prefs.arrayPref('recentTools'); },
       addRecentTool: function (id) {
         var list = storage.prefs.getRecentTools().filter(function (x) { return x !== id; });
         list.unshift(id);
         lsSet('recentTools', list.slice(0, 8));
       },
-      getRecentSearches: function () { return lsGet('recentSearches', []); },
+      getRecentSearches: function () { return storage.prefs.arrayPref('recentSearches'); },
       addRecentSearch: function (q) {
         q = String(q || '').trim();
         if (q.length < 2) return;
@@ -172,7 +179,11 @@
       }
       if (data.prefs && typeof data.prefs === 'object') {
         ['theme', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
-          if (data.prefs[k] !== undefined) lsSet(k, data.prefs[k]);
+          var value = data.prefs[k];
+          if (value === undefined || value === null) return;
+          if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches') && !Array.isArray(value)) return;
+          if (k === 'theme' && !['auto', 'dark', 'light'].includes(value)) return;
+          lsSet(k, value);
         });
       }
       return Promise.all(COLLECTIONS.map(function (name) {

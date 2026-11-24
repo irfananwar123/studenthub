@@ -1,0 +1,161 @@
+'use strict';
+/* Real-browser smoke test. Run: node tests/browser-smoke.js
+   Starts a local static server and headless Chrome, then drives each tool page. */
+const { spawn } = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..');
+const PORT = 8765;
+const CDP_PORT = 9333;
+const BASE = `http://127.0.0.1:${PORT}`;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const CHROME_CANDIDATES = [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  '/usr/bin/google-chrome', '/usr/bin/chromium'
+];
+
+const TOOL_TESTS = {
+  'percentage-calculator': `set('p-percent',15);set('p-whole',200);submit('percentage-calculator-form');return R();`,
+  'cgpa-calculator': `click('cg-demo');submit('cgpa-calculator-form');return R();`,
+  'gpa-calculator': `click('gpa-demo');submit('gpa-calculator-form');return R();`,
+  'grade-calculator': `set('gr-marks',78);set('gr-total',100);submit('grade-calculator-form');return R();`,
+  'marks-calculator': `click('mk-demo');submit('marks-calculator-form');return R();`,
+  'attendance-calculator': `set('at-attended',42);set('at-total',50);submit('attendance-calculator-form');return R();`,
+  'exam-score-predictor': `set('ep-total',200);set('ep-obtained',90);set('ep-remaining',100);submit('exam-score-predictor-form');return R();`,
+  'study-timetable-maker': `click('st-generate');return R()+'|slots:'+document.querySelectorAll('#st-grid .slot').length;`,
+  'pomodoro-timer': `click('po-start');await wait(1200);const running=document.getElementById('po-display').textContent;click('po-pause');click('po-reset');return 'display:'+running+'|'+R();`,
+  'exam-countdown': `set('cd-name','Biology final');set('cd-date','2027-06-01T09:00');click('cd-add');await wait(400);return R()+'|list:'+document.getElementById('cd-list').textContent.includes('Biology final');`,
+  'study-tracker': `set('tr-subject','Maths');set('tr-minutes',45);click('tr-add');await wait(400);return R()+'|stats:'+document.getElementById('tr-stats').textContent.includes('45 min');`,
+  'assignment-planner': `set('ap-title','Essay draft');set('ap-due','2027-01-15');click('ap-add');await wait(400);return R()+'|list:'+document.getElementById('ap-list').textContent.includes('Essay draft');`,
+  'flashcard-maker': `set('fc-front','Capital of Japan?');set('fc-back','Tokyo');click('fc-add');await wait(400);click('fc-card');return R()+'|flip:'+document.getElementById('fc-card').classList.contains('is-flipped');`,
+  'quiz-maker': `set('qz-question','Which organelle makes ATP?');set('qz-a','Nucleus');set('qz-b','Mitochondria');set('qz-c','Ribosome');set('qz-d','Golgi');set('qz-correct','B');click('qz-add');await wait(400);const r=document.querySelector('input[name="quiz-0"][value="B"]');r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));click('qz-submit');return R();`,
+  'revision-notes': `set('nt-title','Cell notes');set('nt-body','Mitochondria make ATP.');click('nt-save');await wait(400);return R()+'|list:'+document.getElementById('nt-list').textContent.includes('Cell notes');`,
+  'question-picker': `set('qp-input','Explain osmosis');click('qp-add');await wait(400);click('qp-pick');return R()+'|selected:'+document.getElementById('qp-selected').textContent;`,
+  'vocabulary-trainer': `set('vc-word','photosynthesis');set('vc-def','Making food from light');click('vc-add');await wait(400);click('vc-reveal');return R()+'|shown:'+!document.getElementById('vc-practice-def').classList.contains('visually-hidden');`,
+  'word-counter': `set('wc-text','Study smarter. Achieve more.');return document.getElementById('wc-stats').textContent;`,
+  'character-counter': `set('cc-text','Hello world');return document.getElementById('cc-stats').textContent;`,
+  'reading-time-calculator': `set('rt-words',1200);set('rt-wpm',200);submit('reading-time-calculator-form');return R();`,
+  'text-case-converter': `set('tc-input','study smarter every day');document.querySelector('[data-tc-case="title"]').click();return document.getElementById('tc-output').value;`,
+  'citation-formatter': `set('cf-author','Rivera, A.');set('cf-year','2022');set('cf-title','Learning that lasts');set('cf-publisher','Example Press');submit('citation-formatter-form');return R();`,
+  'age-calculator': `set('age-birth','2000-02-29');set('age-asof','2024-02-29');submit('age-calculator-form');return R();`,
+  'date-calculator': `set('dc-from','2024-01-01');set('dc-to','2025-01-01');submit('date-calculator-form');return R();`,
+  'unit-converter': `set('uc-value',10);submit('unit-converter-form');return R();`
+};
+
+const HELPERS = `
+const set=(id,v)=>{const n=document.getElementById(id);if(!n)throw new Error('missing '+id);n.value=v;n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}));};
+const click=id=>{const n=document.getElementById(id);if(!n)throw new Error('missing '+id);n.click();};
+const submit=id=>document.getElementById(id).requestSubmit();
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const R=()=>document.getElementById('result').textContent.trim();
+`;
+
+async function waitFor(predicate, timeout = 15000, label = 'condition') {
+  const started = Date.now();
+  while (Date.now() - started < timeout) {
+    if (await predicate()) return;
+    await sleep(100);
+  }
+  throw new Error('Timeout waiting for ' + label);
+}
+
+async function main() {
+  const chromePath = CHROME_CANDIDATES.find(p => fs.existsSync(p));
+  if (!chromePath) throw new Error('Chrome not found. Install Chrome or skip the browser smoke test.');
+  const server = spawn('python', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'], { cwd: ROOT, stdio: 'ignore' });
+  const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'sh-chrome-'));
+  const chrome = spawn(chromePath, [
+    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+    '--remote-allow-origins=*', `--remote-debugging-port=${CDP_PORT}`,
+    `--user-data-dir=${profile}`, 'about:blank'
+  ], { stdio: 'ignore' });
+  let ws;
+  try {
+    await waitFor(async () => {
+      try { const r = await fetch(`http://127.0.0.1:${CDP_PORT}/json/list`); return r.ok; } catch (e) { return false; }
+    }, 20000, 'Chrome debugging port');
+    await waitFor(async () => {
+      try { const r = await fetch(BASE + '/'); return r.ok; } catch (e) { return false; }
+    }, 10000, 'local server');
+    const targets = await (await fetch(`http://127.0.0.1:${CDP_PORT}/json/list`)).json();
+    const page = targets.find(t => t.type === 'page');
+    if (!page) throw new Error('No Chrome page target');
+    ws = new WebSocket(page.webSocketDebuggerUrl);
+    await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
+    let nextId = 1;
+    const pending = new Map();
+    let exceptions = [];
+    ws.onmessage = event => {
+      const msg = JSON.parse(event.data);
+      if (msg.id && pending.has(msg.id)) {
+        const p = pending.get(msg.id); pending.delete(msg.id);
+        if (msg.error) p.reject(new Error(JSON.stringify(msg.error))); else p.resolve(msg.result);
+        return;
+      }
+      if (msg.method === 'Runtime.exceptionThrown') exceptions.push(msg.params.exceptionDetails.text + ' ' + (msg.params.exceptionDetails.exception?.description || ''));
+      if (msg.method === 'Log.entryAdded' && msg.params.entry.level === 'error') exceptions.push(msg.params.entry.text);
+      if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error') exceptions.push(msg.params.args.map(a => a.value || a.description).join(' '));
+    };
+    const send = (method, params = {}) => new Promise((resolve, reject) => {
+      const id = nextId++; pending.set(id, { resolve, reject });
+      ws.send(JSON.stringify({ id, method, params }));
+    });
+    await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable');
+
+    const results = [];
+    const check = async (name, url, expression, expected) => {
+      exceptions = [];
+      try {
+        await send('Page.navigate', { url: BASE + url });
+        await waitFor(async () => {
+          const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
+          return r.result.value === 'complete';
+        }, 15000, 'load ' + url);
+        await sleep(150);
+        const r = await send('Runtime.evaluate', {
+          expression: `(async()=>{${HELPERS}\n${expression}})()`, awaitPromise: true, returnByValue: true
+        });
+        if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
+        const text = String(r.result.value || '');
+        const ok = expected ? text.includes(expected) && exceptions.length === 0
+          : !!text && !/Check your input|Enter (a |both |at least |two )/i.test(text) && exceptions.length === 0;
+        results.push({ name, ok, text: text.slice(0, 160), errors: exceptions.slice(0, 2) });
+      } catch (err) {
+        results.push({ name, ok: false, text: String(err.message || err), errors: exceptions.slice(0, 2) });
+      }
+    };
+
+    for (const [id, expression] of Object.entries(TOOL_TESTS)) {
+      await check(id, `/tools/${id}/`, expression);
+    }
+    await check('homepage-search', '/', `set('home-search','attendance');await wait(50);return document.getElementById('home-search-results').textContent.includes('Attendance Calculator')?'search ok':'search failed';`);
+    await check('theme-switch', '/', `const before=document.documentElement.dataset.theme;document.querySelector('[data-theme-toggle]').click();const after=document.documentElement.dataset.theme;return before!==after?'theme '+before+'->'+after:'theme failed';`);
+    await check('workspace', '/workspace/', `click('ws-export');await wait(600);return document.getElementById('ws-status').textContent.length>0?'export ok':'export failed';`);
+    await check('contact', '/contact/', `set('ct-subject','Hello');set('ct-message','Test message');click('ct-copy');return 'contact loaded';`);
+    await check('offline-page', '/offline/', `return document.querySelector('h1').textContent;`);
+
+    // Edge cases, persistence and offline support.
+    await check('edge-division-by-zero', '/tools/percentage-calculator/', `set('p-percent',15);set('p-whole',0);submit('percentage-calculator-form');return R();`, 'must not be zero');
+    await check('edge-invalid-attendance', '/tools/attendance-calculator/', `set('at-attended',60);set('at-total',50);submit('attendance-calculator-form');return R();`, 'Check your input');
+    await check('edge-invalid-date', '/tools/age-calculator/', `set('age-birth','2023-02-29');set('age-asof','2024-01-01');submit('age-calculator-form');return R();`, 'valid birth date');
+    await check('storage-roundtrip', '/workspace/', `const json=await StudentHub.storage.exportData();await StudentHub.storage.importData(json);return 'roundtrip ok';`, 'roundtrip ok');
+    await check('service-worker', '/', `await wait(1800);const r=await navigator.serviceWorker.getRegistration();return r?'sw registered':'no registration';`, 'sw registered');
+
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+    await check('mobile-homepage-no-overflow', '/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
+    await check('mobile-tool-no-overflow', '/tools/marks-calculator/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
+    await send('Emulation.clearDeviceMetricsOverride');
+
+    const failed = results.filter(r => !r.ok);
+    results.forEach(r => console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.name.padEnd(26)} ${r.text.replace(/\s+/g, ' ').slice(0, 90)}${r.errors.length ? ' ERRORS: ' + r.errors.join(' | ') : ''}`));
+    console.log(`\n${results.length - failed.length}/${results.length} browser checks passed.`);
+    if (failed.length) process.exitCode = 1;
+  } finally {
+    if (ws) ws.close();
+    chrome.kill(); server.kill();
+  }
+}
+main().catch(err => { console.error(err); process.exitCode = 1; });

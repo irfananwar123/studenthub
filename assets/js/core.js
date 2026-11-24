@@ -88,7 +88,6 @@
     if (attrs) Object.keys(attrs).forEach(function (key) {
       if (key === 'class') node.className = attrs[key];
       else if (key === 'text') node.textContent = attrs[key];
-      else if (key === 'html') node.innerHTML = attrs[key];
       else if (attrs[key] !== null && attrs[key] !== undefined) node.setAttribute(key, attrs[key]);
     });
     (children || []).forEach(function (child) {

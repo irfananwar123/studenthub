@@ -3,7 +3,8 @@
   var SH = global.StudentHub = global.StudentHub || {};
 
   function init() {
-    if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    var secureLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || secureLocal)) {
       global.addEventListener('load', function () {
         navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
       });
