@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /workspace/
 
-Sitemap: https://studenthub.pages.dev/sitemap.xml
+Sitemap: https://studenthub-2gs.pages.dev/sitemap.xml

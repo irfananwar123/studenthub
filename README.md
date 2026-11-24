@@ -2,7 +2,7 @@
 
 A complete, free, browser-based student productivity platform: 25 working tools, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
-**Default production URL used for canonical tags:** `https://studenthub.pages.dev`
+**Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
 ---
 
@@ -61,10 +61,10 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 
 ## 3. Before publishing
 
-1. **Set your final URL.** Search for `https://studenthub.pages.dev` in:
+1. **Keep the final URL in sync.** If you change domain, search for `https://studenthub-2gs.pages.dev` in:
    - `scripts/generate.js` (`SITE`)
    - `assets/js/core.js` (`SITE.url`)
-   Then run `node scripts/generate.js` so every canonical, Open Graph URL, sitemap entry and structured-data URL is updated.
+   Then run `node scripts/generate.js` so every canonical, Open Graph URL, sitemap entry and structured-data URL is updated. The `studenthub.pages.dev` name is taken by an unrelated site, so do not use it.
 2. **Set a contact address.** Edit `assets/js/config.js`:
    ```js
    global.StudentHub.config = { contactEmail: 'you@your-domain.com' };
@@ -130,7 +130,7 @@ Create the empty repository on GitHub first if you use the command line. Do not 
 1. Sign in at <https://dash.cloudflare.com> → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
 2. Authorise GitHub and select the `studenthub` repository.
 3. **Configure build:**
-   - Project name: `studenthub` (this gives `https://studenthub.pages.dev` if available).
+   - Project name: `studenthub-2gs` (already deployed at `https://studenthub-2gs.pages.dev`; `studenthub` is taken by another site).
    - Production branch: `main`.
    - Framework preset: **None**.
    - Build command: **leave empty**.

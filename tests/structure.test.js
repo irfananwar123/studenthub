@@ -16,6 +16,8 @@ function toolIds() {
   return new Function('return ' + match[1])().map(t => t.id); // trusted local source
 }
 const IDS = toolIds();
+const SITE = (read('scripts/generate.js').match(/const SITE = '([^']+)'/) || [])[1];
+assert.ok(SITE, 'production URL configured in generator');
 const PAGES = [
   'index.html', 'about.html', 'contact.html', 'privacy-policy.html', 'terms.html', 'offline.html', '404.html', 'workspace.html',
   ...IDS.map(id => `tools/${id}/index.html`),
@@ -40,7 +42,7 @@ test('every page has unique title, description, canonical and one H1', () => {
     const h1 = (html.match(/<h1[^>]*>/g) || []).length;
     assert.ok(title && title.length > 10, `${page}: title`);
     assert.ok(desc && desc.length > 30, `${page}: description`);
-    assert.ok(canonical && canonical.startsWith('https://studenthub.pages.dev/'), `${page}: canonical`);
+    assert.ok(canonical && canonical.startsWith(SITE + '/'), `${page}: canonical`);
     assert.equal(h1, 1, `${page}: exactly one H1`);
     assert.ok(html.includes('property="og:title"'), `${page}: Open Graph`);
     assert.ok(html.includes('property="og:description"'), `${page}: OG description`);
@@ -80,8 +82,8 @@ test('all internal links and asset paths resolve to generated files', () => {
 
 test('sitemap, robots, manifest and icons are complete', () => {
   const sitemap = read('sitemap.xml');
-  IDS.forEach(id => assert.ok(sitemap.includes(`<loc>https://studenthub.pages.dev/tools/${id}/</loc>`), `${id} in sitemap`));
-  assert.ok(read('robots.txt').includes('Sitemap: https://studenthub.pages.dev/sitemap.xml'));
+  IDS.forEach(id => assert.ok(sitemap.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in sitemap`));
+  assert.ok(read('robots.txt').includes(`Sitemap: ${SITE}/sitemap.xml`));
   const manifest = JSON.parse(read('manifest.webmanifest'));
   assert.equal(manifest.display, 'standalone');
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));

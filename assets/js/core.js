@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
 
-  var SITE = { name: 'StudentHub', url: 'https://studenthub.pages.dev' };
+  var SITE = { name: 'StudentHub', url: 'https://studenthub-2gs.pages.dev' };
 
   var TOOLS = [
     { id: 'percentage-calculator', name: 'Percentage Calculator', category: 'Academic Calculators', desc: 'Find percentages, percentage change and the original value.', tags: 'percent increase decrease original value maths' },

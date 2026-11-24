@@ -6,7 +6,7 @@ const path = require('path');
 const { icon, f, faq } = require('./helpers');
 
 const ROOT = path.resolve(__dirname, '..');
-const SITE = 'https://studenthub.pages.dev';
+const SITE = 'https://studenthub-2gs.pages.dev';
 /* Advertising tags. They are written into the HTML at build time, not injected
    after load: the 468x60 tag calls document.write, which only works while the
    document is still parsing. Set enabled to false to remove every placement. */
