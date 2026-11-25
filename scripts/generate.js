@@ -241,7 +241,7 @@ function homepage() {
     <div class="animate-in">
       <span class="eyebrow">${icon('star', 15)} Free tools · Private by design</span>
       <h1>Study smarter.<br><span class="gradient">Achieve more.</span></h1>
-      <p class="hero-sub">Twenty-five genuinely useful study tools in one fast, private place. Calculate grades, plan revision, track progress and check your writing — no account or subscription needed.</p>
+      <p class="hero-sub">${TOOLS.length} genuinely useful study tools in one fast, private place. Calculate grades, plan revision, track your hours and check your writing — no account or subscription needed.</p>
       <div data-search class="search-wrap" style="margin-top:1.8rem">
         <form class="search-box" data-search-form role="search"><label class="visually-hidden" for="home-search">Search all tools</label>${icon('search', 20)}<input id="home-search" data-search-input type="search" autocomplete="off" placeholder="Search ${TOOLS.length} tools — try ‘attendance’ or ‘hours’" aria-autocomplete="list" aria-controls="home-search-results" aria-expanded="true"><button class="btn btn-primary btn-small" type="submit">Search</button></form>
         <div class="search-results" id="home-search-results" data-search-results role="listbox" aria-label="Tool search results"></div>
@@ -288,7 +288,7 @@ function homepage() {
 </main>`;
   return shell({
     title: 'StudentHub — Free Study Tools, Calculators and Planners',
-    desc: 'Twenty-five free, private study tools: GPA and percentage calculators, attendance tracker, Pomodoro timer, flashcards, quizzes, word counter and more. No sign-up.',
+    desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, live study timer, revision scheduler, flashcards, quizzes, word counter and more. No sign-up.`,
     path: '/', ld: homeLd, body,
     scripts: `<script src="/assets/js/home.js" defer></script>`
   });
