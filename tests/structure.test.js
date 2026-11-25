@@ -41,7 +41,7 @@ test('every page has unique title, description, canonical and one H1', () => {
     const canonical = (html.match(/<link rel="canonical" href="([^"]+)">/) || [])[1];
     const h1 = (html.match(/<h1[^>]*>/g) || []).length;
     assert.ok(title && title.length > 10, `${page}: title`);
-    assert.ok(desc && desc.length > 30, `${page}: description`);
+    assert.ok(desc && desc.length >= 25 && desc.length <= 160, `${page}: description 25-160 characters`);
     assert.ok(canonical && canonical.startsWith(SITE + '/'), `${page}: canonical`);
     assert.ok(html.includes('<meta name="google-site-verification" content="WPy7or4AwCbkixtA55pqg55hMDhLUFs1vPnR8EgH-rA" />'), `${page}: Google Site Verification meta`);
     assert.ok(html.includes('<meta name="msvalidate.01" content="E6A421577F1424D7259F8EE6AA3E0786" />'), `${page}: Bing Webmaster Tools meta`);

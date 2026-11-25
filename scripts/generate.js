@@ -298,7 +298,7 @@ function homepage() {
 </main>`;
   return shell({
     title: 'StudentHub — Free Study Tools, Calculators and Planners',
-    desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, live study timer, revision scheduler, flashcards, quizzes, word counter and more. No sign-up.`,
+    desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, study timer, revision scheduler, flashcards, quizzes, word counter and more.`,
     path: '/', ld: homeLd, body,
     scripts: `<script src="/assets/js/home.js" defer></script>`
   });
