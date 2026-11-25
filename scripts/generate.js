@@ -471,8 +471,12 @@ const urls = [
   ...TOOLS.map(t => ['/tools/' + t.id + '/', '0.9', 'monthly'])
 ];
 const today = new Date().toISOString().slice(0, 10);
-write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, p, freq]) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod><changefreq>${freq}</changefreq><priority>${p}</priority></url>`).join('\n')}\n</urlset>\n`);
-write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /workspace/\n\nSitemap: ${SITE}/sitemap.xml\n`);
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, p, freq]) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod><changefreq>${freq}</changefreq><priority>${p}</priority></url>`).join('\n')}\n</urlset>\n`;
+write('sitemap.xml', sitemapXml);
+/* A second, identical sitemap path lets webmaster tools retry with a fresh URL
+   if they cache a failed fetch of /sitemap.xml during deployment. */
+write('sitemap-fallback.xml', sitemapXml);
+write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /workspace/\n\nSitemap: ${SITE}/sitemap.xml\nSitemap: ${SITE}/sitemap-fallback.xml\n`);
 
 // Service worker with a content-derived version so deployments invalidate old caches.
 const crypto = require('crypto');

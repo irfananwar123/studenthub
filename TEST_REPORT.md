@@ -36,7 +36,7 @@ Independent calculation checks compare output against separately calculated expe
 - Every generated page ships the pre-paint theme script, all three theme controls and `theme.js`; no stale hidden light-only toggle remains. Dark palette tokens are present in `themes.css`.
 - Every tool page includes instructions, formulas, worked example, FAQ, related tools, breadcrumb structured data, result region and favourite control.
 - All internal links resolve to real generated files (no broken routes).
-- Sitemap includes every tool; robots.txt points to the sitemap; manifest icons exist.
+- Sitemap and identical fallback sitemap include every tool; robots.txt points to both; Cloudflare headers declare the XML MIME type; manifest icons exist.
 - Service worker precaches the app shell and all tool pages with a content-derived cache version.
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
 - All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). Every generated page has active head tags, a slot and a footer link; there is no ad-free page or URL off switch. `ads.js` holds the same URLs but never injects duplicate scripts. The privacy policy discloses every network, and no unrelated ad-network tags are present.

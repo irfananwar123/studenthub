@@ -98,10 +98,19 @@ test('all internal links and asset paths resolve to generated files', () => {
   });
 });
 
-test('sitemap, robots, manifest and icons are complete', () => {
+test('sitemap, fallback sitemap, robots, manifest and icons are complete', () => {
   const sitemap = read('sitemap.xml');
-  IDS.forEach(id => assert.ok(sitemap.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in sitemap`));
-  assert.ok(read('robots.txt').includes(`Sitemap: ${SITE}/sitemap.xml`));
+  const fallback = read('sitemap-fallback.xml');
+  IDS.forEach(id => {
+    assert.ok(sitemap.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in sitemap`);
+    assert.ok(fallback.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in fallback sitemap`);
+  });
+  assert.equal((fallback.match(/<loc>/g) || []).length, (sitemap.match(/<loc>/g) || []).length, 'fallback sitemap is identical');
+  const robots = read('robots.txt');
+  assert.ok(robots.includes(`Sitemap: ${SITE}/sitemap.xml`), 'primary sitemap in robots.txt');
+  assert.ok(robots.includes(`Sitemap: ${SITE}/sitemap-fallback.xml`), 'fallback sitemap in robots.txt');
+  const headers = read('_headers');
+  assert.ok(headers.includes('/sitemap.xml') && headers.includes('Content-Type: application/xml; charset=UTF-8'), 'sitemap MIME header');
   const manifest = JSON.parse(read('manifest.webmanifest'));
   assert.equal(manifest.display, 'standalone');
   assert.ok(manifest.icons.some(i => i.sizes === '192x192'));

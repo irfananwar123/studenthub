@@ -3,3 +3,4 @@ Allow: /
 Disallow: /workspace/
 
 Sitemap: https://studenthub-2gs.pages.dev/sitemap.xml
+Sitemap: https://studenthub-2gs.pages.dev/sitemap-fallback.xml
