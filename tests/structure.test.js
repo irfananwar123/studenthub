@@ -24,8 +24,8 @@ const PAGES = [
   ...['study-tips', 'active-recall', 'spaced-repetition', 'exam-preparation'].map(s => `articles/${s}/index.html`)
 ];
 
-test('all 25 tool pages and scripts exist', () => {
-  assert.equal(IDS.length, 25);
+test('all 29 tool pages and scripts exist', () => {
+  assert.equal(IDS.length, 29);
   IDS.forEach(id => {
     assert.ok(exists(`tools/${id}/index.html`), `${id} page exists`);
     assert.ok(exists(`tools/${id}/tool.js`), `${id} script exists`);

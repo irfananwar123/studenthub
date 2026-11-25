@@ -29,7 +29,11 @@
     { id: 'citation-formatter', name: 'Citation Formatter', category: 'Writing Tools', desc: 'Format basic APA, MLA and Chicago references from your details.', tags: 'apa mla chicago bibliography reference style' },
     { id: 'age-calculator', name: 'Age Calculator', category: 'Student Utilities', desc: 'Exact age in years, months and days from two dates.', tags: 'birthdate age years months days leap year' },
     { id: 'date-calculator', name: 'Date Difference Calculator', category: 'Student Utilities', desc: 'Count days between dates and shift a date by a number of days.', tags: 'date difference days between add subtract date' },
-    { id: 'unit-converter', name: 'Unit Converter', category: 'Student Utilities', desc: 'Convert length, mass, temperature and volume units.', tags: 'meters feet kilograms pounds celsius fahrenheit liters gallons' }
+    { id: 'unit-converter', name: 'Unit Converter', category: 'Student Utilities', desc: 'Convert length, mass, temperature and volume units.', tags: 'meters feet kilograms pounds celsius fahrenheit liters gallons' },
+    { id: 'study-hours-tracker', name: 'Study Hours Tracker', category: 'Study Planning', desc: 'Run a real study timer, save sessions and analyse hours by day and subject.', tags: 'study hours timer live stopwatch sessions goal chart heatmap analytics' },
+    { id: 'spaced-revision-scheduler', name: 'Spaced Revision Scheduler', category: 'Study Planning', desc: 'Generate spaced review dates before an exam and track completed revisions.', tags: 'spaced repetition revision schedule review dates exam plan intervals' },
+    { id: 'grade-goal-planner', name: 'Grade Goal Planner', category: 'Academic Calculators', desc: 'Work out the marks you need on every remaining assessment to hit a target.', tags: 'target grade required marks remaining assessments weighted goal planner' },
+    { id: 'focus-streak-habits', name: 'Focus Streak & Habits', category: 'Study Planning', desc: 'Build daily study habits with streaks, a consistency heatmap and history.', tags: 'streak habit daily tracker consistency heatmap focus routine' }
   ];
 
   var ICONS = {

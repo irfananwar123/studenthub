@@ -52,12 +52,16 @@
   .brand { font-size: 1.05rem; }
   .brand-mark { width: 34px; height: 34px; }
   .header-inner { gap: .5rem; min-height: 64px; }
-  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat-grid, .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .breakdown-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .breakdown-row .split-bar { grid-column: 1 / -1; }
+  .heatmap { max-width: 100%; }
+  .timer-console { padding-inline: .7rem; }
   .tool-panel { padding: 1.1rem; }
 }
 @media (max-width: 380px) {
   .mini-stats { grid-template-columns: minmax(0, 1fr); }
-  .stat-grid { grid-template-columns: minmax(0, 1fr); }
+  .stat-grid, .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
   .week-grid, .countdown-grid { grid-template-columns: minmax(0, 1fr); }
   .hero-points { gap: .4rem .8rem; font-size: .86rem; }
   .btn { padding-inline: .9rem; }

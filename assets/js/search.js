@@ -59,7 +59,7 @@
         list.appendChild(SH.el('div', { class: 'search-empty', role: 'status' }, [
           SH.icon('search', 22),
           SH.el('strong', { text: 'No tools found for “' + q + '”' }),
-          SH.el('span', { text: 'Check the spelling or browse all 25 tools below.' })
+          SH.el('span', { text: 'Check the spelling or browse all ' + (SH.TOOLS ? SH.TOOLS.length : 25) + ' tools below.' })
         ]));
         return;
       }

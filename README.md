@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 25 working tools, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 29 working tools with dashboard-style analytics, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -23,7 +23,7 @@ studenthub/
 │   │                           ads.js, app.js, home.js, contact.js,
 │   │                           workspace.js, config.js
 │   └── icons/                  favicon.svg, icon-192.png, icon-512.png
-├── tools/<25 tools>/           index.html + tool.js for each tool
+├── tools/<29 tools>/           index.html + tool.js for each tool
 ├── articles/<4 guides>/        index.html
 ├── scripts/
 │   ├── generate.js             Regenerates all HTML, sitemap, robots and service worker
@@ -90,8 +90,8 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 18 calculation + structure checks
-node tests/browser-smoke.js # 41 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 22 calculation + structure checks
+node tests/browser-smoke.js # 51 real Chrome checks (needs Google Chrome installed)
 ```
 
 The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, the locked light theme, mobile overflow and ad behaviour (including a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
@@ -150,7 +150,8 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 
 ## 7. Features delivered
 
-- **25 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference and unit converter.
+- **29 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner and focus streak & habits.
+- **Advanced study analytics**: live study timer with saved sessions, weekly goal ring, 7-day bars, subject breakdown and 35-day heatmap; automatic spaced-review plans with completion tracking; required-marks planning for every remaining assessment; daily habit streaks with a consistency heatmap. All charts and totals are calculated locally and stored only in the browser.
 - **Personal workspace**: favourites, recent tools, progress, all local collections, JSON export/import and clear-all.
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
 - **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for small preferences; IndexedDB for collections.

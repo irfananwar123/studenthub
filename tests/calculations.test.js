@@ -130,3 +130,56 @@ test('citation formatting never invents missing details', () => {
   assert.ok(!partial.text.includes('undefined'));
   assert.equal(C.formatCitation('Unknown', { author: 'A' }), null);
 });
+
+test('study hours analytics: daily, weekly, subject totals and goal progress', () => {
+  const sessions = [
+    { date: '2026-11-25', subject: 'Maths', minutes: 60 },
+    { date: '2026-11-25', subject: 'Physics', minutes: 30 },
+    { date: '2026-11-24', subject: 'Maths', minutes: 45 },
+    { date: '2026-11-24', subject: 'Maths', minutes: -5 }
+  ];
+  const s = C.hoursSummary(sessions, 120, '2026-11-25');
+  assert.equal(s.todayMinutes, 90);
+  assert.equal(s.weekMinutes, 135);
+  assert.equal(s.totalMinutes, 135);
+  assert.equal(s.bySubject.Maths, 105);
+  assert.equal(s.bySubject.Physics, 30);
+  assert.equal(s.goalPercent, 112.5);
+  assert.equal(s.averageMinutes, 19.3);
+  assert.equal(s.weekKeys.length, 7);
+  assert.equal(C.hoursSummary([], 0, '2026-11-25').goalPercent, null);
+});
+
+test('spaced revision plan respects strength intervals and the exam date', () => {
+  const medium = C.revisionPlan('2026-11-25', '2026-12-20', 'medium');
+  assert.deepEqual(medium.map(x => x.date), ['2026-11-26', '2026-11-27', '2026-11-30', '2026-12-05', '2026-12-16']);
+  assert.equal(medium[2].interval, 5);
+  assert.equal(C.revisionPlan('2026-11-25', '2026-12-05', 'medium').length, 4);
+  assert.equal(C.revisionPlan('2026-11-25', '', 'hard').length, 5);
+  assert.equal(C.revisionPlan('2026-02-30', '', 'easy'), null);
+  assert.equal(C.revisionPlan('2026-11-25', '2026-11-20', 'easy').length, 0);
+});
+
+test('grade goal planner: required marks, achieved and impossible cases', () => {
+  const plan = C.gradeGoalPlan(80, 60, 80, [20]);
+  assert.equal(plan.status, 'possible');
+  assert.equal(plan.grandTotal, 100);
+  assert.equal(plan.requiredTotal, 80);
+  assert.equal(plan.needed, 20);
+  assert.equal(plan.requiredPercent, 100);
+  assert.deepEqual(plan.perAssessment, [20]);
+  assert.equal(C.gradeGoalPlan(80, 90, 80, [20]).status, 'achieved');
+  assert.equal(C.gradeGoalPlan(80, 60, 80, [5]).status, 'impossible');
+  assert.equal(C.gradeGoalPlan(101, 60, 80, [20]), null);
+  assert.equal(C.gradeGoalPlan(80, 60, 80, []).status, 'impossible');
+});
+
+test('streak statistics: current run, longest run and 35-day heatmap', () => {
+  const s = C.streakStats(['2026-11-25', '2026-11-24', '2026-11-23', '2026-11-20', '2026-11-23'], '2026-11-25');
+  assert.equal(s.current, 3);
+  assert.equal(s.longest, 3);
+  assert.equal(s.totalDays, 4);
+  assert.equal(s.last35.length, 35);
+  assert.equal(s.last35[34].count, 1);
+  assert.equal(C.streakStats(['2026-11-20'], '2026-11-25').current, 0);
+});

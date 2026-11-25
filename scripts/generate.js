@@ -54,7 +54,8 @@ const TOOLS = new Function('return ' + listText[1])(); // trusted build-time sou
 
 const content = Object.assign({},
   require('./content-academic'), require('./content-planning'),
-  require('./content-learning'), require('./content-writing'), require('./content-utils'));
+  require('./content-learning'), require('./content-writing'), require('./content-utils'),
+  require('./content-advanced'));
 
 const generated = {};
 /* Pages live at different depths (root, /about/, /tools/<id>/). Absolute site
@@ -164,7 +165,8 @@ ${scripts(opts.scripts)}
 </body>\n</html>\n`;
 }
 function toolCard(t) {
-  return `<article class="tool-card"><div class="card-icon">${icon('calculator', 20)}</div><h3><a href="/tools/${t.id}/">${t.name}</a></h3><p>${t.desc}</p><span class="card-link">Open tool →</span></article>`;
+  const c = content[t.id];
+  return `<article class="tool-card"><div class="card-icon">${icon(c && c.icon ? c.icon : 'calculator', 20)}</div><h3><a href="/tools/${t.id}/">${t.name}</a></h3><p>${t.desc}</p><span class="card-link">Open tool →</span></article>`;
 }
 function relatedSection(id) {
   const same = TOOLS.filter(t => t.id !== id);
@@ -176,6 +178,7 @@ function toolPage(t) {
   const c = content[t.id];
   if (!c) throw new Error('Missing content for ' + t.id);
   const url = `/tools/${t.id}/`;
+  const advanced = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits'].indexOf(t.id) !== -1;
   const breadcrumb = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
@@ -191,8 +194,8 @@ function toolPage(t) {
     </div>
     ${adSlot('tool', ADS.enabled)}
   </section>
-  <section class="section" style="padding-top:.5rem"><div class="container tool-layout">
-    <div class="card tool-panel"><h2>Use the tool</h2><form id="${t.id}-form" novalidate>${c.form}</form></div>
+  <section class="section" style="padding-top:.5rem"><div class="container tool-layout${advanced ? ' tool-layout-single' : ''}">
+    <div class="card tool-panel${advanced ? ' advanced-panel' : ''}"><h2>Use the tool</h2><form id="${t.id}-form" novalidate>${c.form}</form></div>
     <aside class="card tool-panel output-panel" aria-labelledby="result-heading"><h2 id="result-heading">Results</h2><div id="result" data-autoscroll="false" aria-live="polite" aria-atomic="true"><div class="empty-state">${icon('chart', 28)}<strong>Your results appear here</strong><span>Fill in the fields and choose the calculate button.</span></div></div></aside>
   </div></section>
   <section class="section section-soft"><div class="container prose">
@@ -212,7 +215,7 @@ function toolPage(t) {
 }
 
 function homepage() {
-  const featured = ['percentage-calculator', 'cgpa-calculator', 'attendance-calculator', 'pomodoro-timer', 'flashcard-maker', 'word-counter'];
+  const featured = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits', 'percentage-calculator', 'cgpa-calculator', 'attendance-calculator', 'pomodoro-timer'];
   const popular = ['gpa-calculator', 'grade-calculator', 'marks-calculator', 'exam-score-predictor', 'exam-countdown', 'study-tracker', 'quiz-maker', 'unit-converter'];
   const find = id => TOOLS.find(t => t.id === id);
   const cats = [
@@ -240,7 +243,7 @@ function homepage() {
       <h1>Study smarter.<br><span class="gradient">Achieve more.</span></h1>
       <p class="hero-sub">Twenty-five genuinely useful study tools in one fast, private place. Calculate grades, plan revision, track progress and check your writing — no account or subscription needed.</p>
       <div data-search class="search-wrap" style="margin-top:1.8rem">
-        <form class="search-box" data-search-form role="search"><label class="visually-hidden" for="home-search">Search all tools</label>${icon('search', 20)}<input id="home-search" data-search-input type="search" autocomplete="off" placeholder="Search 25 tools — try ‘attendance’ or ‘citation’" aria-autocomplete="list" aria-controls="home-search-results" aria-expanded="true"><button class="btn btn-primary btn-small" type="submit">Search</button></form>
+        <form class="search-box" data-search-form role="search"><label class="visually-hidden" for="home-search">Search all tools</label>${icon('search', 20)}<input id="home-search" data-search-input type="search" autocomplete="off" placeholder="Search ${TOOLS.length} tools — try ‘attendance’ or ‘hours’" aria-autocomplete="list" aria-controls="home-search-results" aria-expanded="true"><button class="btn btn-primary btn-small" type="submit">Search</button></form>
         <div class="search-results" id="home-search-results" data-search-results role="listbox" aria-label="Tool search results"></div>
       </div>
       <ul class="hero-points"><li>${icon('check', 16)} Works offline</li><li>${icon('check', 16)} No sign-up</li><li>${icon('check', 16)} Your data stays local</li></ul>
@@ -259,7 +262,7 @@ function homepage() {
 
   <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card"><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
 
-  <section class="section section-soft" id="all-tools" aria-labelledby="all-heading"><div class="container"><div class="section-head"><span class="eyebrow">The full library</span><h2 id="all-heading">All 25 tools</h2><p>Every tool has its own page with instructions, formulas and examples.</p></div><div class="grid tool-grid">${TOOLS.map(toolCard).join('')}</div></div></section>
+  <section class="section section-soft" id="all-tools" aria-labelledby="all-heading"><div class="container"><div class="section-head"><span class="eyebrow">The full library</span><h2 id="all-heading">All ${TOOLS.length} tools</h2><p>Every tool has its own page with instructions, formulas and examples.</p></div><div class="grid tool-grid">${TOOLS.map(toolCard).join('')}</div></div></section>
 
   <section class="section" aria-labelledby="recent-heading"><div class="container"><div class="section-head"><span class="eyebrow">Pick up where you left off</span><h2 id="recent-heading">Recently used tools</h2><p>Saved on this device only.</p></div><div id="recent-tools" class="grid tool-grid"><div class="empty-state"><strong>Nothing here yet</strong><span>Open a tool and it will appear here on your next visit.</span></div></div></div></section>
 
@@ -436,7 +439,7 @@ const offlineBody = `<main id="main"><section class="page-hero container"><span 
 write('offline.html', staticPage({ title: 'Offline — StudentHub', desc: 'StudentHub offline fallback page.', path: '/offline/', robots: 'noindex', body: offlineBody }));
 
 const notFoundBody = `<main id="main"><section class="page-hero container"><span class="eyebrow">404</span><h1>That page does not exist</h1><p>The link may be out of date, or the page may have moved. You can search all tools from the homepage or open the sitemap.</p><div data-search class="search-wrap" style="margin-top:1.2rem"><form class="search-box" data-search-form role="search"><label class="visually-hidden" for="404-search">Search tools</label>${icon('search', 20)}<input id="404-search" data-search-input type="search" placeholder="Search for a tool" aria-autocomplete="list" aria-controls="404-results" aria-expanded="true"><button class="btn btn-primary btn-small" type="submit">Search</button></form><div class="search-results" id="404-results" data-search-results role="listbox" aria-label="Tool search results"></div></div><div class="btn-row" style="margin-top:1.4rem"><a class="btn btn-primary" href="/">Back to StudentHub</a><a class="btn btn-secondary" href="/sitemap.xml">View sitemap</a></div></section></main>`;
-write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc: 'The requested StudentHub page could not be found. Search the 25 free tools instead.', path: '/404/', robots: 'noindex', body: notFoundBody }));
+write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc: `The requested StudentHub page could not be found. Search the ${TOOLS.length} free tools instead.`, path: '/404/', robots: 'noindex', body: notFoundBody }));
 
 // Pretty URLs work on any static host: /about/ and /about.html both resolve.
 ['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace'].forEach(function (name) {

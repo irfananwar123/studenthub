@@ -52,7 +52,7 @@
         list.appendChild(row);
       });
     }
-    function load() { return SH.storage.all('tasks').then(function (rows) { tasks = rows; render(); }); }
+    function load() { return SH.storage.all('tasks').then(function (rows) { tasks = rows.filter(function (row) { return !row || row.type !== 'habit'; }); render(); }); }
     document.getElementById('ap-add').addEventListener('click', function () {
       var title = document.getElementById('ap-title').value.trim();
       if (!title) return T.error('result', 'Enter an assignment title.');

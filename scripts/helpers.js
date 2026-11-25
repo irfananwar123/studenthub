@@ -13,7 +13,12 @@ const ICONS = {
   check: 'm5 12 5 5L20 7',
   home: 'm3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z M9 22v-7h6v7',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M12 11v6 M12 7h.01',
-  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z'
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z',
+  checkcircle: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M8 12l3 3 5-6',
+  play: 'm7 4 13 8-13 8Z',
+  pause: 'M8 5v14 M16 5v14',
+  reset: 'M3 12a9 9 0 1 0 3-6.7 M3 4v5h5',
+  plus: 'M12 5v14 M5 12h14'
 };
 function icon(name, size = 20) {
   const paths = (ICONS[name] || ICONS.calculator).split(' M').map((p, i) => i === 0 ? p : 'M' + p);

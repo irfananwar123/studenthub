@@ -222,6 +222,105 @@
     return { text: text.replace(/\s+/g, ' ').trim(), warnings: warnings };
   }
 
+  /* Advanced study analytics helpers. Pure functions: no DOM, no storage. */
+  function isoDay(date) { return date.toISOString().slice(0, 10); }
+
+  function hoursSummary(sessions, goalMinutes, todayKey) {
+    var rows = Array.isArray(sessions) ? sessions : [];
+    var byDay = {}, bySubject = {}, totalMinutes = 0;
+    rows.forEach(function (row) {
+      var minutes = Number(row && row.minutes);
+      var key = row && typeof row.date === 'string' ? row.date.slice(0, 10) : '';
+      if (!isNum(minutes) || minutes <= 0 || !parseDate(key)) return;
+      byDay[key] = (byDay[key] || 0) + minutes;
+      var subject = String((row && row.subject) || 'Unsorted').trim() || 'Unsorted';
+      bySubject[subject] = (bySubject[subject] || 0) + minutes;
+      totalMinutes += minutes;
+    });
+    var today = todayKey && parseDate(todayKey) ? todayKey : isoDay(new Date());
+    var weekKeys = [], cursor = parseDate(today);
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(cursor.getTime() - i * 86400000);
+      weekKeys.push(isoDay(d));
+    }
+    var weekMinutes = weekKeys.reduce(function (a, k) { return a + (byDay[k] || 0); }, 0);
+    var goal = isNum(goalMinutes) && goalMinutes > 0 ? goalMinutes : null;
+    return {
+      byDay: byDay, bySubject: bySubject, weekKeys: weekKeys,
+      todayMinutes: byDay[today] || 0, weekMinutes: weekMinutes,
+      totalMinutes: totalMinutes, sessionCount: rows.length,
+      goalMinutes: goal, goalPercent: goal ? round(weekMinutes / goal * 100, 1) : null,
+      averageMinutes: round(weekMinutes / 7, 1)
+    };
+  }
+
+  function revisionPlan(startDate, examDate, strength) {
+    var start = parseDate(startDate);
+    if (!start) return null;
+    var exam = null;
+    if (examDate) { exam = parseDate(examDate); if (!exam) return null; }
+    var sets = { easy: [1, 3, 7, 14, 30], medium: [1, 2, 5, 10, 21], hard: [1, 2, 4, 8, 15] };
+    var intervals = sets[strength] || sets.medium;
+    var plan = [];
+    intervals.forEach(function (gap, index) {
+      var d = new Date(start.getTime() + gap * 86400000);
+      if (exam && d > exam) return;
+      plan.push({ stage: index + 1, interval: gap, date: isoDay(d) });
+    });
+    return plan;
+  }
+
+  function gradeGoalPlan(targetPercent, earned, possibleSoFar, remainingMax) {
+    if (!isNum(targetPercent) || !isNum(earned) || !isNum(possibleSoFar)) return null;
+    if (targetPercent < 0 || targetPercent > 100 || earned < 0 || possibleSoFar < 0) return null;
+    var list = (Array.isArray(remainingMax) ? remainingMax : []).map(Number)
+      .filter(function (n) { return isNum(n) && n > 0; });
+    var remainingPossible = sum(list);
+    var grandTotal = possibleSoFar + remainingPossible;
+    if (grandTotal <= 0) return null;
+    var requiredTotal = round(grandTotal * targetPercent / 100, 2);
+    var needed = round(requiredTotal - earned, 2);
+    var status = needed <= 0 ? 'achieved' : (needed > remainingPossible ? 'impossible' : 'possible');
+    var requiredPercent = remainingPossible > 0 && status === 'possible' ? round(needed / remainingPossible * 100, 1) : null;
+    return {
+      status: status, grandTotal: grandTotal, requiredTotal: requiredTotal,
+      earned: earned, needed: needed, remainingPossible: remainingPossible,
+      requiredPercent: requiredPercent,
+      perAssessment: list.map(function (max) { return round(needed / remainingPossible * max, 1); }),
+      remaining: list.slice()
+    };
+  }
+
+  function streakStats(dateKeys, todayKey) {
+    var counts = {};
+    (Array.isArray(dateKeys) ? dateKeys : []).forEach(function (key) {
+      if (typeof key !== 'string' || !parseDate(key.slice(0, 10))) return;
+      var day = key.slice(0, 10);
+      counts[day] = (counts[day] || 0) + 1;
+    });
+    var keys = Object.keys(counts).sort();
+    var today = todayKey && parseDate(todayKey) ? todayKey : isoDay(new Date());
+    var cursor = parseDate(today);
+    if (!counts[isoDay(cursor)]) cursor = new Date(cursor.getTime() - 86400000);
+    var current = 0;
+    while (counts[isoDay(cursor)]) {
+      current++;
+      cursor = new Date(cursor.getTime() - 86400000);
+    }
+    var longest = 0, run = 0, previous = null;
+    keys.forEach(function (key) {
+      run = previous && daysBetween(previous, key) === 1 ? run + 1 : 1;
+      if (run > longest) longest = run;
+      previous = key;
+    });
+    var last35 = [], anchor = parseDate(today);
+    for (var i = 34; i >= 0; i--) {
+      var day = isoDay(new Date(anchor.getTime() - i * 86400000));
+      last35.push({ date: day, count: counts[day] || 0 });
+    }
+    return { current: current, longest: longest, totalDays: keys.length, last35: last35, today: today };
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -229,7 +328,9 @@
     attendance: attendance, scorePredictor: scorePredictor,
     textStats: textStats, readingTime: readingTime,
     parseDate: parseDate, daysBetween: daysBetween, age: age, isLeap: isLeap,
-    convertUnit: convertUnit, UNIT_GROUPS: UNIT_GROUPS, formatCitation: formatCitation
+    convertUnit: convertUnit, UNIT_GROUPS: UNIT_GROUPS, formatCitation: formatCitation,
+    isoDay: isoDay, hoursSummary: hoursSummary, revisionPlan: revisionPlan,
+    gradeGoalPlan: gradeGoalPlan, streakStats: streakStats
   };
   return api;
 });

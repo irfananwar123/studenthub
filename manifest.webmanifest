@@ -17,6 +17,7 @@
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
+    { "name": "Study Hours Tracker", "short_name": "Hours", "url": "tools/study-hours-tracker/index.html", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Pomodoro Timer", "short_name": "Focus", "url": "tools/pomodoro-timer/index.html", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Flashcard Maker", "short_name": "Cards", "url": "tools/flashcard-maker/index.html", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "My Workspace", "short_name": "Workspace", "url": "workspace/index.html", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
