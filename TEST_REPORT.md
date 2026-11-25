@@ -32,7 +32,7 @@ Independent calculation checks compare output against separately calculated expe
 ### Structural tests (9 suites)
 
 - All 29 tool directories contain `index.html` and `tool.js`.
-- 36 generated pages have unique titles, descriptions, canonical URLs and exactly one H1; all have Open Graph and Google Search Console verification meta tags.
+- 36 generated pages have unique titles, descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags.
 - Every generated page ships the pre-paint theme script, all three theme controls and `theme.js`; no stale hidden light-only toggle remains. Dark palette tokens are present in `themes.css`.
 - Every tool page includes instructions, formulas, worked example, FAQ, related tools, breadcrumb structured data, result region and favourite control.
 - All internal links resolve to real generated files (no broken routes).
