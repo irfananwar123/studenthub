@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 29 working tools with dashboard-style analytics, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 29 working tools with dashboard-style analytics, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -81,7 +81,7 @@ You can also open `index.html` directly (double-click it) and browse the whole s
    | Pop-under | Head of every page, all devices | `ADS.popunder` + `headAds()` |
    | Sponsored SmartLink | Footer of general pages | `ADS.smartlink` + `sponsoredLink()` |
 
-   Set `ADS.enabled = false` in `scripts/generate.js` and run `node scripts/generate.js` to remove every ad placement. Ads are intentionally omitted from `/privacy-policy/`, `/contact/` and `/workspace/` (`ads: false` on those pages). `assets/js/ads.js` keeps the same URLs for reference, hides slots when `?noads=1` is present (used by the tests), and shows a clearly labelled first-party sponsored banner if a network returns no creative after four seconds. It also detects blocked ad scripts (via a parse-time error listener and a hidden bait element) and immediately shows those self-hosted banners plus a polite, dismissible notice asking the visitor to allow ads. The banners are plain SVG images in `assets/ads/` linking to the sponsor; they set no cookies and receive no study data. If a network replaces a tag, edit `ADS` in `scripts/generate.js`, regenerate and redeploy — editing `ads.js` alone will not change the live tags.
+   Set `ADS.enabled = false` in `scripts/generate.js` and run `node scripts/generate.js` to remove every ad placement. Ads are intentionally omitted from `/privacy-policy/`, `/contact/` and `/workspace/` (`ads: false` on those pages). `assets/js/ads.js` keeps the same URLs for reference, hides slots when `?noads=1` is present (used by the tests), and shows a clearly labelled first-party sponsored banner if a network returns no creative after four seconds. It also detects blocked ad scripts (via a parse-time error listener and a hidden bait element) and immediately shows those self-hosted banners plus a polite, dismissible notice asking the visitor to allow ads. The banners are plain SVG images in `assets/ads/` linking to the sponsor; they set no cookies and receive no study data. If a network replaces a tag, edit `ADS` in `scripts/generate.js`, regenerate and redeploy — editing `ads.js` alone will not change the live tags. Ad slots are now theme-aware, labelled dashboard surfaces; the networks and placements are unchanged.
 
    Ad networks usually only serve creatives to approved publisher accounts and allowlisted domains. Test locally or from an unapproved domain and the scripts may return HTTP 200 while displaying nothing; the fallback link still gives visitors a working sponsored destination.
 
@@ -90,11 +90,11 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 22 calculation + structure checks
-node tests/browser-smoke.js # 51 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 23 calculation + structure checks
+node tests/browser-smoke.js # 56 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, the locked light theme, mobile overflow and ad behaviour (including a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
+The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
 
 See `TEST_REPORT.md` for the latest results and known limits.
 

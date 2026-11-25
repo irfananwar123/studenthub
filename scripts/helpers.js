@@ -18,7 +18,10 @@ const ICONS = {
   play: 'm7 4 13 8-13 8Z',
   pause: 'M8 5v14 M16 5v14',
   reset: 'M3 12a9 9 0 1 0 3-6.7 M3 4v5h5',
-  plus: 'M12 5v14 M5 12h14'
+  plus: 'M12 5v14 M5 12h14',
+  sun: 'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z M12 1v2 M12 21v2 M4.2 4.2l1.4 1.4 M18.4 18.4l1.4 1.4 M1 12h2 M21 12h2 M4.2 19.8l1.4-1.4 M18.4 5.6l1.4-1.4',
+  moon: 'M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z',
+  auto: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M12 3v18 M3.5 9h17 M3.5 15h17'
 };
 function icon(name, size = 20) {
   const paths = (ICONS[name] || ICONS.calculator).split(' M').map((p, i) => i === 0 ? p : 'M' + p);

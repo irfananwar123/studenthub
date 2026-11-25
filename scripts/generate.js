@@ -95,7 +95,7 @@ function head(opts) {
   const canonical = SITE + opts.path;
   const ld = opts.ld ? jsonLd(opts.ld) : '';
   return `<!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-theme-preference="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -103,7 +103,8 @@ function head(opts) {
 <meta name="description" content="${opts.desc}">
 ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="canonical" href="${canonical}">
-<meta name="theme-color" content="#0a1c3d">
+<meta name="theme-color" content="#f5f8ff">
+<script>(function(){var d=document.documentElement,p='auto',m=d.getAttribute('data-theme-preference');try{var r=localStorage.getItem('studenthub:theme');if(r!==null){var v=JSON.parse(r);if(v==='light'||v==='dark'||v==='auto')p=v;}else if(m==='light'||m==='dark'||m==='auto')p=m;}catch(e){}var dark=p==='dark'||(p==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',dark?'dark':'light');d.setAttribute('data-theme-preference',p);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',dark?'#07101f':'#f5f8ff');})();</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="StudentHub">
 <meta property="og:title" content="${opts.title}">
@@ -121,6 +122,11 @@ ${ld}
 </head>`;
 }
 const brand = `<a class="brand" href="/" aria-label="StudentHub home"><span class="brand-mark">${icon('book', 21)}</span><span>Student<span class="accent">Hub</span></span></a>`;
+const themeSwitch = `<div class="theme-switch" role="group" aria-label="Colour theme">
+      <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false" aria-label="Light theme" title="Light theme">${icon('sun', 16)}</button>
+      <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${icon('moon', 16)}</button>
+      <button class="theme-option" type="button" data-theme-option="auto" aria-pressed="true" aria-label="Auto theme (follows device)" title="Auto theme">${icon('auto', 16)}</button>
+    </div>`;
 function header() {
   return `<header class="site-header"><div class="container header-inner">
     ${brand}
@@ -135,13 +141,14 @@ function header() {
     </ul></nav>
     <div class="header-actions">
       <span class="header-chip">${TOOLS.length} tools · 100% free</span>
+      ${themeSwitch}
     </div>
   </div></header>`;
 }
 function footer(adsOn) {
   return `<footer class="site-footer"><div class="container">
     <div class="footer-grid">
-      <div class="footer-brand"><a class="brand" href="/" style="color:#fff">${brand.replace(/<a[^>]*>|<\/a>/g, '')}</a><p>Free, private study tools that work in your browser. No account, no subscription. Adverts help keep it free.</p></div>
+      <div class="footer-brand"><a class="brand" href="/">${brand.replace(/<a[^>]*>|<\/a>/g, '')}</a><p>Free, private study tools that work in your browser. No account, no subscription. Adverts help keep it free.</p></div>
       <div><h3>Tools</h3><ul><li><a href="/tools/percentage-calculator/">Calculators</a></li><li><a href="/tools/pomodoro-timer/">Study planning</a></li><li><a href="/tools/flashcard-maker/">Learning tools</a></li><li><a href="/tools/word-counter/">Writing tools</a></li></ul></div>
       <div><h3>Learn</h3><ul><li><a href="/articles/study-tips/">Study tips</a></li><li><a href="/articles/active-recall/">Active recall</a></li><li><a href="/articles/spaced-repetition/">Spaced repetition</a></li><li><a href="/articles/exam-preparation/">Exam preparation</a></li></ul></div>
       <div><h3>StudentHub</h3><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy-policy/">Privacy policy</a></li><li><a href="/terms/">Terms</a></li></ul></div>

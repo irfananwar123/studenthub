@@ -1,9 +1,11 @@
-/* Design tokens. One fixed, carefully tuned light theme.
-   Dark mode has been removed deliberately: the palette is locked so every
-   page, tool and ad slot renders with identical contrast and spacing. */
+/* Design tokens for the premium StudentHub dashboard.
+   :root is the light palette; html[data-theme="dark"] overrides the same
+   semantic tokens, so every page, tool, chart and ad slot can switch theme
+   without changing component CSS. The preference is saved locally by theme.js. */
 :root {
   color-scheme: light;
 
+  /* Brand and status colours */
   --navy-950: #050f26;
   --navy-900: #0a1c3b;
   --navy-800: #102a56;
@@ -14,36 +16,243 @@
   --sky-500: #0ea5e9;
   --violet-500: #7c3aed;
   --teal-500: #0d9488;
-  --amber-500: #f59e0b;
+  --amber-500: #d97706;
   --red-600: #dc2626;
   --green-600: #059669;
 
+  /* Page and surfaces */
   --bg: #f5f8ff;
   --bg-soft: #eaf1ff;
   --surface: #ffffff;
   --surface-2: #f7faff;
   --surface-3: #eef4ff;
+  --surface-glass: rgba(255, 255, 255, .84);
+  --surface-highlight: rgba(255, 255, 255, .82);
+  --surface-inset: rgba(255, 255, 255, .72);
+  --surface-accent: rgba(59, 130, 246, .06);
   --text: #0b1a33;
   --text-soft: #334662;
   --muted: #64748b;
   --border: #dbe6f7;
   --border-strong: #c2d3ec;
+  --border-accent: #d5e4ff;
 
   --brand: var(--blue-600);
   --brand-strong: var(--blue-700);
   --brand-soft: #e9f1ff;
   --accent: var(--sky-500);
+  --on-brand: #ffffff;
+  --brand-shadow: rgba(37, 99, 235, .35);
+  --green-glow: rgba(5, 150, 105, .14);
 
+  /* Gradients and contrast panels */
+  --body-glow-1: rgba(59, 130, 246, .12);
+  --body-glow-2: rgba(14, 165, 233, .09);
+  --body-glow-3: rgba(124, 58, 237, .06);
+  --section-soft-bg: linear-gradient(180deg, rgba(234, 241, 255, .55), rgba(234, 241, 255, .9));
+  --header-bg: rgba(255, 255, 255, .84);
+  --header-highlight: rgba(255, 255, 255, .78);
+  --page-hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fbff 52%, #eef5ff 100%);
+  --card-icon-bg: linear-gradient(145deg, var(--brand-soft), #ffffff);
+  --card-icon-border: #d8e6ff;
+  --output-panel-bg: linear-gradient(180deg, #ffffff 0%, var(--surface-2) 100%);
+  --advanced-panel-bg: linear-gradient(180deg, #ffffff 0%, var(--surface-2) 100%);
+  --flashcard-bg: linear-gradient(155deg, #ffffff, var(--surface-2));
+  --flashcard-back-bg: linear-gradient(155deg, var(--brand-soft), #ffffff);
+  --timer-gradient: linear-gradient(135deg, var(--navy-900), var(--brand));
+  --timer-console-bg: linear-gradient(155deg, var(--brand-soft), var(--surface));
+  --hero-glow: rgba(59, 130, 246, .16);
+  --hero-panel-border: rgba(255, 255, 255, .16);
+  --hero-panel-grid: rgba(255, 255, 255, .18);
+  --hero-panel-text: #ffffff;
+  --hero-panel-muted: rgba(255, 255, 255, .74);
+  --hero-inset-bg: rgba(255, 255, 255, .1);
+  --hero-inset-border: rgba(255, 255, 255, .14);
+  --chart-bar-start: #7dd3fc;
+  --chart-bar-end: #2563eb;
+  --footer-text: #c9d8f0;
+  --footer-strong: #ffffff;
+  --footer-muted: #9db4d8;
+  --footer-border: rgba(255, 255, 255, .14);
+
+  /* Ad surfaces stay distinct from study content but follow the theme */
+  --ad-bg: linear-gradient(155deg, var(--surface), var(--surface-2));
+  --ad-border: var(--border-strong);
+  --ad-glow: rgba(37, 99, 235, .12);
+  --ad-label-bg: var(--brand-soft);
+  --ad-label-text: var(--brand);
+
+  /* Charts, rings and heatmaps */
+  --progress-track: var(--bg-soft);
+  --heat-0: #eef3fb;
+  --heat-0-border: #dbe6f7;
+  --heat-1: #d8e8ff;
+  --heat-1-border: #bcd5ff;
+  --heat-2: #a9ccff;
+  --heat-2-border: #8fb9fb;
+  --heat-3: #64a1f5;
+  --heat-3-border: #4d8ceb;
+  --heat-4: #1d4ed8;
+  --heat-4-border: #1d4ed8;
+
+  /* Depth */
   --ring: rgba(37, 99, 235, .32);
+  --hairline: rgba(13, 34, 76, .06);
   --shadow-sm: 0 1px 2px rgba(13, 34, 76, .05), 0 6px 16px rgba(13, 34, 76, .05);
   --shadow-md: 0 12px 32px rgba(13, 34, 76, .1);
   --shadow-lg: 0 28px 64px rgba(13, 34, 76, .16);
   --shadow-glow: 0 18px 40px -20px rgba(37, 99, 235, .45);
 
+  /* Structure */
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 24px;
   --max: 1200px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --blue-700: #60a5fa;
+  --blue-600: #3b82f6;
+  --blue-500: #60a5fa;
+  --sky-500: #38bdf8;
+  --violet-500: #a78bfa;
+  --teal-500: #2dd4bf;
+  --amber-500: #fbbf24;
+  --red-600: #f87171;
+  --green-600: #34d399;
+
+  --bg: #07101f;
+  --bg-soft: #0e1b30;
+  --surface: #101e35;
+  --surface-2: #14253f;
+  --surface-3: #1a2f4d;
+  --surface-glass: rgba(16, 30, 53, .86);
+  --surface-highlight: rgba(26, 47, 77, .82);
+  --surface-inset: rgba(7, 16, 31, .52);
+  --surface-accent: rgba(96, 165, 250, .08);
+  --text: #eef5ff;
+  --text-soft: #c6d6ef;
+  --muted: #94aac9;
+  --border: #263b5d;
+  --border-strong: #37537c;
+  --border-accent: #31527f;
+
+  --brand: #7cb2ff;
+  --brand-strong: #3b82f6;
+  --brand-soft: rgba(59, 130, 246, .16);
+  --accent: #38bdf8;
+  --on-brand: #ffffff;
+  --brand-shadow: rgba(59, 130, 246, .28);
+  --green-glow: rgba(52, 211, 153, .18);
+
+  --body-glow-1: rgba(59, 130, 246, .18);
+  --body-glow-2: rgba(14, 165, 233, .1);
+  --body-glow-3: rgba(124, 58, 237, .12);
+  --section-soft-bg: linear-gradient(180deg, rgba(10, 21, 39, .6), rgba(14, 27, 48, .92));
+  --header-bg: rgba(9, 19, 36, .86);
+  --header-highlight: rgba(96, 165, 250, .12);
+  --page-hero-bg: linear-gradient(135deg, #10203a 0%, #142944 52%, #0c1b32 100%);
+  --card-icon-bg: linear-gradient(145deg, rgba(59, 130, 246, .24), #14253f);
+  --card-icon-border: #31527f;
+  --output-panel-bg: linear-gradient(180deg, #14253f 0%, var(--surface-2) 100%);
+  --advanced-panel-bg: linear-gradient(180deg, #14253f 0%, var(--surface-2) 100%);
+  --flashcard-bg: linear-gradient(155deg, #172b49, var(--surface-2));
+  --flashcard-back-bg: linear-gradient(155deg, rgba(59, 130, 246, .22), #172b49);
+  --timer-gradient: linear-gradient(135deg, #a8ccff, #60a5fa);
+  --timer-console-bg: linear-gradient(155deg, rgba(59, 130, 246, .16), var(--surface));
+  --hero-glow: rgba(96, 165, 250, .2);
+  --hero-panel-border: rgba(148, 190, 255, .22);
+  --hero-panel-grid: rgba(255, 255, 255, .12);
+  --hero-panel-text: #f4f8ff;
+  --hero-panel-muted: rgba(226, 238, 255, .72);
+  --hero-inset-bg: rgba(255, 255, 255, .07);
+  --hero-inset-border: rgba(255, 255, 255, .11);
+  --chart-bar-start: #67e8f9;
+  --chart-bar-end: #3b82f6;
+  --footer-text: #a9bddc;
+  --footer-strong: #ffffff;
+  --footer-muted: #8298bd;
+  --footer-border: rgba(255, 255, 255, .12);
+
+  --ad-bg: linear-gradient(155deg, rgba(20, 37, 63, .96), rgba(14, 27, 48, .96));
+  --ad-border: #37537c;
+  --ad-glow: rgba(96, 165, 250, .16);
+  --ad-label-bg: rgba(59, 130, 246, .18);
+  --ad-label-text: #8fbcff;
+
+  --progress-track: #1a2f4d;
+  --heat-0: #13243d;
+  --heat-0-border: #223958;
+  --heat-1: #163a62;
+  --heat-1-border: #24507d;
+  --heat-2: #165899;
+  --heat-2-border: #2a74b6;
+  --heat-3: #2f82e8;
+  --heat-3-border: #53a0f3;
+  --heat-4: #71b1ff;
+  --heat-4-border: #8fc3ff;
+
+  --ring: rgba(96, 165, 250, .45);
+  --hairline: rgba(255, 255, 255, .05);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .28), 0 8px 20px rgba(0, 0, 0, .2);
+  --shadow-md: 0 14px 36px rgba(0, 0, 0, .34);
+  --shadow-lg: 0 28px 64px rgba(0, 0, 0, .44);
+  --shadow-glow: 0 18px 44px -20px rgba(59, 130, 246, .55);
+}
+
+/* The inline pre-paint script normally sets data-theme before CSS loads. This
+   fallback still follows the device setting if scripting is unavailable. */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #07101f;
+    --bg-soft: #0e1b30;
+    --surface: #101e35;
+    --surface-2: #14253f;
+    --surface-3: #1a2f4d;
+    --surface-glass: rgba(16, 30, 53, .86);
+    --surface-highlight: rgba(26, 47, 77, .82);
+    --surface-inset: rgba(7, 16, 31, .52);
+    --surface-accent: rgba(96, 165, 250, .08);
+    --text: #eef5ff;
+    --text-soft: #c6d6ef;
+    --muted: #94aac9;
+    --border: #263b5d;
+    --border-strong: #37537c;
+    --border-accent: #31527f;
+    --brand: #7cb2ff;
+    --brand-soft: rgba(59, 130, 246, .16);
+    --section-soft-bg: linear-gradient(180deg, rgba(10, 21, 39, .6), rgba(14, 27, 48, .92));
+    --page-hero-bg: linear-gradient(135deg, #10203a 0%, #142944 52%, #0c1b32 100%);
+    --card-icon-bg: linear-gradient(145deg, rgba(59, 130, 246, .24), #14253f);
+    --card-icon-border: #31527f;
+    --output-panel-bg: linear-gradient(180deg, #14253f 0%, var(--surface-2) 100%);
+    --advanced-panel-bg: linear-gradient(180deg, #14253f 0%, var(--surface-2) 100%);
+    --flashcard-bg: linear-gradient(155deg, #172b49, var(--surface-2));
+    --flashcard-back-bg: linear-gradient(155deg, rgba(59, 130, 246, .22), #172b49);
+    --timer-gradient: linear-gradient(135deg, #a8ccff, #60a5fa);
+    --timer-console-bg: linear-gradient(155deg, rgba(59, 130, 246, .16), var(--surface));
+    --ad-bg: linear-gradient(155deg, rgba(20, 37, 63, .96), rgba(14, 27, 48, .96));
+    --ad-border: #37537c;
+    --progress-track: #1a2f4d;
+    --heat-0: #13243d;
+    --heat-0-border: #223958;
+    --heat-1: #163a62;
+    --heat-1-border: #24507d;
+    --heat-2: #165899;
+    --heat-2-border: #2a74b6;
+    --heat-3: #2f82e8;
+    --heat-3-border: #53a0f3;
+    --heat-4: #71b1ff;
+    --heat-4-border: #8fc3ff;
+    --ring: rgba(96, 165, 250, .45);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .28), 0 8px 20px rgba(0, 0, 0, .2);
+    --shadow-md: 0 14px 36px rgba(0, 0, 0, .34);
+    --shadow-lg: 0 28px 64px rgba(0, 0, 0, .44);
+    --shadow-glow: 0 18px 44px -20px rgba(59, 130, 246, .55);
+  }
 }

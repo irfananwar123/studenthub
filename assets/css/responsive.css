@@ -52,6 +52,9 @@
   .brand { font-size: 1.05rem; }
   .brand-mark { width: 34px; height: 34px; }
   .header-inner { gap: .5rem; min-height: 64px; }
+  .header-actions { gap: .4rem; }
+  .theme-switch { gap: 0; padding: 2px; }
+  .theme-option { width: 28px; height: 28px; }
   .stat-grid, .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .breakdown-row { grid-template-columns: minmax(0, 1fr) auto; }
   .breakdown-row .split-bar { grid-column: 1 / -1; }
@@ -65,6 +68,11 @@
   .week-grid, .countdown-grid { grid-template-columns: minmax(0, 1fr); }
   .hero-points { gap: .4rem .8rem; font-size: .86rem; }
   .btn { padding-inline: .9rem; }
+  .header-inner { gap: .35rem; }
+  .brand { gap: .45rem; font-size: 1rem; }
+  .theme-option { width: 26px; height: 27px; }
+  .theme-option svg { width: 14px; height: 14px; }
+  .ad-slot, .ad-slot.ad-slot-active { padding-inline: .5rem; }
 }
 @media print {
   .site-header, .site-footer, .btn, .ad-slot, .no-print, .search-wrap, .header-chip { display: none !important; }

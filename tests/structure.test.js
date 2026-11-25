@@ -53,6 +53,22 @@ test('every page has unique title, description, canonical and one H1', () => {
   assert.equal(descriptions.size, PAGES.length, 'descriptions are unique');
 });
 
+test('light, dark and auto theme controls are shipped on every page', () => {
+  const themeJs = read('assets/js/theme.js');
+  ['studenthub:theme', 'prefers-color-scheme', "'light'", "'dark'", "'auto'"].forEach(needle => {
+    assert.ok(themeJs.includes(needle), `theme.js: ${needle}`);
+  });
+  assert.ok(read('assets/css/themes.css').includes('html[data-theme="dark"]'), 'dark tokens exist');
+  PAGES.forEach(page => {
+    const html = read(page);
+    assert.ok(html.includes('data-theme-preference="auto"'), `${page}: default preference`);
+    assert.ok(html.includes("localStorage.getItem('studenthub:theme')"), `${page}: pre-paint theme script`);
+    ['light', 'dark', 'auto'].forEach(mode => assert.ok(html.includes(`data-theme-option="${mode}"`), `${page}: ${mode} control`));
+    assert.ok(html.includes('theme.js'), `${page}: theme script`);
+    assert.ok(!html.includes('data-theme-toggle'), `${page}: no stale hidden toggle`);
+  });
+});
+
 test('tool pages contain instructions, formulas, FAQs, related links and structured data', () => {
   IDS.forEach(id => {
     const html = read(`tools/${id}/index.html`);
