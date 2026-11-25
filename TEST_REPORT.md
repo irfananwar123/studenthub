@@ -8,7 +8,7 @@ Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via 
 | Command | Result |
 | --- | --- |
 | `node --test tests` | **23/23 passed** |
-| `node tests/browser-smoke.js` | **56/56 passed** |
+| `node tests/browser-smoke.js` | **58/58 passed** |
 
 ### Unit tests (14 suites)
 
@@ -39,9 +39,9 @@ Independent calculation checks compare output against separately calculated expe
 - Sitemap includes every tool; robots.txt points to the sitemap; manifest icons exist.
 - Service worker precaches the app shell and all tool pages with a content-derived cache version.
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
-- All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). `ads.js` holds the same URLs but never injects duplicate scripts. Ad-free pages contain no ad tags, the privacy policy discloses every network, and no unrelated ad-network tags are present.
+- All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). Every generated page has active head tags, a slot and a footer link; there is no ad-free page or URL off switch. `ads.js` holds the same URLs but never injects duplicate scripts. The privacy policy discloses every network, and no unrelated ad-network tags are present.
 
-### Real-browser smoke tests (56 checks)
+### Real-browser smoke tests (58 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
@@ -53,9 +53,9 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 6. The four advanced tools are exercised end to end: Study Hours Tracker runs a real timer, saves the session and renders its dashboard; Spaced Revision Scheduler generates and completes review stages; Grade Goal Planner calculates required marks and saves a local draft; Focus Streak & Habits logs completions, streaks and a 35-day heatmap.
 7. Instant search finds the right tool; the theme starts on Auto, Dark and Light switches repaint the page and update `theme-color`, the Dark choice persists across navigation, Auto follows an emulated system dark preference and updates live when it changes, and the offline page renders.
 8. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
-9. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 41 pages at phone width: `overflow:none on 41 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px (164 combinations per theme) for overlapping sibling cards/panels, clipped text and viewport overflow: **164/164 clean in light and 164/164 clean in dark (328/328 total)**. With ad slots active and ad domains blocked, the same 41 pages were checked at 390 and 320 px: **82/82 clean in light and 82/82 clean in dark (164/164 total)**.
+9. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 41 pages at phone width with ads active: `overflow:none on 41 pages`. A layout audit checked every page at 1440, 820, 390 and 320 px with ad domains blocked and first-party sponsored slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **164/164 clean in light and 164/164 clean in dark (328/328 total)**.
 10. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
-11. With ads enabled, the homepage contains an active 468×60 slot, a native slot, the correct `atOptions` key, exactly one pop-under, social-bar and banner script, and a sponsored footer link. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
+11. Ads are always on: sampled home, tool, article, About, Terms, Privacy, Contact, Workspace, offline and error pages all contain static head tags, an active slot and a sponsored footer link, and the former URL off switch is ignored. The homepage contains an active 468×60 slot, a native slot, the correct `atOptions` key, exactly one pop-under, social-bar and banner script. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
 
 No JavaScript console exceptions were observed in any passing check.
 
@@ -70,7 +70,7 @@ No JavaScript console exceptions were observed in any passing check.
 - `/about/`, `/workspace/` etc. needed directory `index.html` copies to work on plain static servers.
 - Pages used root-relative paths (`/assets/...`), so opening the files directly from disk resolved CSS/JS to `C:\assets\...` and the UI appeared unstyled. The generator now emits folder-relative URLs plus a `data-base` marker; tool links point to explicit `index.html` files; the service worker also caches those URLs. The manifest is injected only for HTTP(S) to avoid a harmless `file://` CORS warning.
 - The UI was upgraded to a premium dashboard design in both light and dark themes: glass header with a tool-count chip and compact Light/Dark/Auto switch, deeper gradient hero and page panels, raised tool cards, richer forms/results/tables/tabs/charts, animated hero accents and theme-aware labelled ad surfaces. `theme.js` applies the saved preference before paint, updates `theme-color` and follows system changes in Auto mode. All grids use `minmax(0, 1fr)`/`auto-fit` so columns shrink instead of colliding.
-- Advertising was extended to a native slot on the homepage. Because a blocker can prevent the third-party network tags entirely, the site now detects blocked scripts (parse-time error listener plus a hidden bait element) and shows self-hosted, clearly labelled sponsored SVG banners with a dismissible inline notice. The existing four-second fallback and all ad-free/`?noads=1` rules remain intact; the privacy policy discloses the new behaviour.
+- Advertising is now always on across every generated page, including Workspace, Privacy, Contact, offline and error pages. Static pages gained native slots, the URL off switch was removed, and slots became richer theme-aware dashboard cards without changing networks or placement types. Because a blocker can prevent the third-party network tags entirely, the site detects blocked scripts (parse-time error listener plus a hidden bait element) and shows self-hosted, clearly labelled sponsored SVG banners with a dismissible inline notice. The four-second fallback remains; the privacy policy discloses the new behaviour.
 - Four advanced tools were added with full-width dashboard layouts: progress rings, bar charts, breakdown bars, heatmaps, sortable history and CSV export. Their data is split across the existing local collections (`sessions`, `schedules`, `tasks`) and a LocalStorage grade-plan draft, so the workspace and all export/import flows keep working. Habit and revision rows are typed and filtered so they never appear as assignments in the Assignment Planner.
 
 ## Not measured in this environment

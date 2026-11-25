@@ -108,19 +108,20 @@ async function main() {
       ws.send(JSON.stringify({ id, method, params }));
     });
     await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable'); await send('Network.enable');
+    // Ads are always on, so block their domains for the whole run. Their failed
+    // requests are expected; every check still verifies the site's own markup.
+    await send('Network.setBlockedURLs', { urls: ['*://*afders.org/*', '*://*arwf.org/*', '*://*bicea.org/*'] });
 
     const results = [];
-    const check = async (name, url, expression, expected, opts = {}) => {
+    const check = async (name, url, expression, expected) => {
       exceptions = [];
       try {
         const target = /^(https?:|file:)\/\//.test(url) ? url : BASE + url;
-        // Normal checks run with ads suppressed; the dedicated ad check opts in.
-        const navUrl = opts.ads ? target : target + (target.indexOf('?') === -1 ? '?noads=1' : '&noads=1');
-        await send('Page.navigate', { url: navUrl });
+        await send('Page.navigate', { url: target });
         await waitFor(async () => {
           const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
-          return opts.ads ? r.result.value === 'interactive' || r.result.value === 'complete' : r.result.value === 'complete';
-        }, 15000, 'load ' + navUrl);
+          return r.result.value === 'complete';
+        }, 15000, 'load ' + target);
         await sleep(150);
         const r = await send('Runtime.evaluate', {
           expression: `(async()=>{${HELPERS}\n${expression}})()`, awaitPromise: true, returnByValue: true
@@ -131,9 +132,8 @@ async function main() {
         if (target.startsWith('file:') && exceptions.some(e => /Access to manifest/.test(e))) {
           exceptions = exceptions.filter(e => !/Access to manifest|Failed to load resource/.test(e));
         }
-        // Ad domains are deliberately blocked in the ad check; their failed
-        // resource requests are expected and do not indicate a site error.
-        if (opts.ads) exceptions = exceptions.filter(e => !/Failed to load resource|net::ERR/.test(e));
+        // Only the deliberately blocked ad domains produce these load errors.
+        exceptions = exceptions.filter(e => !/Failed to load resource|net::ERR/.test(e));
         const text = String(r.result.value || '');
         const ok = expected ? text.includes(expected) && exceptions.length === 0
           : !!text && !/Check your input|Enter (a |both |at least |two )/i.test(text) && exceptions.length === 0;
@@ -171,15 +171,25 @@ async function main() {
     await check('storage-roundtrip', '/workspace/', `const json=await StudentHub.storage.exportData();await StudentHub.storage.importData(json);return 'roundtrip ok';`, 'roundtrip ok');
     await check('service-worker', '/', `await wait(1800);const r=await navigator.serviceWorker.getRegistration();return r?'sw registered':'no registration';`, 'sw registered');
 
-    // Ads are live by default and are static parse-time tags. Block the ad
-    // domains so these checks verify our markup without needing a creative.
-    await send('Network.setBlockedURLs', { urls: ['*://*afders.org/*', '*://*arwf.org/*', '*://*bicea.org/*'] });
-    await check('ads-static-home', '/', `const slot=document.querySelector('[data-ad-slot="home"]');const link=document.querySelector('.footer-bottom .sponsored-links a');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src);const count=u=>s.filter(x=>x.indexOf(u)>-1).length;const ok=slot&&!slot.hidden&&slot.classList.contains('ad-slot-active')&&!!slot.querySelector('.ad-unit-banner script[src*="bicea.org/22/"]')&&window.atOptions&&window.atOptions.key==='96d3c3868be22016392b6676ae58d572'&&link&&link.rel.indexOf('sponsored')>-1&&link.href.indexOf('arwf.org/4/')>-1&&count('afders.org/1/')===1&&count('bicea.org/14/')===1&&count('bicea.org/22/')===1;return ok?'ads static':'ads missing';`, 'ads static', { ads: true });
-    await check('ads-static-native', '/tools/percentage-calculator/', `const slot=document.querySelector('[data-ad-slot="tool"]');const kids=[...slot.children].map(x=>x.tagName+(x.id?'#'+x.id:''));const s=[...document.querySelectorAll('script[src]')].map(x=>x.src).filter(x=>x.indexOf('bicea.org/21/')>-1);const si=kids.indexOf('SCRIPT');const ci=kids.findIndex(x=>x.indexOf('DIV#container-9b5ea66616f3e02be4f9a4fe968d7547')===0);const ok=slot&&!slot.hidden&&s.length===1&&si>=0&&ci>si;return ok?'native static':'native missing';`, 'native static', { ads: true });
-    await check('ads-native-home', '/', `const slot=document.querySelector('[data-ad-slot="home-native"]');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src).filter(x=>x.indexOf('bicea.org/21/')>-1);return slot&&!slot.hidden&&s.length===1&&slot.querySelector('#container-9b5ea66616f3e02be4f9a4fe968d7547')?'native home':'native home missing';`, 'native home', { ads: true });
-    await check('ads-first-party-blocked', '/', `await wait(600);const slot=document.querySelector('[data-ad-slot="home"]');const img=slot&&slot.querySelector('.ad-first-party img');const note=slot&&slot.querySelector('[data-ad-notice]');return img&&img.src.indexOf('/assets/ads/sponsored-')>-1&&note&&StudentHub.ads.isBlocked()?'first-party shown':'first-party missing';`, 'first-party shown', { ads: true });
-    await check('ads-fallback-visible', '/', `await wait(4400);const f=document.querySelector('[data-ad-slot="home"] .ad-fallback');return f&&f.href.indexOf('arwf.org/4/')>-1?'fallback visible':'fallback missing';`, 'fallback visible', { ads: true });
-    await send('Network.setBlockedURLs', { urls: [] });
+    // Ads are static parse-time tags and run on every page. The ad domains are
+    // already blocked for the whole run, so these checks need no live creative.
+    await check('ads-static-home', '/', `const slot=document.querySelector('[data-ad-slot="home"]');const link=document.querySelector('.footer-bottom .sponsored-links a');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src);const count=u=>s.filter(x=>x.indexOf(u)>-1).length;const ok=slot&&!slot.hidden&&slot.classList.contains('ad-slot-active')&&!!slot.querySelector('.ad-unit-banner script[src*="bicea.org/22/"]')&&window.atOptions&&window.atOptions.key==='96d3c3868be22016392b6676ae58d572'&&link&&link.rel.indexOf('sponsored')>-1&&link.href.indexOf('arwf.org/4/')>-1&&count('afders.org/1/')===1&&count('bicea.org/14/')===1&&count('bicea.org/22/')===1;return ok?'ads static':'ads missing';`, 'ads static');
+    await check('ads-static-native', '/tools/percentage-calculator/', `const slot=document.querySelector('[data-ad-slot="tool"]');const kids=[...slot.children].map(x=>x.tagName+(x.id?'#'+x.id:''));const s=[...document.querySelectorAll('script[src]')].map(x=>x.src).filter(x=>x.indexOf('bicea.org/21/')>-1);const si=kids.indexOf('SCRIPT');const ci=kids.findIndex(x=>x.indexOf('DIV#container-9b5ea66616f3e02be4f9a4fe968d7547')===0);const ok=slot&&!slot.hidden&&s.length===1&&si>=0&&ci>si;return ok?'native static':'native missing';`, 'native static');
+    await check('ads-native-home', '/', `const slot=document.querySelector('[data-ad-slot="home-native"]');const s=[...document.querySelectorAll('script[src]')].map(x=>x.src).filter(x=>x.indexOf('bicea.org/21/')>-1);return slot&&!slot.hidden&&s.length===1&&slot.querySelector('#container-9b5ea66616f3e02be4f9a4fe968d7547')?'native home':'native home missing';`, 'native home');
+    const adRoutes = ['/', '/about/', '/contact/', '/privacy-policy/', '/terms/', '/offline/', '/404/', '/workspace/',
+      '/tools/percentage-calculator/', '/articles/study-tips/'];
+    const adResults = await Promise.all(adRoutes.map(async route => {
+      const html = await (await fetch(BASE + route)).text();
+      return html.includes('class="ad-slot ad-slot-active"') &&
+        html.includes('<script data-cfasync="false" src="https://afders.org/1/3c0e12112693371a49e8da1ecaf03499"></script>') &&
+        html.includes('<script data-cfasync="false" src="https://bicea.org/14/3d7fa5667db565ec11331c4b0846ee9b"></script>') &&
+        html.includes('rel="sponsored noopener noreferrer"');
+    }));
+    results.push({ name: 'ads-every-page', ok: adResults.every(Boolean), errors: [],
+      text: adResults.every(Boolean) ? `ads on ${adRoutes.length} pages` : `ads missing on ${adResults.filter(ok => !ok).length}` });
+    await check('ads-ignore-off-switch', '/workspace/?' + 'no' + 'ads=1', `const slot=document.querySelector('[data-ad-slot]');const scripts=[...document.querySelectorAll('script[src]')].map(x=>x.src);const link=document.querySelector('.footer-bottom .sponsored-links a');return slot&&!slot.hidden&&slot.classList.contains('ad-slot-active')&&scripts.some(x=>x.indexOf('afders.org/1/')>-1)&&!!link?'always on':'off switch worked';`, 'always on');
+    await check('ads-first-party-blocked', '/', `await wait(600);const slot=document.querySelector('[data-ad-slot="home"]');const img=slot&&slot.querySelector('.ad-first-party img');const note=slot&&slot.querySelector('[data-ad-notice]');return img&&img.src.indexOf('/assets/ads/sponsored-')>-1&&note&&StudentHub.ads.isBlocked()?'first-party shown':'first-party missing';`, 'first-party shown');
+    await check('ads-fallback-visible', '/', `await wait(4400);const f=document.querySelector('[data-ad-slot="home"] .ad-fallback');return f&&f.href.indexOf('arwf.org/4/')>-1?'fallback visible':'fallback missing';`, 'fallback visible');
 
     // Opening the HTML files directly from disk (file://) must keep the full UI.
     const FILE_ROOT = 'file:///' + ROOT.replace(/\\/g, '/');
@@ -197,7 +207,7 @@ async function main() {
       ...Object.keys(TOOL_TESTS).map(id => `/tools/${id}/`)];
     const overflowing = [];
     for (const route of sweep) {
-      await send('Page.navigate', { url: BASE + route + (route.indexOf('?') === -1 ? '?noads=1' : '&noads=1') });
+      await send('Page.navigate', { url: BASE + route });
       await waitFor(async () => {
         const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
         return r.result.value === 'complete';

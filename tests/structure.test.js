@@ -138,7 +138,7 @@ test('shipped JavaScript has no eval, innerHTML or external service calls', () =
   });
 });
 
-test('ad tags are static, parse-time, disclosed and placed in real slots', () => {
+test('ad tags are static, parse-time and present on every generated page', () => {
   const urls = [
     'https://afders.org/1/3c0e12112693371a49e8da1ecaf03499',
     'https://arwf.org/4/f9c719598061c9d7137f077570fe38b1',
@@ -147,7 +147,13 @@ test('ad tags are static, parse-time, disclosed and placed in real slots', () =>
     'https://bicea.org/22/96d3c3868be22016392b6676ae58d572'
   ];
   const ads = read('assets/js/ads.js');
+  const generator = read('scripts/generate.js');
+  const offSwitch = 'no' + 'ads';
+  const count = (text, needle) => text.split(needle).length - 1;
   assert.ok(ads.includes('enabled: true'), 'ads are live');
+  assert.ok(!ads.includes(offSwitch), 'no URL off switch in ads.js');
+  assert.ok(!generator.includes(offSwitch), 'no URL off switch in the generator');
+  assert.ok(!generator.includes('ads: ' + 'false'), 'no ad-free page option');
   urls.forEach(url => assert.ok(ads.includes(url), `config: ${url}`));
   assert.ok(ads.includes("containerId: 'container-9b5ea66616f3e02be4f9a4fe968d7547'"), 'native container id in config');
   assert.ok(ads.includes("rel: 'sponsored noopener noreferrer'"), 'sponsored rel in config');
@@ -166,18 +172,30 @@ test('ad tags are static, parse-time, disclosed and placed in real slots', () =>
   });
   assert.ok(ads.includes("noticeStorageKey: 'studenthub:ad-notice-dismissed'"), 'dismissible notice preference');
 
+  const allPages = [...new Set(PAGES.concat(DIR_PAGES))];
+  allPages.forEach(page => {
+    const html = read(page);
+    assert.ok(html.includes('<script data-cfasync="false" src="' + urls[0] + '"></script>'), `${page}: pop-under head tag`);
+    assert.ok(html.includes('<script data-cfasync="false" src="' + urls[3] + '"></script>'), `${page}: social bar head tag`);
+    assert.equal(count(html, urls[0]), 1, `${page}: one pop-under script`);
+    assert.equal(count(html, urls[3]), 1, `${page}: one social bar script`);
+    assert.equal(count(html, urls[2]), 1, `${page}: one native script`);
+    assert.ok(html.includes('class="ad-slot ad-slot-active"'), `${page}: active ad slot`);
+    assert.ok(/data-ad-slot="[^"]+"/.test(html), `${page}: labelled slot`);
+    assert.ok(html.includes('rel="sponsored noopener noreferrer"'), `${page}: sponsored footer link`);
+    assert.ok(html.includes("setAttribute('data-ad-blocked','1')"), `${page}: block detection`);
+    assert.ok(!html.includes(offSwitch), `${page}: no URL off switch`);
+    assert.ok(!/adsbygoogle|googlesyndication|pagead2/.test(html), `${page}: no unrelated ad network tags`);
+  });
+
   const tool = read('tools/percentage-calculator/index.html');
   assert.ok(tool.includes('data-ad-slot="tool"'), 'tool slot');
   assert.ok(tool.indexOf('src="' + urls[2] + '"') < tool.indexOf('id="container-9b5ea66616f3e02be4f9a4fe968d7547"'), 'native script before its container');
   assert.ok(read('articles/study-tips/index.html').includes('data-ad-slot="article"'), 'article slot');
 
-  ['privacy-policy.html', 'contact.html', 'workspace.html'].forEach(page => {
-    assert.ok(!/afders\.org\/1\/|bicea\.org\/(14|21|22)\/|arwf\.org\/4\//.test(read(page)), `${page}: no ad tags`);
-  });
-
   const privacy = read('privacy-policy.html');
-  ['afders.org', 'arwf.org', 'bicea.org', 'Advertising and third parties'].forEach(s => assert.ok(privacy.includes(s), `privacy discloses ${s}`));
-  PAGES.forEach(page => {
-    assert.ok(!/adsbygoogle|googlesyndication|pagead2/.test(read(page)), `${page}: no unrelated ad network tags`);
+  ['afders.org', 'arwf.org', 'bicea.org', 'Advertising and third parties', 'every generated page', 'no URL switch'].forEach(s => {
+    assert.ok(privacy.includes(s), `privacy discloses ${s}`);
   });
+  assert.ok(!privacy.includes('Ads are not placed'), 'privacy has no ad-free claim');
 });

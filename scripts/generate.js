@@ -116,7 +116,7 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="stylesheet" href="/assets/css/main.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
-${opts.ads !== false ? `<script>(function(){window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'&&/afders\\.org|bicea\\.org/.test(t.src||''))document.documentElement.setAttribute('data-ad-blocked','1');},true);})();</script>
+${ADS.enabled ? `<script>(function(){window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'&&/afders\\.org|bicea\\.org/.test(t.src||''))document.documentElement.setAttribute('data-ad-blocked','1');},true);})();</script>
 ${headAds()}` : ''}
 ${ld}
 </head>`;
@@ -161,13 +161,14 @@ function scripts(extra) {
   return base.map(n => `<script src="/assets/js/${n}.js" defer></script>`).join('\n') + '\n' + (extra || '');
 }
 function shell(opts) {
-  const adsOn = ADS.enabled && opts.ads !== false;
-  return head(Object.assign({}, opts, { ads: adsOn })) + `\n<body${opts.bodyAttrs ? ' ' + opts.bodyAttrs : ''}>
+  /* Advertising is always on: every generated page gets the same static head
+     tags, sponsored footer link and at least one visible slot. */
+  return head(opts) + `\n<body${opts.bodyAttrs ? ' ' + opts.bodyAttrs : ''}>
 <a class="skip-link" href="#main">Skip to main content</a>
 ${header()}
 <div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
 ${opts.body}
-${footer(adsOn)}
+${footer(ADS.enabled)}
 ${scripts(opts.scripts)}
 </body>\n</html>\n`;
 }
@@ -371,7 +372,14 @@ function articlePage(slug, a) {
   return shell({ title: `${a.title} | StudentHub`, desc: a.desc, path: `/articles/${slug}/`, body });
 }
 
-function staticPage(opts) { return shell(opts); }
+function staticPage(opts) {
+  /* Static pages have no built-in slot in their body. Add the same native
+     placement used by tools and articles so every generated page has ads. */
+  const body = opts.body.includes('data-ad-slot')
+    ? opts.body
+    : `${opts.body}\n<div class="container">${adSlot('page', ADS.enabled)}</div>`;
+  return shell(Object.assign({}, opts, { body }));
+}
 
 // Build tool pages
 TOOLS.forEach(t => write(`tools/${t.id}/index.html`, toolPage(t)));
@@ -384,11 +392,11 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
 <h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools and recent searches.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
-<h2>Advertising and third parties</h2><p>To keep StudentHub free, general pages load ad scripts from third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. Ads are not placed on the privacy policy, contact or workspace pages. You can still block the third-party domains with a browser extension; all tools will keep working. There is no paid ad-free tier.</p>
+<h2>Advertising and third parties</h2><p>To keep StudentHub free, every generated page — home, tools, articles, About, Terms, Privacy, Contact, Workspace, offline and error pages — loads ad scripts from the same third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. There are no ad-free pages and no URL switch that hides the placements: advertising runs on every page view. You can still block the third-party domains with a browser extension; all tools will keep working, and the labelled first-party sponsored banner remains. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
-<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 24 November 2026.</p>
+<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 25 November 2026.</p>
 </div></section></main>`;
-write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', ads: false, body: privacyBody }));
+write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', body: privacyBody }));
 
 const termsBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Terms of use</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Using the site</span><h1>Terms of Use</h1><p>Short, plain-language terms for a free browser-based study tool.</p></section>
@@ -425,7 +433,7 @@ const contactBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 </form></div>
 <aside class="card"><h2>Privacy note</h2><p>This form builds an email in your own mail application. Nothing is submitted to a StudentHub server, and no copy is kept here.</p><div class="notice">Before publishing, set <code>StudentHub.config.contactEmail</code> in <code>/assets/js/config.js</code> to your own address.</div><h3>Other useful pages</h3><div class="chip-list"><a href="/about/">About</a><a href="/privacy-policy/">Privacy policy</a><a href="/terms/">Terms</a></div></aside>
 </div></section></main>`;
-write('contact.html', staticPage({ title: 'Contact StudentHub — Bug Reports and Suggestions', desc: 'Send feedback or report a problem. The contact form opens your own email app and does not transmit data to StudentHub.', path: '/contact/', ads: false, body: contactBody, scripts: '<script src="/assets/js/config.js" defer></script>\n<script src="/assets/js/contact.js" defer></script>' }));
+write('contact.html', staticPage({ title: 'Contact StudentHub — Bug Reports and Suggestions', desc: 'Send feedback or report a problem. The contact form opens your own email app and does not transmit data to StudentHub.', path: '/contact/', body: contactBody, scripts: '<script src="/assets/js/config.js" defer></script>\n<script src="/assets/js/contact.js" defer></script>' }));
 
 const workspaceBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">My workspace</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Local personal space</span><h1>My Workspace</h1><p>A private dashboard for your saved tools, study progress and local data. Everything here stays on this device.</p></section>
@@ -440,7 +448,7 @@ const workspaceBody = `<main id="main"><nav class="breadcrumbs container" aria-l
     <p class="field-hint" id="ws-status" role="status" aria-live="polite" style="margin-top:.8rem"></p>
   </div>
 </div></section></main>`;
-write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', robots: 'noindex,follow', ads: false, body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
+write('workspace.html', staticPage({ title: 'My Workspace — Private Study Dashboard | StudentHub', desc: 'View saved tools, study progress and local collections, and export, import or clear your StudentHub data.', path: '/workspace/', robots: 'noindex,follow', body: workspaceBody, scripts: '<script src="/assets/js/workspace.js" defer></script>' }));
 
 const offlineBody = `<main id="main"><section class="page-hero container"><span class="eyebrow">Offline</span><h1>You are offline</h1><p>The page you requested is not available in this browser’s cache yet. Previously visited tools still work, and any data you saved locally is safe.</p><div class="btn-row"><a class="btn btn-primary" href="/">Go to the offline homepage</a><button class="btn btn-secondary" type="button" data-reload>Try again</button></div></section></main>`;
 write('offline.html', staticPage({ title: 'Offline — StudentHub', desc: 'StudentHub offline fallback page.', path: '/offline/', robots: 'noindex', body: offlineBody }));

@@ -7,12 +7,11 @@
    exact remote creatives to load. Instead it shows clearly labelled,
    first-party sponsored banners hosted on this domain, plus a polite inline
    notice asking the visitor to allow ads. Private study data is never sent
-   anywhere, and ?noads=1 / the ad-free pages remain respected. */
+   anywhere. Ads run on every page: there is no URL switch or ad-free page. */
 (function (global) {
   'use strict';
   var config = {
     enabled: true,
-    pagesWithoutAds: ['/privacy-policy/', '/contact/', '/workspace/'],
     fallbackDelay: 4000,
     noticeStorageKey: 'studenthub:ad-notice-dismissed',
     placements: {
@@ -57,15 +56,9 @@
   var blocked = global.document.documentElement.getAttribute('data-ad-blocked') === '1';
   var bait = null;
 
-  function blockedPage() {
-    var path = location.pathname.replace(/\\/g, '/').toLowerCase();
-    return config.pagesWithoutAds.some(function (p) {
-      return path.indexOf(p.replace(/^\//, '')) !== -1;
-    });
-  }
-
   function suppressed() {
-    return !config.enabled || /[?&]noads=1(?:&|$)/.test(location.search) || blockedPage();
+    /* Only the build-time master switch can disable advertising. */
+    return !config.enabled;
   }
 
   /* A hidden bait element using common filter-list class names. It cannot
