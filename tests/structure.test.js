@@ -43,6 +43,7 @@ test('every page has unique title, description, canonical and one H1', () => {
     assert.ok(title && title.length > 10, `${page}: title`);
     assert.ok(desc && desc.length > 30, `${page}: description`);
     assert.ok(canonical && canonical.startsWith(SITE + '/'), `${page}: canonical`);
+    assert.ok(html.includes('<meta name="google-site-verification" content="WPy7or4AwCbkixtA55pqg55hMDhLUFs1vPnR8EgH-rA" />'), `${page}: Google Site Verification meta`);
     assert.equal(h1, 1, `${page}: exactly one H1`);
     assert.ok(html.includes('property="og:title"'), `${page}: Open Graph`);
     assert.ok(html.includes('property="og:description"'), `${page}: OG description`);

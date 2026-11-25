@@ -156,7 +156,7 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
 - **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for small preferences; IndexedDB for collections.
 - **PWA**: manifest, installable icons, versioned service worker, offline fallback, offline indicator and automatic cache cleanup.
-- **SEO**: unique titles/descriptions/canonical/OG tags, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, sitemap and robots.
+- **SEO**: unique titles/descriptions/canonical/OG tags, Google Search Console verification meta, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, sitemap and robots.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.
 - **Performance**: system fonts, no dependencies, small vanilla scripts, deferred JS, tiny PNG/SVG assets, no layout-shifting imagery, simple CSS animations only.
 - **Advertising**: five live placement types (banner, native, social bar, pop-under, SmartLink) generated as static parse-time tags and active on every page, with first-party sponsored banners when a creative is missing or an ad blocker stops the network tags.
