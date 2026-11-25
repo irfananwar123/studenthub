@@ -114,7 +114,8 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="stylesheet" href="/assets/css/main.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
-${opts.ads !== false ? headAds() : ''}
+${opts.ads !== false ? `<script>(function(){window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'&&/afders\\.org|bicea\\.org/.test(t.src||''))document.documentElement.setAttribute('data-ad-blocked','1');},true);})();</script>
+${headAds()}` : ''}
 ${ld}
 </head>`;
 }
@@ -254,6 +255,8 @@ function homepage() {
 
   <section class="section section-soft" aria-labelledby="featured-heading"><div class="container"><div class="section-head"><span class="eyebrow">Start here</span><h2 id="featured-heading">Featured tools</h2><p>The tools students open most often, ready to use without setup.</p></div><div class="grid tool-grid">${featured.map(id => toolCard(find(id))).join('')}</div></div></section>
 
+  <div class="container">${adSlot('home-native', ADS.enabled)}</div>
+
   <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card"><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
 
   <section class="section section-soft" id="all-tools" aria-labelledby="all-heading"><div class="container"><div class="section-head"><span class="eyebrow">The full library</span><h2 id="all-heading">All 25 tools</h2><p>Every tool has its own page with instructions, formulas and examples.</p></div><div class="grid tool-grid">${TOOLS.map(toolCard).join('')}</div></div></section>
@@ -371,7 +374,7 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
 <h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools and recent searches.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
-<h2>Advertising and third parties</h2><p>To keep StudentHub free, general pages load ad scripts from third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>They do not receive your notes, flashcards, quizzes or other workspace collections. Ads are not placed on the privacy policy, contact or workspace pages. You can block these domains with a browser extension if you prefer; all tools will keep working. There is no paid ad-free tier.</p>
+<h2>Advertising and third parties</h2><p>To keep StudentHub free, general pages load ad scripts from third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. Ads are not placed on the privacy policy, contact or workspace pages. You can still block the third-party domains with a browser extension; all tools will keep working. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
 <h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 24 November 2026.</p>
 </div></section></main>`;
@@ -460,6 +463,7 @@ const precache = [
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
   ...['themes', 'main', 'components', 'responsive'].map(n => `/assets/css/${n}.css`),
   ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace'].map(n => `/assets/js/${n}.js`),
+  ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];
 /* Links now point at explicit index.html files so they work from disk too;

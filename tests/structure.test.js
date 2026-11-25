@@ -143,6 +143,12 @@ test('ad tags are static, parse-time, disclosed and placed in real slots', () =>
   assert.ok(home.includes("'key' : '96d3c3868be22016392b6676ae58d572'"), 'banner atOptions at parse time');
   assert.ok(home.includes('<script data-cfasync="false" src="' + urls[4] + '"></script>'), 'banner script at parse time');
   assert.ok(home.includes('data-ad-slot="home"') && home.includes('rel="sponsored noopener noreferrer"'), 'home slot and footer link');
+  assert.ok(home.includes('data-ad-slot="home-native"'), 'home native ad slot');
+  assert.ok(home.includes("setAttribute('data-ad-blocked','1')"), 'ad-block detection script runs before ad tags');
+  ['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].forEach(name => {
+    assert.ok(exists('assets/ads/' + name), `first-party creative ${name}`);
+  });
+  assert.ok(ads.includes("noticeStorageKey: 'studenthub:ad-notice-dismissed'"), 'dismissible notice preference');
 
   const tool = read('tools/percentage-calculator/index.html');
   assert.ok(tool.includes('data-ad-slot="tool"'), 'tool slot');
