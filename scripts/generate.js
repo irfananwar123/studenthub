@@ -114,7 +114,6 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="stylesheet" href="/assets/css/main.css">
 <link rel="stylesheet" href="/assets/css/components.css">
 <link rel="stylesheet" href="/assets/css/responsive.css">
-<script>(function(){try{var t=JSON.parse(localStorage.getItem('studenthub:theme')||'"auto"');var d=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
 ${opts.ads !== false ? headAds() : ''}
 ${ld}
 </head>`;
@@ -133,7 +132,7 @@ function header() {
       <li><a href="/about/">About</a></li>
     </ul></nav>
     <div class="header-actions">
-      <button class="icon-button" type="button" data-theme-toggle aria-label="Switch theme">${icon('moon', 19)}<span class="visually-hidden" data-theme-label>Dark</span></button>
+      <span class="header-chip">${TOOLS.length} tools · 100% free</span>
     </div>
   </div></header>`;
 }

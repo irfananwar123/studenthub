@@ -94,7 +94,7 @@ node --test tests          # 18 calculation + structure checks
 node tests/browser-smoke.js # 41 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, theme switching and mobile overflow. It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
+The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, the locked light theme and mobile overflow. It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
 
 See `TEST_REPORT.md` for the latest results and known limits.
 

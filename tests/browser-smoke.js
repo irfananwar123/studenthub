@@ -144,7 +144,7 @@ async function main() {
     }
     await check('homepage-search', '/', `set('home-search','attendance');await wait(50);return document.getElementById('home-search-results').textContent.includes('Attendance Calculator')?'search ok':'search failed';`);
     await check('manifest-http', '/', `const l=document.querySelector('link[rel=manifest]');return l?l.getAttribute('href'):'missing';`, 'manifest.webmanifest');
-    await check('theme-switch', '/', `const before=document.documentElement.dataset.theme;document.querySelector('[data-theme-toggle]').click();const after=document.documentElement.dataset.theme;return before!==after?'theme '+before+'->'+after:'theme failed';`);
+    await check('theme-locked-light', '/', `const t=document.documentElement.dataset.theme;const toggle=document.querySelector('[data-theme-toggle]');const bg=getComputedStyle(document.body).backgroundColor;return t==='light'&&!toggle&&bg!=='rgba(0, 0, 0, 0)'?'light locked':'theme failed';`, 'light locked');
     await check('workspace', '/workspace/', `click('ws-export');await wait(600);return document.getElementById('ws-status').textContent.length>0?'export ok':'export failed';`);
     await check('contact', '/contact/', `set('ct-subject','Hello');set('ct-message','Test message');click('ct-copy');return 'contact loaded';`);
     await check('offline-page', '/offline/', `return document.querySelector('h1').textContent;`);
@@ -173,6 +173,24 @@ async function main() {
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
     await check('mobile-homepage-no-overflow', '/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
     await check('mobile-tool-no-overflow', '/tools/marks-calculator/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
+
+    // Sweep every generated page at phone width: no page may widen the viewport.
+    const sweep = ['/', '/about/', '/contact/', '/privacy-policy/', '/terms/', '/offline/', '/404/', '/workspace/',
+      '/articles/study-tips/', '/articles/active-recall/', '/articles/spaced-repetition/', '/articles/exam-preparation/',
+      ...Object.keys(TOOL_TESTS).map(id => `/tools/${id}/`)];
+    const overflowing = [];
+    for (const route of sweep) {
+      await send('Page.navigate', { url: BASE + route + (route.indexOf('?') === -1 ? '?noads=1' : '&noads=1') });
+      await waitFor(async () => {
+        const r = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
+        return r.result.value === 'complete';
+      }, 15000, 'overflow sweep ' + route);
+      await sleep(60);
+      const r = await send('Runtime.evaluate', { expression: 'document.documentElement.scrollWidth>window.innerWidth+1', returnByValue: true });
+      if (r.result.value) overflowing.push(route);
+    }
+    results.push({ name: 'all-pages-no-overflow', ok: overflowing.length === 0,
+      text: overflowing.length ? 'overflow: ' + overflowing.join(', ') : 'overflow:none on ' + sweep.length + ' pages', errors: [] });
     await send('Emulation.clearDeviceMetricsOverride');
 
     const failed = results.filter(r => !r.ok);
