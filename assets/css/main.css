@@ -93,6 +93,31 @@ ul, ol { padding-left: 1.25rem; }
   border: 1px solid var(--border); color: var(--text-soft); font-size: .78rem; font-weight: 700;
 }
 .header-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green-600); box-shadow: 0 0 0 3px var(--green-glow); }
+
+/* Live on-device usage strip */
+.usage-bar {
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand) 7%, var(--surface)), var(--surface));
+}
+.usage-inner {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .9rem;
+  min-height: 38px; padding-block: .4rem; font-size: .72rem; min-width: 0;
+}
+.usage-live {
+  display: inline-flex; align-items: center; gap: .4rem; flex-shrink: 0;
+  color: var(--brand); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; font-size: .68rem;
+}
+.usage-live i {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--green-600);
+  box-shadow: 0 0 0 3px var(--green-glow); animation: usage-pulse 2.1s ease-in-out infinite;
+}
+@keyframes usage-pulse { 50% { opacity: .45; transform: scale(.8); } }
+.usage-metric { display: inline-flex; align-items: baseline; gap: .28rem; min-width: 0; }
+.usage-metric strong { color: var(--text); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.usage-metric span { color: var(--muted); white-space: nowrap; }
+.usage-updated { margin-left: auto; color: var(--muted); font-size: .7rem; white-space: nowrap; }
+.usage-link { color: var(--brand); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.usage-link:hover { text-decoration: underline; }
 .icon-button {
   display: inline-grid; place-items: center; width: 42px; height: 42px;
   border: 1px solid var(--border); background: var(--surface); color: var(--text-soft);

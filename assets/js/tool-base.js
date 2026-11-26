@@ -17,6 +17,7 @@
     return new Intl.NumberFormat(undefined, { minimumFractionDigits: 0, maximumFractionDigits: dp == null ? 2 : dp }).format(n);
   }
   function result(target, title, rows, note, tone) {
+    if (SH.usage && SH.usage.record) SH.usage.record('result', { tool: document.body.getAttribute('data-tool-id') });
     var box = typeof target === 'string' ? document.getElementById(target) : target;
     if (!box) return;
     box.textContent = '';
@@ -84,6 +85,7 @@
     });
   }
   function init(id) {
+    if (id && SH.usage && SH.usage.record) SH.usage.record('open', { tool: id });
     if (id && SH.storage) SH.storage.prefs.addRecentTool(id);
     bindFavorites(id);
   }

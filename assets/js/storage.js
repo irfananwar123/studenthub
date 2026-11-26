@@ -164,7 +164,7 @@
     },
     exportData: function () {
       var prefs = {};
-      ['theme', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) { prefs[k] = lsGet(k, null); });
+      ['theme', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) { prefs[k] = lsGet(k, null); });
       var payload = { app: 'StudentHub', version: 1, exportedAt: new Date().toISOString(), prefs: prefs, collections: {} };
       return Promise.all(COLLECTIONS.map(function (name) {
         return storage.all(name).then(function (rows) { payload.collections[name] = rows; });
@@ -181,7 +181,7 @@
         ['theme', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
           var value = data.prefs[k];
           if (value === undefined || value === null) return;
-          if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches') && !Array.isArray(value)) return;
+          if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches' || k === 'usageEvents') && !Array.isArray(value)) return;
           if (k === 'theme' && !['auto', 'dark', 'light'].includes(value)) return;
           lsSet(k, value);
         });
@@ -197,7 +197,7 @@
       })).then(function () { return true; });
     },
     clearAll: function () {
-      ['theme', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
+      ['theme', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) {
         try { localStorage.removeItem(PREFIX + k); } catch (e) {}
       });
       return Promise.all(COLLECTIONS.map(function (name) { return storage.clear(name); })).then(function () { return true; });

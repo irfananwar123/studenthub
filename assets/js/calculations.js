@@ -466,6 +466,191 @@
     };
   }
 
+  /* Learning-theory dashboards. Still pure: these model planning signals,
+     not guarantees, and never read storage or the network. */
+  function deliberatePractice(values) {
+    if (!values || typeof values !== 'object') return null;
+    var current = Number(values.currentLevel), target = Number(values.targetLevel);
+    var sessions = Number(values.sessionsPerWeek), minutes = Number(values.minutesPerSession), weeks = Number(values.weeks);
+    if (!isNum(current) || !isNum(target) || current < 1 || current > 10 || target < 1 || target > 10 || target < current) return null;
+    if (!isNum(sessions) || sessions <= 0 || !isNum(minutes) || minutes <= 0 || !isNum(weeks) || weeks <= 0) return null;
+    var multipliers = { coach: 1, peer: 1.1, 'past-paper': 1.15, 'self-quiz': 1.25 };
+    var multiplier = multipliers[values.feedback] || 1.25;
+    var steps = [], hours = 0, level = current;
+    while (level < target) {
+      var adjusted = round((3 + level * 1.5) * multiplier, 2);
+      steps.push({ from: level, to: level + 1, hours: adjusted });
+      hours += adjusted;
+      level++;
+    }
+    if (!steps.length) steps.push({ from: current, to: current, hours: 0 });
+    var requiredHours = round(hours, 2);
+    var weeklyHours = round(sessions * minutes / 60, 2);
+    var availableHours = round(weeklyHours * weeks, 2);
+    var requiredWeeks = weeklyHours > 0 ? round(requiredHours / weeklyHours, 1) : null;
+    var capacityPercent = requiredHours > 0 ? round(availableHours / requiredHours * 100, 1) : 100;
+    var themes = ['Weakest subskill', 'Timed repetition', 'Feedback review', 'Mixed recall'];
+    var nextSessions = themes.map(function (theme, i) {
+      return { number: i + 1, theme: theme, minutes: Math.round(minutes) };
+    });
+    return {
+      currentLevel: current, targetLevel: target, steps: steps, multiplier: multiplier,
+      requiredHours: requiredHours, weeklyHours: weeklyHours, availableHours: availableHours,
+      requiredWeeks: requiredWeeks, weeklyTarget: round(requiredHours / weeks, 2),
+      capacityPercent: capacityPercent, gapHours: round(Math.max(0, requiredHours - availableHours), 2),
+      status: availableHours >= requiredHours ? 'enough' : 'short', nextSessions: nextSessions
+    };
+  }
+
+  function feynmanClarity(text, concept) {
+    var content = String(text == null ? '' : text).trim();
+    if (content.length < 30) return null;
+    var stats = textStats(content);
+    var words = content.toLowerCase().match(/[a-z']+/g) || [];
+    var simplePercent = words.length ? round(words.filter(function (w) { return w.length <= 6; }).length / words.length * 100, 1) : 0;
+    var sentences = Math.max(1, stats.sentences);
+    var sentenceLength = round(stats.words / sentences, 1);
+    var jargonList = ['utilize', 'utilise', 'methodology', 'paradigm', 'substantiate', 'approximately',
+      'fundamental', 'consequently', 'notwithstanding', 'plethora', 'aforementioned', 'inherently'];
+    var lower = content.toLowerCase();
+    var jargonHits = jargonList.filter(function (word) { return lower.indexOf(word) !== -1; });
+    var longWords = words.filter(function (w) { return w.length > 12; }).length;
+    var questions = (content.match(/\?/g) || []).length;
+    var examples = (content.match(/\b(for example|such as|imagine|e\.g\.)\b/gi) || []).length;
+    var mentioned = concept ? lower.indexOf(String(concept).toLowerCase().trim()) !== -1 : false;
+    var components = {
+      sentences: round(Math.max(0, Math.min(100, 100 - Math.max(0, sentenceLength - 14) * 5)), 1),
+      simple: simplePercent,
+      teaching: round(Math.min(100, examples * 30 + questions * 15 + (stats.paragraphs > 1 ? 10 : 0)), 1),
+      jargon: round(Math.max(0, 100 - jargonHits.length * 15 - longWords * 3), 1),
+      coverage: mentioned ? 100 : 70
+    };
+    var score = round(components.sentences * 0.25 + components.simple * 0.3 + components.teaching * 0.2 +
+      components.jargon * 0.15 + components.coverage * 0.1, 1);
+    var gaps = [];
+    if (sentenceLength > 18) gaps.push('Split long sentences. Aim for about 14 words per sentence.');
+    if (simplePercent < 65) gaps.push('Replace long words with everyday words.');
+    if (!examples) gaps.push('Add one example or analogy in plain language.');
+    if (!questions) gaps.push('Write a question a beginner would ask, then answer it.');
+    if (jargonHits.length) gaps.push('Translate jargon: ' + jargonHits.slice(0, 3).join(', ') + '.');
+    if (concept && !mentioned) gaps.push('Name the concept explicitly so the explanation stays anchored.');
+    if (!gaps.length) gaps.push('The explanation is clear. Test it by teaching it aloud from memory.');
+    return {
+      score: score, band: score >= 85 ? 'Clear enough to teach' : score >= 70 ? 'Almost there' :
+        score >= 50 ? 'Needs simpler words' : 'Find the gaps',
+      stats: stats, sentenceLength: sentenceLength, simplePercent: simplePercent,
+      jargonHits: jargonHits, longWords: longWords, questions: questions, examples: examples,
+      conceptMentioned: mentioned, components: components, gaps: gaps
+    };
+  }
+
+  function interleavingPlan(rows, options) {
+    var list = (Array.isArray(rows) ? rows : []).map(function (row) {
+      if (!row || !String(row.name || '').trim()) return null;
+      var confidence = { low: 'low', medium: 'medium', high: 'high' }[row.confidence] || 'medium';
+      return { name: String(row.name).trim(), confidence: confidence };
+    }).filter(Boolean);
+    if (list.length < 2) return null;
+    var opts = options || {};
+    var days = Number(opts.days), minutes = Number(opts.minutesPerDay), session = Number(opts.sessionMinutes);
+    if (!isNum(days) || days < 1 || days > 90 || !isNum(minutes) || minutes <= 0 || !isNum(session) || session <= 0) return null;
+    var mode = opts.mode === 'weak-first' || opts.mode === 'strict' ? opts.mode : 'weighted';
+    var weights = { low: 3, medium: 2, high: 1 };
+    var totals = list.map(function () { return { minutes: 0, sessions: 0 }; });
+    var counts = list.map(function () { return 0; });
+    var anchor = opts.startDate && parseDate(opts.startDate) ? parseDate(opts.startDate) : new Date();
+    var schedule = [], last = -1;
+    for (var d = 0; d < Math.ceil(days); d++) {
+      var date = isoDay(new Date(anchor.getTime() + d * 86400000));
+      var slots = Math.max(1, Math.min(4, Math.floor(minutes / session)));
+      var chosen = [], used = {};
+      for (var s = 0; s < slots; s++) {
+        var pick = -1;
+        if (mode === 'strict') {
+          for (var k = 0; k < list.length; k++) {
+            var idx = (d * slots + s + k) % list.length;
+            if (idx !== last && !used[idx]) { pick = idx; break; }
+          }
+        } else {
+          /* Pick the topic furthest below its confidence-based share, so weak
+             areas really do get more blocks instead of merely more pool entries. */
+          var targets = mode === 'weak-first' ? { low: 5, medium: 2, high: 1 } : weights;
+          var totalWeight = list.reduce(function (a, topic) { return a + targets[topic.confidence]; }, 0);
+          var assigned = schedule.reduce(function (a, day) { return a + day.topics.length; }, 0) + chosen.length;
+          var best = -Infinity;
+          for (var c = 0; c < list.length; c++) {
+            if (used[c] || c === last) continue;
+            var deficit = targets[list[c].confidence] / totalWeight * (assigned + 1) - counts[c];
+            if (deficit > best + 1e-9) { pick = c; best = deficit; }
+          }
+        }
+        if (pick < 0) {
+          for (var q = 0; q < list.length; q++) { if (!used[q]) { pick = q; break; } }
+        }
+        if (pick < 0) break;
+        var spent = chosen.reduce(function (a, x) { return a + x.minutes; }, 0);
+        var mins = Math.min(session, minutes - spent);
+        if (mins <= 0) break;
+        chosen.push({
+          name: list[pick].name, confidence: list[pick].confidence, minutes: mins,
+          focus: list[pick].confidence === 'low' ? 'Rebuild' : list[pick].confidence === 'medium' ? 'Strengthen' : 'Maintain'
+        });
+        used[pick] = true;
+        totals[pick].minutes += mins;
+        totals[pick].sessions++;
+        counts[pick]++;
+        last = pick;
+      }
+      schedule.push({ day: d + 1, date: date, topics: chosen, minutes: chosen.reduce(function (a, x) { return a + x.minutes; }, 0) });
+    }
+    var flat = schedule.reduce(function (a, day) { return a.concat(day.topics); }, []);
+    var transitions = 0;
+    for (var i = 1; i < flat.length; i++) { if (flat[i].name !== flat[i - 1].name) transitions++; }
+    var byTopic = list.map(function (topic, i) {
+      return { name: topic.name, confidence: topic.confidence, minutes: round(totals[i].minutes, 1), sessions: totals[i].sessions };
+    }).sort(function (a, b) { return b.minutes - a.minutes || a.name.localeCompare(b.name); });
+    return {
+      schedule: schedule, totals: byTopic,
+      mixScore: flat.length > 1 ? round(transitions / (flat.length - 1) * 100, 1) : 0,
+      sessionMinutes: session, days: schedule.length,
+      totalMinutes: round(schedule.reduce(function (a, day) { return a + day.minutes; }, 0), 1)
+    };
+  }
+
+  function confidenceCalibration(rows) {
+    var list = (Array.isArray(rows) ? rows : []).map(function (row) {
+      if (!row) return null;
+      var predicted = Number(row.predicted), actual = Number(row.actual);
+      if (!isNum(predicted) || !isNum(actual) || predicted < 0 || predicted > 100 || actual < 0 || actual > 100) return null;
+      return {
+        name: String(row.name || '').trim() || 'Quiz', predicted: round(predicted, 1), actual: round(actual, 1),
+        error: round(predicted - actual, 1), absError: round(Math.abs(predicted - actual), 1)
+      };
+    }).filter(Boolean);
+    if (!list.length) return null;
+    var meanAbs = round(sum(list.map(function (r) { return r.absError; })) / list.length, 1);
+    var bias = round(sum(list.map(function (r) { return r.error; })) / list.length, 1);
+    var brier = round(sum(list.map(function (r) { return Math.pow(r.error / 100, 2); })) / list.length, 4);
+    var half = Math.max(1, Math.floor(list.length / 2));
+    var early = sum(list.slice(0, half).map(function (r) { return r.absError; })) / half;
+    var later = list.slice(half);
+    var late = later.length ? sum(later.map(function (r) { return r.absError; })) / later.length : early;
+    var direction = bias > 5 ? 'Overconfident' : bias < -5 ? 'Underconfident' : 'Well calibrated';
+    var trend = late < early - 2 ? 'Improving' : late > early + 2 ? 'Slipping' : 'Steady';
+    var advice = direction === 'Overconfident'
+      ? ['Before each quiz, write one reason your answer could be wrong.']
+      : direction === 'Underconfident'
+        ? ['List what you already know before predicting; low estimates can hide real progress.']
+        : ['Your estimates are close to your results. Keep making a quick prediction before practice.'];
+    if (trend === 'Slipping') advice.push('Your gaps grew later in the list. Review feedback after each quiz.');
+    else if (trend === 'Improving') advice.push('Your estimates improved over time. Keep the same routine.');
+    else advice.push('Check whether the same topics cause the same errors each time.');
+    return {
+      rows: list, meanAbsError: meanAbs, bias: bias, brier: brier,
+      accuracy: round(100 - meanAbs, 1), direction: direction, trend: trend, advice: advice
+    };
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -477,7 +662,9 @@
     isoDay: isoDay, hoursSummary: hoursSummary, revisionPlan: revisionPlan,
     gradeGoalPlan: gradeGoalPlan, streakStats: streakStats,
     syllabusCoverage: syllabusCoverage, readinessScore: readinessScore,
-    studyForecast: studyForecast, priorityMatrix: priorityMatrix
+    studyForecast: studyForecast, priorityMatrix: priorityMatrix,
+    deliberatePractice: deliberatePractice, feynmanClarity: feynmanClarity,
+    interleavingPlan: interleavingPlan, confidenceCalibration: confidenceCalibration
   };
   return api;
 });

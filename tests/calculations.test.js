@@ -246,3 +246,61 @@ test('assignment priority matrix: urgency ranking and overloaded days', () => {
   assert.equal(C.priorityMatrix(tasks, 2, '2026-11-26').overloadedDays, 1);
   assert.equal(C.priorityMatrix([{ title: 'No date' }], 5, '2026-11-26'), null);
 });
+
+test('deliberate practice: weighted level steps and schedule coverage', () => {
+  const plan = C.deliberatePractice({ currentLevel: 6, targetLevel: 7, sessionsPerWeek: 3, minutesPerSession: 30, weeks: 6, feedback: 'coach' });
+  assert.equal(plan.requiredHours, 12);
+  assert.equal(plan.weeklyHours, 1.5);
+  assert.equal(plan.availableHours, 9);
+  assert.equal(plan.capacityPercent, 75);
+  assert.equal(plan.gapHours, 3);
+  assert.equal(plan.status, 'short');
+  assert.equal(plan.steps.length, 1);
+  assert.equal(plan.steps[0].hours, 12);
+  assert.equal(plan.nextSessions[0].theme, 'Weakest subskill');
+  const weakFeedback = C.deliberatePractice({ currentLevel: 6, targetLevel: 7, sessionsPerWeek: 3, minutesPerSession: 30, weeks: 6, feedback: 'self-quiz' });
+  assert.equal(weakFeedback.requiredHours, 15);
+  assert.equal(C.deliberatePractice({ currentLevel: 7, targetLevel: 6, sessionsPerWeek: 3, minutesPerSession: 30, weeks: 6 }), null);
+});
+
+test('feynman clarity: plain language scores above jargon-heavy text', () => {
+  const plain = C.feynmanClarity('Photosynthesis is how a plant makes food. It uses light, water and carbon dioxide. Imagine a tiny kitchen inside a leaf: light is the power, water and carbon dioxide are the ingredients, and sugar is the food. For example, a leaf in bright sun makes more sugar than a leaf in shade.', 'Photosynthesis');
+  assert.ok(plain.score > 70);
+  assert.equal(plain.conceptMentioned, true);
+  assert.ok(plain.examples >= 1);
+  assert.equal(plain.jargonHits.length, 0);
+  assert.ok(plain.gaps.length >= 1);
+  const jargon = C.feynmanClarity('The methodology is fundamentally complex and consequently one must utilise a paradigm before proceeding.', 'Method');
+  assert.ok(jargon.jargonHits.length >= 3);
+  assert.ok(jargon.score < plain.score);
+  assert.equal(C.feynmanClarity('Too short.', 'Method'), null);
+});
+
+test('interleaving schedule: weighted mix avoids immediate repeats', () => {
+  const topics = [{ name: 'Biology', confidence: 'low' }, { name: 'Chemistry', confidence: 'medium' }, { name: 'Physics', confidence: 'high' }];
+  const plan = C.interleavingPlan(topics, { days: 7, minutesPerDay: 60, sessionMinutes: 30, mode: 'weighted', startDate: '2026-11-26' });
+  assert.equal(plan.days, 7);
+  assert.equal(plan.schedule[0].date, '2026-11-26');
+  assert.equal(plan.schedule[0].topics.length, 2);
+  assert.equal(plan.mixScore, 100);
+  assert.equal(plan.totalMinutes, 420);
+  assert.equal(plan.totals[0].name, 'Biology');
+  assert.ok(plan.totals[0].minutes > plan.totals[2].minutes);
+  assert.equal(C.interleavingPlan([{ name: 'Only one' }], { days: 7, minutesPerDay: 60, sessionMinutes: 30 }), null);
+});
+
+test('confidence calibration: bias, accuracy, trend and validation', () => {
+  const result = C.confidenceCalibration([
+    { name: 'Quiz 1', predicted: 85, actual: 70 },
+    { name: 'Quiz 2', predicted: 80, actual: 65 },
+    { name: 'Quiz 3', predicted: 75, actual: 68 }
+  ]);
+  assert.equal(result.rows.length, 3);
+  assert.equal(result.bias, 12.3);
+  assert.equal(result.meanAbsError, 12.3);
+  assert.equal(result.accuracy, 87.7);
+  assert.equal(result.direction, 'Overconfident');
+  assert.equal(result.trend, 'Improving');
+  assert.ok(result.advice.join(' ').includes('wrong'));
+  assert.equal(C.confidenceCalibration([{ predicted: 101, actual: 50 }]), null);
+});

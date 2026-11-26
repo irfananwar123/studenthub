@@ -53,6 +53,9 @@
   .brand-mark { width: 34px; height: 34px; }
   .header-inner { gap: .5rem; min-height: 64px; }
   .header-actions { gap: .4rem; }
+  .usage-inner { gap: .25rem .6rem; font-size: .68rem; padding-block: .35rem; }
+  .usage-metric strong { font-size: .76rem; }
+  .usage-updated { margin-left: 0; }
   .theme-switch { gap: 0; padding: 2px; }
   .theme-option { width: 28px; height: 28px; }
   .stat-grid, .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -75,7 +78,7 @@
   .ad-slot, .ad-slot.ad-slot-active { padding-inline: .5rem; }
 }
 @media print {
-  .site-header, .site-footer, .btn, .ad-slot, .no-print, .search-wrap, .header-chip { display: none !important; }
+  .site-header, .usage-bar, .site-footer, .btn, .ad-slot, .no-print, .search-wrap, .header-chip { display: none !important; }
   body { background: #fff !important; color: #000; }
   .card { background: #fff !important; border: 1px solid #ccc !important; box-shadow: none; break-inside: avoid; }
   .tool-card, .category-card, .article-card, .tip-card { box-shadow: none; border-color: #ccc; }

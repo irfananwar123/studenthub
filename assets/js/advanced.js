@@ -27,7 +27,8 @@
       });
       empty.hidden = shown !== 0;
       grid.hidden = shown === 0;
-      var label = filter === 'all' ? 'all dashboards' : filter === 'study-planning' ? 'planning dashboards' : 'analysis dashboards';
+      var label = filter === 'all' ? 'all dashboards' : filter === 'study-planning' ? 'planning dashboards'
+        : filter === 'academic-calculators' ? 'analysis dashboards' : 'learning-theory dashboards';
       status.textContent = shown
         ? 'Ready — showing ' + shown + ' of ' + cards.length + ' advanced tools in ' + label + '.'
         : 'No matching dashboards. Choose another filter or clear your search.';

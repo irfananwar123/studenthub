@@ -51,11 +51,12 @@ const core = fs.readFileSync(path.join(ROOT, 'assets/js/core.js'), 'utf8');
 const listText = core.match(/var TOOLS = (\[[\s\S]*?\n  \]);/);
 if (!listText) throw new Error('Tool registry not found in core.js');
 const TOOLS = new Function('return ' + listText[1])(); // trusted build-time source only
-/* The Advanced hub is a curated, dashboard-first collection. These eight tools
+/* The Advanced hub is a curated, dashboard-first collection. These twelve tools
    share the premium single-panel layout and cross-link through the hub filters. */
 const ADVANCED_IDS = [
   'study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits',
-  'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix'
+  'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix',
+  'deliberate-practice-planner', 'feynman-clarity-score', 'interleaving-schedule-builder', 'confidence-calibrator'
 ];
 
 const content = Object.assign({},
@@ -135,6 +136,19 @@ const themeSwitch = `<div class="theme-switch" role="group" aria-label="Colour t
       <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${icon('moon', 16)}</button>
       <button class="theme-option" type="button" data-theme-option="auto" aria-pressed="true" aria-label="Auto theme (follows device)" title="Auto theme">${icon('auto', 16)}</button>
     </div>`;
+/* A real, device-local usage strip. Every number is recomputed from LocalStorage
+   events and IndexedDB study rows on this device; there is no server counter. */
+function usageBar() {
+  return `<div class="usage-bar" id="usage-bar" aria-label="Live study usage on this device"><div class="container usage-inner">
+    <span class="usage-live" title="Calculated from this device only"><i aria-hidden="true"></i> Live usage</span>
+    <span class="usage-metric"><strong data-usage="actions">0</strong><span>interactions today</span></span>
+    <span class="usage-metric"><strong data-usage="minutes">0m</strong><span>studied today</span></span>
+    <span class="usage-metric"><strong data-usage="streak">0d</strong><span>day streak</span></span>
+    <span class="usage-metric"><strong data-usage="tools">0</strong><span>tools this week</span></span>
+    <span class="usage-updated" data-usage="updated">No activity yet</span>
+    <a class="usage-link" href="/workspace/">Details ${icon('arrow', 13)}</a>
+  </div></div>`;
+}
 function header() {
   return `<header class="site-header"><div class="container header-inner">
     ${brand}
@@ -166,7 +180,7 @@ function footer(adsOn) {
   </div></footer>`;
 }
 function scripts(extra) {
-  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app'];
+  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app'];
   return base.map(n => `<script src="/assets/js/${n}.js" defer></script>`).join('\n') + '\n' + (extra || '');
 }
 function shell(opts) {
@@ -175,6 +189,7 @@ function shell(opts) {
   return head(opts) + `\n<body${opts.bodyAttrs ? ' ' + opts.bodyAttrs : ''}>
 <a class="skip-link" href="#main">Skip to main content</a>
 ${header()}
+${usageBar()}
 <div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
 ${opts.body}
 ${footer(ADS.enabled)}
@@ -411,7 +426,7 @@ function advancedPage() {
     <div class="advanced-hero-copy">
       <span class="eyebrow">${icon('spark', 15)} Advanced workspace</span>
       <h1>Study intelligence, <span class="gradient">beautifully simple.</span></h1>
-      <p>Eight focused dashboards that turn the study data already on your device into honest scores, clear forecasts and a practical next step. No account, no setup, no waiting.</p>
+      <p>Twelve focused dashboards that turn the study data already on your device into honest scores, clear forecasts and a practical next step. Learning-theory tools join the planning and analysis panels — no account, no setup, no waiting.</p>
       <div class="btn-row"><a class="btn btn-primary" href="/tools/exam-readiness-score/">Check my readiness ${icon('arrow', 16)}</a><a class="btn btn-secondary" href="#advanced-grid">Browse dashboards</a></div>
     </div>
     <div class="advanced-hero-visual" aria-hidden="true">
@@ -432,8 +447,9 @@ function advancedPage() {
         <button class="advanced-filter is-active" type="button" data-advanced-filter="all" aria-pressed="true">All dashboards</button>
         <button class="advanced-filter" type="button" data-advanced-filter="study-planning" aria-pressed="false">Planning &amp; tracking</button>
         <button class="advanced-filter" type="button" data-advanced-filter="academic-calculators" aria-pressed="false">Scores &amp; analysis</button>
+        <button class="advanced-filter" type="button" data-advanced-filter="learning-tools" aria-pressed="false">Learning theory</button>
       </div>
-      <label class="advanced-search">${icon('search', 17)}<span class="visually-hidden">Search advanced tools</span><input id="advanced-search" type="search" placeholder="Search 8 dashboards" autocomplete="off"></label>
+      <label class="advanced-search">${icon('search', 17)}<span class="visually-hidden">Search advanced tools</span><input id="advanced-search" type="search" placeholder="Search ${ADVANCED_IDS.length} dashboards" autocomplete="off"></label>
     </div>
     <p class="advanced-status" id="advanced-status" role="status" aria-live="polite">Loading advanced dashboards…</p>
     <div class="advanced-skeleton-grid" id="advanced-skeleton" aria-hidden="true">${[0, 1, 2, 3].map(() => `<div class="advanced-skeleton-card"><i></i><i></i><i></i><i></i></div>`).join('')}</div>
@@ -456,13 +472,13 @@ function advancedPage() {
       ['Do advanced tools need an account?', 'No. Every dashboard runs in your browser, and any saved data stays in LocalStorage or IndexedDB on this device.'],
       ['Will these tools work offline?', 'Yes. After the first visit the advanced hub and its tool pages are cached by the service worker for offline use.'],
       ['Are the scores official predictions?', 'No. They are planning signals based on the information you enter or save locally. Always confirm official results with your institution.'],
-      ['Can I use all eight dashboards for free?', 'Yes. All advanced tools are free, with no subscription, paid API or hidden upgrade.']
+      ['Can I use all twelve dashboards for free?', 'Yes. All advanced tools are free, with no subscription, paid API or hidden upgrade.']
     ])}
   </div></section>
 </main>`;
   return shell({
     title: 'Advanced Study Tools & Dashboards | StudentHub',
-    desc: 'Explore eight advanced StudentHub dashboards for readiness scores, syllabus coverage, study pace, focus streaks and workload planning.',
+    desc: 'Explore twelve advanced StudentHub dashboards for readiness scores, study pace, deliberate practice, Feynman clarity, interleaving and workload planning.',
     path: '/advanced/', body,
     scripts: '<script src="/assets/js/advanced.js" defer></script>'
   });
@@ -486,11 +502,11 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <section class="page-hero container"><span class="eyebrow">Your data</span><h1>Privacy Policy</h1><p>StudentHub is designed so that your study data stays on your device. This page explains exactly what is stored and what is not.</p></section>
 <section class="section" style="padding-top:0"><div class="container prose">
 <h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
-<h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools and recent searches.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
+<h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools, recent searches, tool drafts and a short log of interaction times, tool names and page names used by the live usage strip at the top of every page.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>The live usage strip is calculated from that local log and your saved study sessions on this device only. It is never sent to a server, and no global or cross-user counter exists. This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
 <h2>Advertising and third parties</h2><p>To keep StudentHub free, every generated page — home, tools, articles, About, Terms, Privacy, Contact, Workspace, offline and error pages — loads ad scripts from the same third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. There are no ad-free pages and no URL switch that hides the placements: advertising runs on every page view. You can still block the third-party domains with a browser extension; all tools will keep working, and the labelled first-party sponsored banner remains. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
-<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 25 November 2026.</p>
+<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 26 November 2026.</p>
 </div></section></main>`;
 write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', body: privacyBody }));
 
@@ -500,7 +516,7 @@ const termsBody = `<main id="main"><nav class="breadcrumbs container" aria-label
 <h2>Free to use</h2><p>StudentHub is provided free of charge for personal study and educational use. There is no subscription, and no account is required. Advertising from third-party networks funds the site; see the privacy policy for the domains involved.</p>
 <h2>Results are guides, not official outcomes</h2><p>Calculators, predictors and citation output are based only on what you enter. They are not official grades, predictions guaranteed to happen, or verified bibliographic records. Always confirm results with your school, university or style guide.</p>
 <h2>Your responsibilities</h2><p>Enter accurate information, keep backups of important notes, and do not use the tools for unlawful purposes. You are responsible for decisions you make using the results.</p>
-<h2>Data and availability</h2><p>Data is stored locally on your device. We aim to keep the site available but provide no guarantee of uninterrupted service. Browser storage can be cleared by you or by device maintenance.</p>
+<h2>Data and availability</h2><p>Data is stored locally on your device. The live usage strip at the top is calculated from a small LocalStorage log of interaction times, tool names and page names on this device; it is never sent to a server and no global or cross-user counter exists. Browser storage can be cleared by you or by device maintenance, and the same clear-data control in My Workspace removes this usage log.</p>
 <h2>Third-party advertisements</h2><p>Adverts are supplied by external networks and are not controlled by StudentHub. Clicking an advert takes you to a third-party site with its own terms and privacy practices. StudentHub is not responsible for the content of those sites or for advertiser claims.</p>
 <h2>Changes</h2><p>Tools and these terms may change over time. Continued use after a change means you accept the updated terms.</p>
 </div></section></main>`;
@@ -581,7 +597,7 @@ const precache = [
   ...TOOLS.map(t => `/tools/${t.id}/`),
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
   ...['themes', 'main', 'components', 'responsive'].map(n => `/assets/css/${n}.css`),
-  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
+  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
   ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];

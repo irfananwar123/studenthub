@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 33 working tools with dashboard-style analytics, a dedicated Advanced hub, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 37 working tools with dashboard-style analytics, learning-theory planners, a dedicated Advanced hub, a private local workspace, search, an honest on-device live usage strip, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -22,9 +22,9 @@ studenthub/
 │   ├── js/                     core.js, calculations.js, storage.js, theme.js,
 │   │                           navigation.js, search.js, tool-base.js, pwa.js,
 │   │                           ads.js, app.js, home.js, contact.js,
-│   │                           workspace.js, config.js, advanced.js
+│   │                           workspace.js, config.js, advanced.js, usage.js
 │   └── icons/                  favicon.svg, icon-192.png, icon-512.png
-├── tools/<33 tools>/           index.html + tool.js for each tool
+├── tools/<37 tools>/           index.html + tool.js for each tool
 ├── articles/<4 guides>/        index.html
 ├── scripts/
 │   ├── generate.js             Regenerates all HTML, sitemap, robots and service worker
@@ -91,11 +91,11 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 28 calculation + structure checks
-node tests/browser-smoke.js # 64 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 33 calculation + structure checks
+node tests/browser-smoke.js # 70 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 46 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (736/736 clean).
+The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters and the live usage strip, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 50 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (800/800 clean).
 
 See `TEST_REPORT.md` for the latest results and known limits.
 
@@ -151,12 +151,14 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 
 ## 7. Features delivered
 
-- **33 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner, focus streak & habits, syllabus coverage tracker, exam readiness score, study pace forecaster and assignment priority matrix.
-- **Advanced hub**: a premium, filterable `/advanced/` dashboard with live loading skeletons, category/search filters, eight linked tool cards, a connected workflow and crawlable nested URLs. The hub, its filters and all advanced tools are precached for offline use.
+- **37 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner, focus streak & habits, syllabus coverage tracker, exam readiness score, study pace forecaster, assignment priority matrix, deliberate practice planner, Feynman clarity score, interleaving schedule builder and confidence calibrator.
+- **Advanced hub**: a premium, filterable `/advanced/` dashboard with live loading skeletons, category/search filters, twelve linked tool cards, a fourth “Learning theory” filter, a connected workflow and crawlable nested URLs. The hub, its filters and all advanced tools are precached for offline use.
 - **Advanced study analytics**: live study timer with saved sessions, weekly goal ring, 7-day bars, subject breakdown and 35-day heatmap; automatic spaced-review plans with completion tracking; required-marks planning for every remaining assessment; daily habit streaks with a consistency heatmap; syllabus coverage by subject and confidence; weighted exam readiness scoring; pace forecasting with ideal vs current curves; and assignment urgency/workload ranking. All charts and totals are calculated locally and stored only in the browser.
-- **Personal workspace**: favourites, recent tools, progress, all local collections, JSON export/import and clear-all.
+- **Learning-theory dashboards**: deliberate practice planning with feedback weighting, Feynman clarity scoring with a five-part breakdown, an interleaving schedule builder that actually favours weak topics without back-to-back repeats, and confidence calibration with bias, Brier-style error and trend. Each has a local draft, an example button and a plain-language explanation of the model.
+- **Live usage strip**: a top-of-page strip that recomputes interactions today, studied minutes, day streak and tools used this week from LocalStorage events and saved IndexedDB sessions. It is explicitly labelled as device-local; there is no global counter, no analytics service and no server upload.
+- **Personal workspace**: favourites, recent tools, progress, all local collections, JSON export/import and clear-all. The usage log is included in export/import and removed by clear-all.
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
-- **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for small preferences; IndexedDB for collections.
+- **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for preferences, drafts and the on-device usage log; IndexedDB for collections. The privacy policy explains that no global user counter exists.
 - **PWA**: manifest, installable icons, versioned service worker, offline fallback, offline indicator and automatic cache cleanup.
 - **SEO**: unique titles/descriptions/canonical/OG tags, Google Search Console and Bing Webmaster Tools verification metas, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, primary and fallback sitemaps, and robots.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.

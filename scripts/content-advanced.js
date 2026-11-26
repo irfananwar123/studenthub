@@ -330,5 +330,163 @@ module.exports = {
       ['What happens to completed assignments?', 'They are hidden from the matrix because they no longer need scheduling.'],
       ['Where is this data stored?', 'In this browser’s IndexedDB with your other assignments. The CSV export is created locally.']
     ]
+  },
+
+  'deliberate-practice-planner': {
+    h1: 'Deliberate Practice Planner',
+    seoTitle: 'Deliberate Practice Planner — Focused Hours That Build Skill',
+    desc: 'Plan deliberate practice hours from your current level to a target, with feedback weighting and a focused weekly schedule.',
+    intro: 'Deliberate practice means working just beyond your current ability, getting quick feedback and repeating the weak part. This planner turns a skill level and a weekly routine into an honest estimate of the hours required — and tells you when your current schedule is not enough.',
+    icon: 'target',
+    form: `
+      <div class="form-grid">
+        ${f('dp-skill', 'Skill or topic', 'text', 'placeholder="e.g. Organic chemistry mechanisms"')}
+        ${f('dp-current', 'Current level (1–10)', 'number', 'value="6" min="1" max="10" step="1"')}
+        ${f('dp-target', 'Target level (1–10)', 'number', 'value="7" min="1" max="10" step="1"')}
+        ${f('dp-weak', 'Weakest subskill (optional)', 'text', 'placeholder="e.g. reaction arrows"')}
+        ${f('dp-sessions', 'Sessions each week', 'number', 'value="3" min="1" max="21" step="1"')}
+        ${f('dp-minutes', 'Minutes per session', 'number', 'value="30" min="5" max="240" step="5"')}
+        ${f('dp-weeks', 'Weeks available', 'number', 'value="6" min="1" max="52" step="1"')}
+        <div class="field"><label for="dp-feedback">Feedback source</label><select id="dp-feedback"><option value="coach" selected>Coach or teacher — fastest</option><option value="peer">Peer review</option><option value="past-paper">Past paper with answers</option><option value="self-quiz">Self-quiz only — slowest</option></select></div>
+      </div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Build practice plan</button><button type="button" class="btn btn-secondary" id="dp-demo">Fill example</button></div>
+      <div class="dashboard-grid" id="dp-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="dp-ring"><span id="dp-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="dp-goal-copy">No plan calculated yet</strong><span>Schedule coverage</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Level steps</h3>
+      <div id="dp-steps"></div>
+      <h3 style="margin-top:1.4rem">Next four sessions</h3>
+      <div id="dp-plan"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="dp-save">Save draft on this device</button></div>`,
+    formula: `<p>Each level step needs <code>3 + current level × 1.5</code> hours before feedback weighting. A coach multiplies the step by <code>1.0</code>, a peer by <code>1.1</code>, a past paper by <code>1.15</code> and a self-quiz by <code>1.25</code>, because practice without feedback takes longer to correct. Weekly hours are <code>sessions × minutes ÷ 60</code>, available hours are <code>weekly hours × weeks</code>, and coverage is <code>available ÷ required × 100</code>. The weakest subskill is placed first in the session list.</p>`,
+    example: `<p><strong>Example:</strong> Moving from level 6 to level 7 with coach feedback needs <code>3 + 6 × 1.5 = 12</code> hours. Three 30-minute sessions provide <code>1.5</code> hours a week, so six weeks offer 9 hours — 75% of the plan. You need about 3 extra hours or one more week to close the gap.</p>`,
+    steps: [
+      'Name a skill and rate your current and target level from 1 to 10.',
+      'Add the weakest subskill, your weekly sessions, session length and available weeks.',
+      'Choose the feedback you can actually get, then select Build practice plan.',
+      'Read the required hours, schedule coverage and each level step.',
+      'Use the four-session loop to start, and save the draft if you want to return to it.'
+    ],
+    faq: [
+      ['Is this an exact prediction?', 'No. It is a planning model based on consistent practice and feedback. Real progress depends on the task, your focus and the quality of feedback.'],
+      ['Why does feedback change the hours?', 'Deliberate practice depends on knowing what was wrong. Without prompt feedback, mistakes can be repeated for longer before they are corrected.'],
+      ['Can I lower the level target?', 'Yes. Set the target to any level above your current one, or equal to it if your goal is maintenance.'],
+      ['Is my draft uploaded?', 'No. The last draft stays in LocalStorage on this device.']
+    ]
+  },
+
+  'feynman-clarity-score': {
+    h1: 'Feynman Clarity Score',
+    seoTitle: 'Feynman Clarity Score — Explain It Simply and Find the Gaps',
+    desc: 'Score your explanation with the Feynman technique using simple words, short sentences, examples and gaps in understanding.',
+    intro: 'The Feynman technique says you only understand something when you can explain it simply. Write a short explanation in your own words, name the concept, and this dashboard scores clarity from sentence length, everyday language, examples, questions and jargon. It then tells you exactly what to rewrite.',
+    icon: 'pencil',
+    form: `
+      <div class="form-grid">
+        ${f('fx-concept', 'Concept to explain', 'text', 'placeholder="e.g. Photosynthesis"')}
+      </div>
+      <div class="field"><label for="fx-text">Your explanation in plain language</label><textarea id="fx-text" rows="7" placeholder="Explain it as if you were teaching a curious beginner..."></textarea><span class="field-hint">Aim for at least 30 characters. Short, concrete sentences usually score better than formal ones.</span></div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Score clarity</button><button type="button" class="btn btn-secondary" id="fx-demo">Fill example</button></div>
+      <div class="dashboard-grid" id="fx-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="fx-ring"><span id="fx-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="fx-goal-copy">No explanation scored yet</strong><span>Clarity score</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Score breakdown</h3>
+      <div id="fx-breakdown"></div>
+      <h3 style="margin-top:1.4rem">What to fix next</h3>
+      <div id="fx-gaps"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="fx-save">Save draft on this device</button></div>`,
+    formula: `<p>The score blends five parts: sentence clarity <code>25%</code>, simple-word share <code>30%</code>, teaching signals from examples and questions <code>20%</code>, a jargon and long-word penalty <code>15%</code>, and concept coverage <code>10%</code>. Simple words are words of six letters or fewer. Sentence clarity starts at 100 and loses 5 points for each word above 14 in the average sentence. The jargon penalty removes 15 points per flagged term and 3 points per word longer than 12 letters.</p>`,
+    example: `<p><strong>Example:</strong> “Photosynthesis is how a plant makes food. Imagine a tiny kitchen inside a leaf: light is the power, water and carbon dioxide are the ingredients, and sugar is the food. For example, a leaf in bright sun makes more sugar than a leaf in shade.” This names the concept, uses short words and includes an analogy and an example, so it scores well.</p>`,
+    steps: [
+      'Type the concept you want to understand.',
+      'Write an explanation as if you were teaching a beginner, without copying a textbook.',
+      'Select Score clarity and read the overall band and five-part breakdown.',
+      'Work through the gaps list and rewrite the weakest part.',
+      'Save the draft on this device if you want to improve it in another session.'
+    ],
+    faq: [
+      ['Does a high score mean I really understand it?', 'It means your explanation is clear and simple. Understanding still needs active testing, so try teaching it aloud without looking afterwards.'],
+      ['Why are long words penalised?', 'The Feynman technique favours plain language. If a technical word is unavoidable, explain it in the next sentence.'],
+      ['Do questions help the score?', 'Yes. A question you would ask a beginner often reveals the exact gap you still need to close.'],
+      ['Where is my text stored?', 'Only in this page and, if you choose Save draft, in LocalStorage on this device. It is never uploaded.']
+    ]
+  },
+
+  'interleaving-schedule-builder': {
+    h1: 'Interleaving Schedule Builder',
+    seoTitle: 'Interleaving Schedule Builder — Mixed-Topic Practice That Sticks',
+    desc: 'Build a mixed-topic study schedule that spaces weak areas more often and avoids practising the same subject back to back.',
+    intro: 'Blocked practice feels smooth; interleaving feels harder and remembered better. Enter your topics with a confidence level and this builder creates a day-by-day schedule that mixes them, gives weak topics more slots and avoids repeating the same topic in consecutive sessions.',
+    icon: 'calendar',
+    form: `
+      <div class="field"><label for="ib-topics">Topics, one per line</label><textarea id="ib-topics" rows="5" placeholder="Biology|low&#10;Chemistry|medium&#10;Physics|high"></textarea><span class="field-hint">Use Topic|low, Topic|medium or Topic|high. At least two topics are needed.</span></div>
+      <div class="form-grid">
+        ${f('ib-days', 'Days to schedule', 'number', 'value="7" min="1" max="90" step="1"')}
+        ${f('ib-minutes', 'Minutes each day', 'number', 'value="60" min="10" max="480" step="5"')}
+        ${f('ib-session', 'Minutes per topic block', 'number', 'value="30" min="5" max="120" step="5"')}
+        <div class="field"><label for="ib-mode">Mix style</label><select id="ib-mode"><option value="weighted" selected>Weighted mix — weak areas more often</option><option value="weak-first">Weak first — rebuild confidence early</option><option value="strict">Strict rotation — equal turns</option></select></div>
+      </div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Build schedule</button><button type="button" class="btn btn-secondary" id="ib-demo">Fill example</button></div>
+      <div class="dashboard-grid" id="ib-stats"></div>
+      <h3 style="margin-top:1.4rem">Daily practice blocks</h3>
+      <div id="ib-days" class="interleave-days"></div>
+      <h3 style="margin-top:1.4rem">Time by topic</h3>
+      <div id="ib-totals"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="ib-save">Save draft on this device</button></div>`,
+    formula: `<p>Confidence is converted into weighting: low <code>3</code>, medium <code>2</code> and high <code>1</code>. Each day contains <code>available minutes ÷ block length</code> topic blocks, capped at four. For each block the builder picks the topic furthest below its confidence-based share that is different from the previous block, so weak areas genuinely receive more practice without consecutive repetition. The mix score is <code>different adjacent topic pairs ÷ all adjacent pairs × 100</code>.</p>`,
+    example: `<p><strong>Example:</strong> Biology marked low, Chemistry medium and Physics high, with 60 minutes a day and 30-minute blocks, gives two blocks each day. Biology is selected more often than Physics, and a Biology block is never immediately followed by another Biology block.</p>`,
+    steps: [
+      'List at least two topics with a confidence level after a pipe, such as Biology|low.',
+      'Set the number of days, daily minutes and length of each topic block.',
+      'Choose a mix style and select Build schedule.',
+      'Follow the daily blocks, then check the time-by-topic totals for balance.',
+      'Save the topic list as a local draft if you want to rebuild the schedule later.'
+    ],
+    faq: [
+      ['Why does interleaving feel harder?', 'Switching topics forces your brain to retrieve each method again. That extra effort is why it often improves long-term recall even though practice feels less smooth.'],
+      ['Can I use more than three topics?', 'Yes. Add one topic per line. The builder keeps mixing them and prevents immediate repeats where possible.'],
+      ['What if my daily minutes are not a multiple of the block length?', 'The final block is shortened to use the remaining time, so no minute in your daily budget is wasted.'],
+      ['Is the schedule uploaded?', 'No. All dates and totals are calculated in your browser from the topics you type.']
+    ]
+  },
+
+  'confidence-calibrator': {
+    h1: 'Confidence Calibrator',
+    seoTitle: 'Confidence Calibrator — Predicted vs Actual Quiz Scores',
+    desc: 'Compare predicted and actual quiz scores to find overconfidence, underconfidence and whether your estimates are improving.',
+    intro: 'Good students are not always good judges of their own understanding. Enter a prediction and a real score for each quiz, and this dashboard measures the gap, the direction of your bias and whether your estimates are getting better over time. It turns guesswork into a habit you can improve.',
+    icon: 'chart',
+    form: `
+      <div class="field"><label for="cc-rows">Quiz results, one per line</label><textarea id="cc-rows" rows="6" placeholder="Quiz 1|85|70&#10;Quiz 2|80|65&#10;Quiz 3|75|68"></textarea><span class="field-hint">Use Quiz name|predicted %|actual %. Enter at least one result with values from 0 to 100.</span></div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Check calibration</button><button type="button" class="btn btn-secondary" id="cc-demo">Fill example</button></div>
+      <div class="dashboard-grid" id="cc-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="cc-ring"><span id="cc-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="cc-goal-copy">No calibration checked yet</strong><span>Estimation accuracy</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Quiz by quiz</h3>
+      <div id="cc-list"></div>
+      <h3 style="margin-top:1.4rem">What to change</h3>
+      <div id="cc-advice"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="cc-save">Save draft on this device</button></div>`,
+    formula: `<p>For each quiz, error is <code>predicted − actual</code>; a positive error means overconfidence. Mean absolute error is the average of the absolute errors, and accuracy is <code>100 − mean absolute error</code>. Bias is the average signed error: above <code>+5</code> is overconfident, below <code>−5</code> is underconfident, and anything between is well calibrated. The Brier-style score averages <code>(error ÷ 100)²</code>, where lower is better. Trend compares the average absolute error of the first half with the second half.</p>`,
+    example: `<p><strong>Example:</strong> Predictions of 85, 80 and 75 against actual scores of 70, 65 and 68 give errors of +15, +15 and +7. Bias is about <code>+12.3</code>, so this student is overconfident, while accuracy is about <code>87.7%</code> and the trend is improving because the last gap is smaller.</p>`,
+    steps: [
+      'Before each quiz, write down the percentage you genuinely expect.',
+      'After the result, add a line with the quiz name, prediction and actual score.',
+      'Select Check calibration to see bias, accuracy and trend.',
+      'Read the quiz-by-quiz list to find where your estimate drifted most.',
+      'Follow the advice and save the draft to keep improving your prediction habit.'
+    ],
+    faq: [
+      ['What is a good accuracy?', 'Higher is better, but the direction matters more. A steady bias near zero means your confidence tracks your real performance, even if accuracy changes.'],
+      ['Why does the Brier score use squares?', 'Squaring penalises large misses more heavily, so one wildly wrong prediction cannot hide behind several close ones.'],
+      ['Do I need many quizzes?', 'Three or more give a useful first read. More results make the trend more reliable.'],
+      ['Are my scores stored anywhere?', 'Only in this page and, if you choose Save draft, in LocalStorage on this device.']
+    ]
   }
 };

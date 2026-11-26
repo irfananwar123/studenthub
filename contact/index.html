@@ -42,7 +42,7 @@
       <li><a href="../about/index.html">About</a></li>
     </ul></nav>
     <div class="header-actions">
-      <span class="header-chip">33 tools · 100% free</span>
+      <span class="header-chip">37 tools · 100% free</span>
       <div class="theme-switch" role="group" aria-label="Colour theme">
       <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false" aria-label="Light theme" title="Light theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M12 1v2"></path><path d="M12 21v2"></path><path d="M4.2 4.2l1.4 1.4"></path><path d="M18.4 18.4l1.4 1.4"></path><path d="M1 12h2"></path><path d="M21 12h2"></path><path d="M4.2 19.8l1.4-1.4"></path><path d="M18.4 5.6l1.4-1.4"></path></svg></button>
       <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"></path></svg></button>
@@ -50,6 +50,15 @@
     </div>
     </div>
   </div></header>
+<div class="usage-bar" id="usage-bar" aria-label="Live study usage on this device"><div class="container usage-inner">
+    <span class="usage-live" title="Calculated from this device only"><i aria-hidden="true"></i> Live usage</span>
+    <span class="usage-metric"><strong data-usage="actions">0</strong><span>interactions today</span></span>
+    <span class="usage-metric"><strong data-usage="minutes">0m</strong><span>studied today</span></span>
+    <span class="usage-metric"><strong data-usage="streak">0d</strong><span>day streak</span></span>
+    <span class="usage-metric"><strong data-usage="tools">0</strong><span>tools this week</span></span>
+    <span class="usage-updated" data-usage="updated">No activity yet</span>
+    <a class="usage-link" href="../workspace/index.html">Details <svg class="sh-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M8 7h8"></path><path d="M8 12h2"></path><path d="M14 12h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg></a>
+  </div></div>
 <div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
 <main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="../index.html">Home</a></li><li aria-current="page">Contact</li></ol></nav>
 <section class="page-hero container"><span class="eyebrow">Get in touch</span><h1>Contact</h1><p>Found a bug or have a suggestion? Write a message below and open it in your own email app. StudentHub does not send or store the message.</p></section>
@@ -81,6 +90,7 @@
 <script src="../assets/js/navigation.js" defer></script>
 <script src="../assets/js/search.js" defer></script>
 <script src="../assets/js/tool-base.js" defer></script>
+<script src="../assets/js/usage.js" defer></script>
 <script src="../assets/js/pwa.js" defer></script>
 <script src="../assets/js/ads.js" defer></script>
 <script src="../assets/js/app.js" defer></script>

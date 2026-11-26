@@ -24,8 +24,9 @@ const PAGES = [
   ...['study-tips', 'active-recall', 'spaced-repetition', 'exam-preparation'].map(s => `articles/${s}/index.html`)
 ];
 
-test('all 33 tool pages and scripts exist', () => {
-  assert.equal(IDS.length, 33);
+test('all 37 tool pages and scripts exist', () => {
+  assert.equal(IDS.length, 37);
+  assert.equal(PAGES.length, 50);
   IDS.forEach(id => {
     assert.ok(exists(`tools/${id}/index.html`), `${id} page exists`);
     assert.ok(exists(`tools/${id}/tool.js`), `${id} script exists`);
@@ -71,6 +72,30 @@ test('light, dark and auto theme controls are shipped on every page', () => {
   });
 });
 
+test('live usage strip is on-device only and ships on every page', () => {
+  const usageJs = read('assets/js/usage.js');
+  ['usageEvents', "SH.storage.prefs.get(KEY", "SH.storage.all('sessions')", "SH.storage.all('tasks')",
+    "streakStats", "record('view')", 'setInterval(update, 30000)'].forEach(needle => {
+    assert.ok(usageJs.includes(needle), `usage.js: ${needle}`);
+  });
+  assert.ok(!/(fetch|XMLHttpRequest|sendBeacon)\s*\(/.test(usageJs), 'usage.js makes no network calls');
+  const storageJs = read('assets/js/storage.js');
+  assert.equal((storageJs.match(/usageEvents/g) || []).length >= 3, true, 'usage log is exported, imported and cleared with other prefs');
+  const baseJs = read('assets/js/tool-base.js');
+  assert.ok(baseJs.includes("record('open'") && baseJs.includes("record('result'"), 'tool use is recorded locally');
+  PAGES.concat(DIR_PAGES).forEach(page => {
+    const html = read(page);
+    assert.ok(html.includes('id="usage-bar"'), `${page}: usage strip`);
+    assert.ok(html.includes('aria-label="Live study usage on this device"'), `${page}: device-only label`);
+    ['actions', 'minutes', 'streak', 'tools', 'updated'].forEach(key => {
+      assert.ok(html.includes(`data-usage="${key}"`), `${page}: ${key} metric`);
+    });
+    assert.ok(html.includes('assets/js/usage.js'), `${page}: usage script`);
+  });
+  const privacy = read('privacy-policy.html');
+  assert.ok(privacy.includes('no global or cross-user counter exists'), 'privacy discloses the local-only counter');
+});
+
 test('tool pages contain instructions, formulas, FAQs, related links and structured data', () => {
   IDS.forEach(id => {
     const html = read(`tools/${id}/index.html`);
@@ -82,7 +107,8 @@ test('tool pages contain instructions, formulas, FAQs, related links and structu
 
 test('advanced hub ships a working filterable dashboard directory', () => {
   const ids = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits',
-    'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix'];
+    'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix',
+    'deliberate-practice-planner', 'feynman-clarity-score', 'interleaving-schedule-builder', 'confidence-calibrator'];
   const root = read('advanced.html');
   const nested = read('advanced/index.html');
   assert.equal((root.match(/<h1[^>]*>/) || [])[0], (nested.match(/<h1[^>]*>/) || [])[0], 'pretty URL copy has the same heading');
@@ -93,10 +119,12 @@ test('advanced hub ships a working filterable dashboard directory', () => {
     assert.ok(read(`tools/${id}/index.html`).includes('data-advanced="true"'), `${id}: premium dashboard layout`);
   });
   ['data-advanced-filter="all"', 'data-advanced-filter="study-planning"', 'data-advanced-filter="academic-calculators"',
+    'data-advanced-filter="learning-tools"', 'Search 12 dashboards',
     'id="advanced-search"', 'id="advanced-grid"', 'id="advanced-status"', 'id="advanced-skeleton"',
     'data-ad-slot="advanced"', 'src="../assets/js/advanced.js"'].forEach(needle => {
     assert.ok(nested.includes(needle), `advanced hub: ${needle}`);
   });
+  assert.equal((nested.match(/class="advanced-card" data-advanced-category=/g) || []).length, 12, 'twelve dashboard cards');
   const js = read('assets/js/advanced.js');
   ['querySelectorAll', 'data-advanced-filter', 'addEventListener(\'click\'', 'addEventListener(\'input\'', 'hidden'].forEach(needle => {
     assert.ok(js.includes(needle), `advanced.js: ${needle}`);
@@ -129,6 +157,7 @@ test('sitemap, fallback sitemap, robots, manifest and icons are complete', () =>
     assert.ok(fallback.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in fallback sitemap`);
   });
   assert.ok(sitemap.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in sitemap');
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 47, 'sitemap has 47 crawlable URLs');
   assert.ok(fallback.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in fallback sitemap');
   assert.equal((fallback.match(/<loc>/g) || []).length, (sitemap.match(/<loc>/g) || []).length, 'fallback sitemap is identical');
   const robots = read('robots.txt');
@@ -150,7 +179,8 @@ test('service worker precaches every tool page and app shell', () => {
     assert.ok(sw.includes(`/tools/${id}/`), `${id} precached`);
     assert.ok(sw.includes(`/tools/${id}/index.html`), `${id}/index.html precached`);
   });
-  ['/offline/', '/advanced/', '/advanced/index.html', '/assets/css/main.css', '/assets/js/core.js', '/assets/js/calculations.js', '/assets/js/advanced.js'].forEach(u => assert.ok(sw.includes(u), `${u} precached`));
+  ['/offline/', '/advanced/', '/advanced/index.html', '/assets/css/main.css', '/assets/js/core.js', '/assets/js/calculations.js',
+    '/assets/js/usage.js', '/assets/js/advanced.js'].forEach(u => assert.ok(sw.includes(u), `${u} precached`));
 });
 
 test('shipped JavaScript has no eval, innerHTML or external service calls', () => {

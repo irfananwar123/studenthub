@@ -436,6 +436,13 @@ html[data-offline="true"] .offline-note { display: block; }
 .bar-row.is-over .bar-fill { background: linear-gradient(90deg, var(--amber-500), var(--red-600)); }
 .bar-capacity { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text); opacity: .55; }
 .bar-row strong { font-size: .78rem; text-align: right; font-variant-numeric: tabular-nums; }
+.interleave-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .8rem; min-width: 0; }
+.interleave-day { padding: 1rem; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); min-width: 0; }
+.interleave-day > strong { display: block; margin-bottom: .7rem; color: var(--text); font-size: .9rem; }
+.interleave-block { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .5rem; padding: .45rem 0; border-top: 1px solid var(--border); min-width: 0; }
+.interleave-block .badge { flex-shrink: 0; }
+.interleave-block span { color: var(--muted); font-size: .78rem; }
+.interleave-block strong { margin-left: auto; font-size: .76rem; font-variant-numeric: tabular-nums; }
 
 /* Premium advanced hub */
 body[data-advanced="true"] .site-header { border-bottom-color: color-mix(in srgb, var(--brand) 34%, var(--border)); }
