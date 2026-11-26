@@ -321,6 +321,151 @@
     return { current: current, longest: longest, totalDays: keys.length, last35: last35, today: today };
   }
 
+  /* Additional advanced dashboards. Still pure: no DOM, storage or network. */
+  function syllabusCoverage(topics) {
+    if (!Array.isArray(topics)) return null;
+    var valid = topics.filter(function (t) { return t && typeof t.subject === 'string' && t.subject.trim(); });
+    if (!valid.length) return null;
+    var weights = { low: 0.4, medium: 0.7, high: 1 };
+    var statuses = { 'not-started': 1, 'in-progress': 1, done: 1 };
+    var groups = {}, done = 0, inProgress = 0, notStarted = 0, confidenceTotal = 0;
+    valid.forEach(function (t) {
+      var subject = t.subject.trim();
+      var status = statuses[t.status] ? t.status : 'not-started';
+      var confidence = weights[t.confidence] ? t.confidence : 'medium';
+      confidenceTotal += weights[confidence];
+      if (status === 'done') done++;
+      else if (status === 'in-progress') inProgress++;
+      else notStarted++;
+      var group = groups[subject] || (groups[subject] = { subject: subject, total: 0, done: 0, inProgress: 0 });
+      group.total++;
+      if (status === 'done') group.done++;
+      if (status === 'in-progress') group.inProgress++;
+    });
+    var bySubject = Object.keys(groups).map(function (key) {
+      var g = groups[key];
+      g.percent = round(g.done / g.total * 100, 1);
+      return g;
+    }).sort(function (a, b) {
+      return a.percent - b.percent || b.total - a.total || a.subject.localeCompare(b.subject);
+    });
+    return {
+      total: valid.length, done: done, inProgress: inProgress, notStarted: notStarted,
+      percent: round(done / valid.length * 100, 1),
+      confidencePercent: round(confidenceTotal / valid.length * 100, 1),
+      bySubject: bySubject, focus: bySubject.slice(0, 3)
+    };
+  }
+
+  function readinessScore(values) {
+    if (!values || typeof values !== 'object') return null;
+    var definitions = [
+      { key: 'marks', label: 'Marks average', weight: 0.35 },
+      { key: 'coverage', label: 'Syllabus coverage', weight: 0.25 },
+      { key: 'revision', label: 'Revision completed', weight: 0.25 },
+      { key: 'consistency', label: 'Study consistency', weight: 0.15 }
+    ];
+    var signals = definitions.map(function (d) {
+      var v = Number(values[d.key]);
+      if (!isNum(v) || v < 0 || v > 100) return null;
+      return { key: d.key, label: d.label, weight: d.weight, value: round(v, 1), contribution: round(v * d.weight, 1) };
+    });
+    if (signals.some(function (s) { return !s; })) return null;
+    var score = round(sum(signals.map(function (s) { return s.value * s.weight; })), 1);
+    var band = score >= 80 ? 'Exam ready' : score >= 65 ? 'On track' : score >= 45 ? 'Needs focus' : 'High risk';
+    var weakest = signals.slice().sort(function (a, b) { return a.value - b.value || a.weight - b.weight; })[0];
+    var advice = {
+      marks: 'Work through the required-marks tool for your weakest subject first.',
+      coverage: 'Finish one more syllabus topic and mark it complete.',
+      revision: 'Open the Spaced Revision Scheduler and clear the next due review.',
+      consistency: 'Log one more focused study day to rebuild your streak.'
+    };
+    return {
+      score: score, band: band, weakest: weakest, signals: signals,
+      actions: score >= 80
+        ? ['Keep the routine going with short, spaced reviews.', 'Use the final week for timed practice and mistake review.']
+        : [advice[weakest.key], 'Recheck this score after your next study session.']
+    };
+  }
+
+  function studyForecast(values) {
+    if (!values || typeof values !== 'object') return null;
+    var total = Number(values.totalUnits), completed = Number(values.completedUnits);
+    var rate = Number(values.unitsPerHour), daily = Number(values.dailyHours), days = Number(values.daysLeft);
+    if (!isNum(total) || total <= 0 || !isNum(completed) || completed < 0 || !isNum(rate) || rate <= 0 ||
+        !isNum(daily) || daily <= 0 || !isNum(days) || days <= 0) return null;
+    completed = Math.min(completed, total);
+    var remaining = Math.max(0, total - completed);
+    var capacity = rate * daily;
+    var projectedUnits = Math.min(total, completed + capacity * days);
+    var finishDays = remaining === 0 ? 0 : Math.ceil(remaining / capacity);
+    var status = completed >= total ? 'complete' : projectedUnits >= total ? 'on-track' : 'behind';
+    var curve = [];
+    var steps = Math.min(Math.ceil(days), 10);
+    for (var i = 0; i <= steps; i++) {
+      var fraction = i / steps;
+      var day = round(days * fraction, 1);
+      curve.push({
+        day: day,
+        ideal: round(Math.min(100, (completed + remaining * fraction) / total * 100), 1),
+        projected: round(Math.min(100, (completed + capacity * day) / total * 100), 1)
+      });
+    }
+    return {
+      total: total, completed: round(completed, 2), remaining: round(remaining, 2),
+      projectedUnits: round(projectedUnits, 2),
+      projectedPercent: round(projectedUnits / total * 100, 1),
+      requiredPerDay: remaining === 0 ? 0 : round(remaining / days, 2),
+      requiredHoursPerDay: remaining === 0 ? 0 : round(remaining / days / rate, 1),
+      capacityPerDay: round(capacity, 2),
+      finishDays: finishDays,
+      bufferDays: status === 'on-track' ? Math.max(0, Math.ceil(days) - finishDays) : null,
+      status: status, curve: curve
+    };
+  }
+
+  function priorityMatrix(tasks, dailyHours, todayKey) {
+    if (!Array.isArray(tasks)) return null;
+    var today = todayKey && parseDate(todayKey) ? todayKey : isoDay(new Date());
+    var capacity = isNum(Number(dailyHours)) && Number(dailyHours) > 0 ? Number(dailyHours) : null;
+    var importance = { high: 3, medium: 2, low: 1 };
+    var rows = [];
+    tasks.forEach(function (t) {
+      if (!t || !String(t.title || '').trim()) return;
+      var due = String(t.due || '').slice(0, 10);
+      var left = daysBetween(today, due);
+      if (left === null) return;
+      var level = importance[t.priority] || 2;
+      var hours = isNum(Number(t.hours)) && Number(t.hours) > 0 ? Number(t.hours) : 1;
+      var urgency = left <= 0 ? 4 : left <= 2 ? 3 : left <= 7 ? 2 : 1;
+      var effort = hours <= 1 ? 2 : hours <= 3 ? 1 : 0;
+      rows.push({
+        title: String(t.title).trim(), subject: String(t.subject || '').trim(), due: due,
+        priority: importance[t.priority] ? t.priority : 'medium', hours: hours,
+        daysLeft: left, bucket: left <= 0 ? 'now' : left <= 7 ? 'week' : 'later',
+        urgency: urgency, importance: level, score: urgency * level + effort
+      });
+    });
+    if (!rows.length) return null;
+    rows.sort(function (a, b) {
+      return b.score - a.score || a.daysLeft - b.daysLeft || a.title.localeCompare(b.title);
+    });
+    var byDay = [], anchor = parseDate(today);
+    for (var i = 0; i < 7; i++) {
+      var key = isoDay(new Date(anchor.getTime() + i * 86400000));
+      var hours = rows.filter(function (r) { return r.due === key; })
+        .reduce(function (a, r) { return a + r.hours; }, 0);
+      byDay.push({ date: key, hours: round(hours, 1), overload: capacity !== null && hours > capacity });
+    }
+    var counts = { now: 0, week: 0, later: 0 };
+    rows.forEach(function (r) { counts[r.bucket]++; });
+    return {
+      rows: rows, byDay: byDay, counts: counts, capacity: capacity,
+      overloadedDays: byDay.filter(function (d) { return d.overload; }).length,
+      totalHours: round(sum(rows.map(function (r) { return r.hours; })), 1)
+    };
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -330,7 +475,9 @@
     parseDate: parseDate, daysBetween: daysBetween, age: age, isLeap: isLeap,
     convertUnit: convertUnit, UNIT_GROUPS: UNIT_GROUPS, formatCitation: formatCitation,
     isoDay: isoDay, hoursSummary: hoursSummary, revisionPlan: revisionPlan,
-    gradeGoalPlan: gradeGoalPlan, streakStats: streakStats
+    gradeGoalPlan: gradeGoalPlan, streakStats: streakStats,
+    syllabusCoverage: syllabusCoverage, readinessScore: readinessScore,
+    studyForecast: studyForecast, priorityMatrix: priorityMatrix
   };
   return api;
 });

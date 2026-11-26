@@ -41,6 +41,7 @@
           document.getElementById('ap-due').value = task.due || '';
           document.getElementById('ap-priority').value = task.priority;
           document.getElementById('ap-subject').value = task.subject || '';
+          document.getElementById('ap-hours').value = task.hours || 2;
           document.getElementById('ap-add').textContent = 'Update assignment';
         });
         var toggle = SH.el('button', { type: 'button', class: 'btn btn-secondary btn-small', text: task.done ? 'Reopen' : 'Complete' });
@@ -52,14 +53,16 @@
         list.appendChild(row);
       });
     }
-    function load() { return SH.storage.all('tasks').then(function (rows) { tasks = rows.filter(function (row) { return !row || row.type !== 'habit'; }); render(); }); }
+    function load() { return SH.storage.all('tasks').then(function (rows) { tasks = rows.filter(function (row) { return row && row.type !== 'habit' && row.type !== 'syllabus'; }); render(); }); }
     document.getElementById('ap-add').addEventListener('click', function () {
       var title = document.getElementById('ap-title').value.trim();
       if (!title) return T.error('result', 'Enter an assignment title.');
+      var hours = Number(document.getElementById('ap-hours').value);
       var payload = {
-        title: title, due: document.getElementById('ap-due').value,
+        type: 'assignment', title: title, due: document.getElementById('ap-due').value,
         priority: document.getElementById('ap-priority').value,
         subject: document.getElementById('ap-subject').value.trim(),
+        hours: isFinite(hours) && hours > 0 ? hours : 1,
         done: editing ? editing.done : false,
         updatedAt: new Date().toISOString()
       };

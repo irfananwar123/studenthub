@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 29 working tools with dashboard-style analytics, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 33 working tools with dashboard-style analytics, a dedicated Advanced hub, a private local workspace, search, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -11,9 +11,10 @@ A complete, free, browser-based student productivity platform: 29 working tools 
 ```
 studenthub/
 ├── index.html                  Homepage
+├── advanced.html               Advanced dashboard hub (/advanced/)
 ├── about.html, contact.html, privacy-policy.html, terms.html
 ├── offline.html, 404.html, workspace.html
-├── about/, contact/, privacy-policy/, terms/, offline/, 404/, workspace/
+├── about/, contact/, privacy-policy/, terms/, offline/, 404/, workspace/, advanced/
 │   └── index.html              Pretty-URL copies (so /about/ works on any static host)
 ├── robots.txt, sitemap.xml, manifest.webmanifest, sw.js, _headers
 ├── assets/
@@ -21,9 +22,9 @@ studenthub/
 │   ├── js/                     core.js, calculations.js, storage.js, theme.js,
 │   │                           navigation.js, search.js, tool-base.js, pwa.js,
 │   │                           ads.js, app.js, home.js, contact.js,
-│   │                           workspace.js, config.js
+│   │                           workspace.js, config.js, advanced.js
 │   └── icons/                  favicon.svg, icon-192.png, icon-512.png
-├── tools/<29 tools>/           index.html + tool.js for each tool
+├── tools/<33 tools>/           index.html + tool.js for each tool
 ├── articles/<4 guides>/        index.html
 ├── scripts/
 │   ├── generate.js             Regenerates all HTML, sitemap, robots and service worker
@@ -76,12 +77,12 @@ You can also open `index.html` directly (double-click it) and browse the whole s
    | Placement | Where it appears | Where to change it |
    | --- | --- | --- |
    | 468×60 display banner | Homepage slot | `ADS.bannerKey` / `ADS.banner` + `bannerAd()` |
-   | Native banner | Homepage, tool, article and static-page slots | `ADS.native` / `ADS.nativeContainer` + `nativeAd()` |
+   | Native banner | Homepage, Advanced hub, tool, article and static-page slots | `ADS.native` / `ADS.nativeContainer` + `nativeAd()` |
    | Social bar | Head of every generated page | `ADS.social` + `headAds()` |
    | Pop-under | Head of every generated page, all devices | `ADS.popunder` + `headAds()` |
    | Sponsored SmartLink | Footer of every generated page | `ADS.smartlink` + `sponsoredLink()` |
 
-   Advertising is always on: every generated page — including Workspace, Privacy, Contact, offline and error pages — gets the static head tags, a native slot and a sponsored footer link. There are no ad-free pages and no URL switch that hides them. Setting `ADS.enabled = false` in `scripts/generate.js` and regenerating is a build-time master switch for removing every placement. `assets/js/ads.js` keeps the same URLs for reference and shows a clearly labelled first-party sponsored banner if a network returns no creative after four seconds. It also detects blocked ad scripts (via a parse-time error listener and a hidden bait element) and immediately shows those self-hosted banners plus a polite, dismissible notice asking the visitor to allow ads. The banners are plain SVG images in `assets/ads/` linking to the sponsor; they set no cookies and receive no study data. If a network replaces a tag, edit `ADS` in `scripts/generate.js`, regenerate and redeploy — editing `ads.js` alone will not change the live tags. Ad slots are richer, theme-aware dashboard cards; the networks and placement types are unchanged.
+   Advertising is always on: every generated page — including the Advanced hub, Workspace, Privacy, Contact, offline and error pages — gets the static head tags, a native slot and a sponsored footer link. There are no ad-free pages and no URL switch that hides them. Setting `ADS.enabled = false` in `scripts/generate.js` and regenerating is a build-time master switch for removing every placement. `assets/js/ads.js` keeps the same URLs for reference and shows a clearly labelled first-party sponsored banner if a network returns no creative after four seconds. It also detects blocked ad scripts (via a parse-time error listener and a hidden bait element) and immediately shows those self-hosted banners plus a polite, dismissible notice asking the visitor to allow ads. The banners are plain SVG images in `assets/ads/` linking to the sponsor; they set no cookies and receive no study data. If a network replaces a tag, edit `ADS` in `scripts/generate.js`, regenerate and redeploy — editing `ads.js` alone will not change the live tags. Ad slots are richer, theme-aware dashboard cards; the networks and placement types are unchanged.
 
    Ad networks usually only serve creatives to approved publisher accounts and allowlisted domains. Test locally or from an unapproved domain and the scripts may return HTTP 200 while displaying nothing; the fallback link still gives visitors a working sponsored destination.
 
@@ -90,11 +91,11 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 23 calculation + structure checks
-node tests/browser-smoke.js # 58 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 28 calculation + structure checks
+node tests/browser-smoke.js # 64 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished.
+The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 46 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (736/736 clean).
 
 See `TEST_REPORT.md` for the latest results and known limits.
 
@@ -144,14 +145,15 @@ Create the empty repository on GitHub first if you use the command line. Do not 
 
 ### Notes on nested routes
 
-Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index.html` and directory copies such as `/about/index.html`. The root `404.html` is the friendly error page.
+Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index.html`, `/advanced/index.html` and directory copies such as `/about/index.html`. The root `404.html` is the friendly error page.
 
 ---
 
 ## 7. Features delivered
 
-- **29 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner and focus streak & habits.
-- **Advanced study analytics**: live study timer with saved sessions, weekly goal ring, 7-day bars, subject breakdown and 35-day heatmap; automatic spaced-review plans with completion tracking; required-marks planning for every remaining assessment; daily habit streaks with a consistency heatmap. All charts and totals are calculated locally and stored only in the browser.
+- **33 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner, focus streak & habits, syllabus coverage tracker, exam readiness score, study pace forecaster and assignment priority matrix.
+- **Advanced hub**: a premium, filterable `/advanced/` dashboard with live loading skeletons, category/search filters, eight linked tool cards, a connected workflow and crawlable nested URLs. The hub, its filters and all advanced tools are precached for offline use.
+- **Advanced study analytics**: live study timer with saved sessions, weekly goal ring, 7-day bars, subject breakdown and 35-day heatmap; automatic spaced-review plans with completion tracking; required-marks planning for every remaining assessment; daily habit streaks with a consistency heatmap; syllabus coverage by subject and confidence; weighted exam readiness scoring; pace forecasting with ideal vs current curves; and assignment urgency/workload ranking. All charts and totals are calculated locally and stored only in the browser.
 - **Personal workspace**: favourites, recent tools, progress, all local collections, JSON export/import and clear-all.
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
 - **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for small preferences; IndexedDB for collections.

@@ -128,6 +128,7 @@ module.exports = {
         <div class="field"><label for="ap-due">Due date</label><input id="ap-due" type="date"></div>
         <div class="field"><label for="ap-priority">Priority</label><select id="ap-priority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
         <div class="field"><label for="ap-subject">Subject (optional)</label><input id="ap-subject" type="text" placeholder="e.g. History"></div>
+        ${f('ap-hours', 'Estimated hours (optional)', 'number', 'value="2" min="0.25" step="0.25"')}
       </div>
       <div class="form-actions"><button class="btn btn-primary" type="button" id="ap-add">${require('./helpers').icon('plus', 16)} Add assignment</button></div>
       <div class="btn-row" style="margin-top:1.2rem">

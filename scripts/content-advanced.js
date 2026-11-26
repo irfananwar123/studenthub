@@ -164,5 +164,171 @@ module.exports = {
       ['Can I backfill earlier dates?', 'Yes. Choose any past date before logging the completion.'],
       ['Where is this history stored?', 'In this browser’s IndexedDB together with your other local task collections. It is never uploaded.']
     ]
+  },
+
+  'syllabus-coverage-tracker': {
+    h1: 'Syllabus Coverage Tracker',
+    seoTitle: 'Syllabus Coverage Tracker — Topic Progress by Subject',
+    desc: 'Track every syllabus topic by subject, status and confidence, then see coverage percentages and the areas that need attention next.',
+    intro: 'A syllabus is easier to manage when every topic has a clear status. Add topics once, mark them as not started, in progress or done, and this dashboard shows overall coverage, the weakest subjects and what deserves your next session.',
+    icon: 'target',
+    form: `
+      <div class="form-grid">
+        ${f('sc-subject', 'Subject', 'text', 'placeholder="e.g. Biology"')}
+        ${f('sc-topic', 'Topic', 'text', 'placeholder="e.g. Cell division"')}
+        <div class="field"><label for="sc-status">Status</label><select id="sc-status"><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="done">Done</option></select></div>
+        <div class="field"><label for="sc-confidence">Confidence</label><select id="sc-confidence"><option value="low">Low — needs review</option><option value="medium" selected>Medium — nearly there</option><option value="high">High — secure</option></select></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn btn-primary" id="sc-add">${icon('plus', 16)} Save topic</button></div>
+      <div class="dashboard-grid" id="sc-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="sc-ring"><span id="sc-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="sc-goal-copy">No topics tracked yet</strong><span>Syllabus completed</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Subject breakdown</h3>
+      <div id="sc-subjects"></div>
+      <h3 style="margin-top:1.4rem">Focus next</h3>
+      <div id="sc-focus"></div>
+      <h3 style="margin-top:1.4rem">Tracked topics</h3>
+      <div id="sc-list"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="sc-export">Export CSV</button><button type="button" class="btn btn-danger btn-small" id="sc-clear">Clear topics</button></div>`,
+    formula: `<p>Coverage is <code>done topics ÷ all topics × 100</code>. Each subject gets its own coverage percentage using the same calculation. Confidence is weighted as low <code>0.4</code>, medium <code>0.7</code> and high <code>1</code>, then averaged across all topics. The focus list sorts subjects by lowest coverage first, with larger subjects ahead of smaller ones when coverage is equal.</p>`,
+    example: `<p><strong>Example:</strong> Four Biology topics and three Chemistry topics, with three Biology and one Chemistry topic done, give <code>4 ÷ 7 = 57.1%</code> overall coverage. Biology is 75% complete and Chemistry is 33.3%, so Chemistry appears first in Focus next.</p>`,
+    steps: [
+      'Enter a subject and one topic from your syllabus.',
+      'Choose the current status and how confident you feel, then save the topic.',
+      'Repeat for the rest of the syllabus. Saving the same subject and topic updates that row.',
+      'Read the ring, subject bars and Focus next list to plan the next study session.',
+      'Export the topic list as CSV or clear all tracked topics.'
+    ],
+    faq: [
+      ['Can I update a topic?', 'Yes. Save the same subject and topic again with a new status or confidence and the existing row is updated.'],
+      ['Does confidence change coverage?', 'No. Coverage only counts done topics. Confidence is a separate quality signal shown beside the percentage.'],
+      ['Are these topics shared with the assignment planner?', 'No. Syllabus rows are typed separately, so your assignments stay in their own list.'],
+      ['Where are the topics stored?', 'In this browser’s IndexedDB. Nothing is uploaded, and the export button creates a plain CSV on your device.']
+    ]
+  },
+
+  'exam-readiness-score': {
+    h1: 'Exam Readiness Score',
+    seoTitle: 'Exam Readiness Score — Weighted Study Signals in One Dashboard',
+    desc: 'Combine marks, syllabus coverage, revision and consistency into one weighted readiness score, with the weakest signal and next actions.',
+    intro: 'One percentage rarely tells the whole story. This dashboard combines four signals you can control — marks, syllabus coverage, revision and consistency — into a single readiness score, then points to the weakest area so you know what to fix next.',
+    icon: 'spark',
+    form: `
+      <div class="form-grid">
+        ${f('er-exam', 'Exam or course (optional)', 'text', 'placeholder="e.g. Biology final"')}
+        ${f('er-marks', 'Marks average %', 'number', 'min="0" max="100" step="0.5" placeholder="e.g. 78"')}
+        ${f('er-coverage', 'Syllabus coverage %', 'number', 'min="0" max="100" step="0.5" placeholder="e.g. 60"')}
+        ${f('er-revision', 'Revision completed %', 'number', 'min="0" max="100" step="0.5" placeholder="e.g. 80"')}
+        ${f('er-consistency', 'Study consistency %', 'number', 'min="0" max="100" step="0.5" placeholder="e.g. 50"')}
+      </div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Calculate readiness</button><button type="button" class="btn btn-secondary" id="er-load">Use my saved study data</button></div>
+      <div class="dashboard-grid" id="er-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="er-ring"><span id="er-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="er-goal-copy">No score calculated yet</strong><span>Weighted readiness</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Signal breakdown</h3>
+      <div id="er-signals"></div>
+      <h3 style="margin-top:1.4rem">Next actions</h3>
+      <div id="er-actions"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="er-save">Save draft on this device</button></div>`,
+    formula: `<p>The score is a weighted average: marks <code>35%</code>, syllabus coverage <code>25%</code>, revision completed <code>25%</code> and study consistency <code>15%</code>. Each signal must be between 0 and 100. Bands are <code>80+</code> exam ready, <code>65–79.9</code> on track, <code>45–64.9</code> needs focus and below <code>45</code> high risk. The lowest signal decides the first suggested action.</p>`,
+    example: `<p><strong>Example:</strong> Marks 90, coverage 60, revision 80 and consistency 50 give <code>90×0.35 + 60×0.25 + 80×0.25 + 50×0.15 = 74%</code>. That is on track, but consistency is the weakest signal, so the first action is to log another focused study day.</p>`,
+    steps: [
+      'Enter your four percentages. Leave the exam name blank if you only want a general score.',
+      'Select Calculate readiness to see the weighted score and band.',
+      'Use Use my saved study data to fill coverage, revision and consistency from other StudentHub tools.',
+      'Read the signal bars and next actions, then save the draft if you want to return to it later.'
+    ],
+    faq: [
+      ['Is this an official prediction?', 'No. It is a planning signal based only on the numbers you enter or save locally. It does not guarantee a result.'],
+      ['Why are marks weighted most heavily?', 'Marks reflect assessed performance. The other signals show whether your current habits support improvement.'],
+      ['What does Use my saved study data fill in?', 'Coverage comes from the Syllabus Coverage Tracker, revision from the Spaced Revision Scheduler and consistency from logged habits and study sessions. Marks stay manual.'],
+      ['Is my draft uploaded?', 'No. The last draft is stored only in LocalStorage on this device.']
+    ]
+  },
+
+  'study-pace-forecaster': {
+    h1: 'Study Pace Forecaster',
+    seoTitle: 'Study Pace Forecaster — Required Daily Hours and Completion Forecast',
+    desc: 'Forecast when your current study pace finishes a syllabus and calculate the daily hours needed to hit your deadline.',
+    intro: 'A deadline feels much clearer when you can see the pace it requires. Enter the work left, your realistic units per hour, daily study time and days remaining. The forecaster compares your current pace with the pace you need and shows the gap honestly.',
+    icon: 'clock',
+    form: `
+      <div class="form-grid">
+        ${f('sp-total', 'Total units', 'number', 'value="100" min="1" step="1" placeholder="e.g. 100 topics"')}
+        ${f('sp-completed', 'Units completed', 'number', 'value="40" min="0" step="1"')}
+        ${f('sp-rate', 'Units per hour', 'number', 'value="2" min="0.1" step="0.1"')}
+        ${f('sp-daily', 'Hours available each day', 'number', 'value="2" min="0.1" step="0.25"')}
+        ${f('sp-days', 'Days left', 'number', 'value="10" min="1" step="1"')}
+      </div>
+      <div class="form-actions"><button type="submit" class="btn btn-primary">Forecast my pace</button><button type="button" class="btn btn-secondary" id="sp-demo">Fill example</button></div>
+      <div class="dashboard-grid" id="sp-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="sp-ring"><span id="sp-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="sp-goal-copy">No forecast yet</strong><span>Projected completion</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Ideal vs current pace</h3>
+      <div class="forecast-chart" id="sp-chart"></div>
+      <div class="legend"><span>Today</span><i class="legend-key ideal"></i> Ideal pace <i class="legend-key projected"></i> Current pace</div>
+      <div id="sp-plan" style="margin-top:1rem"></div>`,
+    formula: `<p>Daily capacity is <code>units per hour × hours available each day</code>. Projected units are <code>completed + capacity × days left</code>, capped at the total. Required units per day are <code>remaining units ÷ days left</code>, and required hours are <code>required units per day ÷ units per hour</code>. If projected units reach the total, the tool also shows the spare days in your schedule.</p>`,
+    example: `<p><strong>Example:</strong> 100 total units with 40 done, 2 units per hour, 2 hours a day and 10 days left gives a capacity of 4 units a day. You would finish at 80 units, so you are behind. You need <code>60 ÷ 10 = 6</code> units a day, or <code>6 ÷ 2 = 3</code> hours a day.</p>`,
+    steps: [
+      'Decide what one unit means: a topic, a chapter, a past paper or a page group.',
+      'Enter the total units, completed units, your realistic rate, daily hours and days left.',
+      'Select Forecast my pace.',
+      'Compare the projected percentage with the required hours per day and adjust your plan.',
+      'Use Fill example to see a complete worked forecast before entering your own numbers.'
+    ],
+    faq: [
+      ['What is a unit?', 'Any consistent piece of work you can count. Use topics for revision or pages for essays, but keep the same meaning in every field.'],
+      ['Does the forecast include breaks?', 'No. Enter the hours you can genuinely study after breaks, not the hours you are merely awake.'],
+      ['What does a negative buffer mean?', 'It does not appear in that case; the result says behind and shows the extra hours each day you would need.'],
+      ['Is anything saved?', 'No. The forecast is calculated in this page and is not stored or uploaded.']
+    ]
+  },
+
+  'assignment-priority-matrix': {
+    h1: 'Assignment Priority Matrix',
+    seoTitle: 'Assignment Priority Matrix — Urgency, Workload and Overload Alerts',
+    desc: 'Rank saved assignments by deadline, priority and effort, then spot overloaded days in the next seven days before they happen.',
+    intro: 'Not all urgent work is important, and not all important work is urgent. This matrix reads the assignments you already saved in StudentHub, scores each one and shows the next seven days of workload so you can move work before a deadline becomes a crisis.',
+    icon: 'folder',
+    form: `
+      <div class="form-grid">
+        ${f('pm-title', 'Assignment', 'text', 'placeholder="e.g. Lab report"')}
+        <div class="field"><label for="pm-due">Due date</label><input id="pm-due" type="date"></div>
+        <div class="field"><label for="pm-priority">Priority</label><select id="pm-priority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
+        ${f('pm-hours', 'Estimated hours', 'number', 'value="2" min="0.25" step="0.25"')}
+        ${f('pm-subject', 'Subject (optional)', 'text', 'placeholder="e.g. Chemistry"')}
+        ${f('pm-capacity', 'Hours available per day', 'number', 'value="4" min="0.25" step="0.25"')}
+      </div>
+      <div class="form-actions"><button type="button" class="btn btn-primary" id="pm-add">${icon('plus', 16)} Add assignment</button><button type="button" class="btn btn-secondary" id="pm-refresh">Refresh matrix</button></div>
+      <div class="dashboard-grid" id="pm-stats"></div>
+      <div id="pm-alert"></div>
+      <h3 style="margin-top:1.4rem">Ranked actions</h3>
+      <div id="pm-list"></div>
+      <h3 style="margin-top:1.4rem">Next 7 days</h3>
+      <div class="bar-chart" id="pm-chart"></div>
+      <div class="btn-row no-print" style="margin-top:1rem"><button type="button" class="btn btn-secondary btn-small" id="pm-export">Export CSV</button></div>
+      <p class="field-hint">This tool reads the same saved assignments as the Assignment Planner. Completed assignments are left out of the matrix.</p>`,
+    formula: `<p>Urgency is 4 for work due today or overdue, 3 within two days, 2 within seven days and 1 later. Importance is high <code>3</code>, medium <code>2</code> and low <code>1</code>. A small effort bonus adds 2 for one hour or less, 1 for up to three hours and 0 for longer tasks. Priority score is <code>urgency × importance + effort bonus</code>. Any day whose estimated hours exceed your available hours is marked as overloaded.</p>`,
+    example: `<p><strong>Example:</strong> A high-priority essay due today with three hours of work scores <code>4 × 3 + 1 = 13</code>. A medium quiz due in two days with one hour of work scores <code>3 × 2 + 2 = 8</code>, so the essay should be started first.</p>`,
+    steps: [
+      'Add an assignment with its due date, priority, estimated hours and optional subject.',
+      'Set the hours you realistically have available each day.',
+      'Select Refresh matrix at any time to reload assignments saved in this browser.',
+      'Work down the ranked actions and inspect the seven-day bars for overloaded days.',
+      'Export the ranked list as a CSV for your own planning.'
+    ],
+    faq: [
+      ['Why does a small task outrank a bigger one?', 'Short tasks receive a small effort bonus because finishing them quickly can clear your list and reduce the number of open deadlines.'],
+      ['Does this replace the Assignment Planner?', 'No. It reads the same local assignments and adds ranking plus workload warnings. Use the Assignment Planner to edit or complete them.'],
+      ['What happens to completed assignments?', 'They are hidden from the matrix because they no longer need scheduling.'],
+      ['Where is this data stored?', 'In this browser’s IndexedDB with your other assignments. The CSV export is created locally.']
+    ]
   }
 };

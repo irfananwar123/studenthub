@@ -41,6 +41,19 @@
   function error(target, message) {
     result(target, 'Check your input', [{ label: 'What to fix', value: message }], null, 'error');
   }
+  function loading(target, lines) {
+    var box = typeof target === 'string' ? document.getElementById(target) : target;
+    if (!box) return;
+    box.textContent = '';
+    box.setAttribute('aria-busy', 'true');
+    for (var i = 0; i < (lines || 3); i++) {
+      box.appendChild(SH.el('div', { class: 'skeleton-line', 'aria-hidden': 'true' }));
+    }
+  }
+  function ready(target) {
+    var box = typeof target === 'string' ? document.getElementById(target) : target;
+    if (box) box.removeAttribute('aria-busy');
+  }
   function copyText(text, button) {
     if (!text) return;
     function done(ok) {
@@ -76,6 +89,7 @@
   }
   SH.tool = {
     value: value, number: number, fmt: fmt, result: result, error: error,
+    loading: loading, ready: ready,
     copyText: copyText, bindCopy: bindCopy, bindFavorites: bindFavorites, init: init
   };
 })(window);

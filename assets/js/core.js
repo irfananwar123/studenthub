@@ -33,7 +33,11 @@
     { id: 'study-hours-tracker', name: 'Study Hours Tracker', category: 'Study Planning', desc: 'Run a real study timer, save sessions and analyse hours by day and subject.', tags: 'study hours timer live stopwatch sessions goal chart heatmap analytics' },
     { id: 'spaced-revision-scheduler', name: 'Spaced Revision Scheduler', category: 'Study Planning', desc: 'Generate spaced review dates before an exam and track completed revisions.', tags: 'spaced repetition revision schedule review dates exam plan intervals' },
     { id: 'grade-goal-planner', name: 'Grade Goal Planner', category: 'Academic Calculators', desc: 'Work out the marks you need on every remaining assessment to hit a target.', tags: 'target grade required marks remaining assessments weighted goal planner' },
-    { id: 'focus-streak-habits', name: 'Focus Streak & Habits', category: 'Study Planning', desc: 'Build daily study habits with streaks, a consistency heatmap and history.', tags: 'streak habit daily tracker consistency heatmap focus routine' }
+    { id: 'focus-streak-habits', name: 'Focus Streak & Habits', category: 'Study Planning', desc: 'Build daily study habits with streaks, a consistency heatmap and history.', tags: 'streak habit daily tracker consistency heatmap focus routine' },
+    { id: 'syllabus-coverage-tracker', name: 'Syllabus Coverage Tracker', category: 'Study Planning', desc: 'Track syllabus topics by subject, status and confidence, then find what needs attention next.', tags: 'syllabus coverage topics subject progress confidence tracker plan' },
+    { id: 'exam-readiness-score', name: 'Exam Readiness Score', category: 'Academic Calculators', desc: 'Combine marks, syllabus coverage, revision and consistency into one honest readiness score.', tags: 'exam readiness score weighted marks revision consistency dashboard' },
+    { id: 'study-pace-forecaster', name: 'Study Pace Forecaster', category: 'Study Planning', desc: 'Forecast completion from your real pace and see the daily hours needed to finish on time.', tags: 'pace forecast workload completion deadline daily hours projection' },
+    { id: 'assignment-priority-matrix', name: 'Assignment Priority Matrix', category: 'Study Planning', desc: 'Rank assignments by deadline and priority, then spot overloaded days before they happen.', tags: 'assignment priority matrix deadline urgency workload overload planner' }
   ];
 
   var ICONS = {
@@ -63,7 +67,9 @@
     plus: 'M12 5v14 M5 12h14',
     checkcircle: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M8 12l3 3 5-6',
     info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M12 11v6 M12 7h.01',
-    shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z'
+    shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z',
+    target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+    spark: 'M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8Z M19 17l.7 2.3L22 20l-2.3.7L19 23l-.7-2.3L16 20l2.3-.7Z'
   };
 
   var SVG_NS = 'http://www.w3.org/2000/svg';

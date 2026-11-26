@@ -183,3 +183,66 @@ test('streak statistics: current run, longest run and 35-day heatmap', () => {
   assert.equal(s.last35[34].count, 1);
   assert.equal(C.streakStats(['2026-11-20'], '2026-11-25').current, 0);
 });
+
+test('syllabus coverage: subject progress, confidence and weakest topics', () => {
+  const s = C.syllabusCoverage([
+    { subject: 'Maths', status: 'done', confidence: 'high' },
+    { subject: 'Maths', status: 'in-progress', confidence: 'medium' },
+    { subject: 'Physics', status: 'done', confidence: 'low' },
+    { subject: 'Chemistry', status: 'not-started', confidence: 'low' }
+  ]);
+  assert.equal(s.total, 4);
+  assert.equal(s.done, 2);
+  assert.equal(s.inProgress, 1);
+  assert.equal(s.percent, 50);
+  near(s.confidencePercent, 62.5);
+  assert.deepEqual(s.bySubject.map(g => g.subject), ['Chemistry', 'Maths', 'Physics']);
+  assert.equal(s.focus[0].subject, 'Chemistry');
+  assert.equal(C.syllabusCoverage([]), null);
+});
+
+test('readiness score: weighted signals, weakest area and validation', () => {
+  const r = C.readinessScore({ marks: 90, coverage: 60, revision: 80, consistency: 50 });
+  near(r.score, 74);
+  assert.equal(r.band, 'On track');
+  assert.equal(r.weakest.key, 'consistency');
+  assert.equal(r.signals.length, 4);
+  assert.ok(r.actions.join(' ').includes('study day'));
+  assert.equal(C.readinessScore({ marks: 100, coverage: 100, revision: 100, consistency: 100 }).band, 'Exam ready');
+  assert.equal(C.readinessScore({ marks: 101, coverage: 60, revision: 80, consistency: 50 }), null);
+});
+
+test('study pace forecast: projected finish, required hours and curve', () => {
+  const behind = C.studyForecast({ totalUnits: 100, completedUnits: 40, unitsPerHour: 2, dailyHours: 2, daysLeft: 10 });
+  assert.equal(behind.status, 'behind');
+  assert.equal(behind.projectedUnits, 80);
+  assert.equal(behind.projectedPercent, 80);
+  assert.equal(behind.requiredPerDay, 6);
+  assert.equal(behind.requiredHoursPerDay, 3);
+  assert.equal(behind.finishDays, 15);
+  assert.equal(behind.bufferDays, null);
+  assert.equal(behind.curve.length, 11);
+  const ahead = C.studyForecast({ totalUnits: 100, completedUnits: 40, unitsPerHour: 2, dailyHours: 2, daysLeft: 20 });
+  assert.equal(ahead.status, 'on-track');
+  assert.equal(ahead.bufferDays, 5);
+  assert.equal(C.studyForecast({ totalUnits: 100, completedUnits: 100, unitsPerHour: 2, dailyHours: 2, daysLeft: 5 }).status, 'complete');
+  assert.equal(C.studyForecast({ totalUnits: 0, completedUnits: 0, unitsPerHour: 2, dailyHours: 2, daysLeft: 5 }), null);
+});
+
+test('assignment priority matrix: urgency ranking and overloaded days', () => {
+  const tasks = [
+    { title: 'Essay', due: '2026-11-26', priority: 'high', hours: 3 },
+    { title: 'Quiz', due: '2026-11-28', priority: 'medium', hours: 1 },
+    { title: 'Reading', due: '2026-12-10', priority: 'low', hours: 2 },
+    { title: 'Broken', due: '2026-02-30', priority: 'high', hours: 1 }
+  ];
+  const m = C.priorityMatrix(tasks, 5, '2026-11-26');
+  assert.deepEqual(m.rows.map(r => r.title), ['Essay', 'Quiz', 'Reading']);
+  assert.equal(m.rows[0].score, 13);
+  assert.deepEqual(m.counts, { now: 1, week: 1, later: 1 });
+  assert.equal(m.byDay[0].hours, 3);
+  assert.equal(m.overloadedDays, 0);
+  assert.equal(m.totalHours, 6);
+  assert.equal(C.priorityMatrix(tasks, 2, '2026-11-26').overloadedDays, 1);
+  assert.equal(C.priorityMatrix([{ title: 'No date' }], 5, '2026-11-26'), null);
+});

@@ -51,6 +51,12 @@ const core = fs.readFileSync(path.join(ROOT, 'assets/js/core.js'), 'utf8');
 const listText = core.match(/var TOOLS = (\[[\s\S]*?\n  \]);/);
 if (!listText) throw new Error('Tool registry not found in core.js');
 const TOOLS = new Function('return ' + listText[1])(); // trusted build-time source only
+/* The Advanced hub is a curated, dashboard-first collection. These eight tools
+   share the premium single-panel layout and cross-link through the hub filters. */
+const ADVANCED_IDS = [
+  'study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits',
+  'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix'
+];
 
 const content = Object.assign({},
   require('./content-academic'), require('./content-planning'),
@@ -136,6 +142,7 @@ function header() {
     <nav id="primary-navigation" aria-label="Primary navigation"><ul class="nav-list">
       <li><a href="/">Home</a></li>
       <li><a href="/#all-tools">All tools</a></li>
+      <li><a href="/advanced/">Advanced</a></li>
       <li><a href="/#categories">Categories</a></li>
       <li><a href="/workspace/">My workspace</a></li>
       <li><a href="/#articles">Articles</a></li>
@@ -178,6 +185,17 @@ function toolCard(t) {
   const c = content[t.id];
   return `<article class="tool-card"><div class="card-icon">${icon(c && c.icon ? c.icon : 'calculator', 20)}</div><h3><a href="/tools/${t.id}/">${t.name}</a></h3><p>${t.desc}</p><span class="card-link">Open tool →</span></article>`;
 }
+function advancedCard(id, index) {
+  const t = TOOLS.find(x => x.id === id);
+  const c = content[id];
+  return `<article class="advanced-card" data-advanced-category="${t.category}" data-tool-id="${id}">
+    <div class="advanced-card-top"><span class="advanced-card-icon">${icon(c && c.icon ? c.icon : 'spark', 22)}</span><span class="advanced-index">${String(index + 1).padStart(2, '0')}</span></div>
+    <span class="advanced-kicker">${t.category}</span>
+    <h3><a href="/tools/${id}/">${t.name}</a></h3>
+    <p>${t.desc}</p>
+    <a class="advanced-card-link" href="/tools/${id}/">Open dashboard <span aria-hidden="true">→</span></a>
+  </article>`;
+}
 function relatedSection(id) {
   const same = TOOLS.filter(t => t.id !== id);
   const current = TOOLS.find(t => t.id === id);
@@ -188,18 +206,19 @@ function toolPage(t) {
   const c = content[t.id];
   if (!c) throw new Error('Missing content for ' + t.id);
   const url = `/tools/${t.id}/`;
-  const advanced = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits'].indexOf(t.id) !== -1;
+  const advanced = ADVANCED_IDS.indexOf(t.id) !== -1;
   const breadcrumb = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
       { '@type': 'ListItem', position: 2, name: t.category, item: SITE + '/#categories' },
-      { '@type': 'ListItem', position: 3, name: t.name, item: SITE + url }
+      ...(advanced ? [{ '@type': 'ListItem', position: 3, name: 'Advanced tools', item: SITE + '/advanced/' }] : []),
+      { '@type': 'ListItem', position: advanced ? 4 : 3, name: t.name, item: SITE + url }
     ]
   };
-  const body = `<main id="main" data-page="tool" data-tool-id="${t.id}">
-  <nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li><a href="/#categories">${t.category}</a></li><li aria-current="page">${t.name}</li></ol></nav>
-  <section class="page-hero container">
-    <div class="page-hero-head"><div><span class="eyebrow">${t.category}</span><h1>${c.h1}</h1><p>${c.intro}</p></div>
+  const body = `<main id="main" data-page="tool" data-tool-id="${t.id}"${advanced ? ' data-advanced="true"' : ''}>
+  <nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li>${advanced ? '<li><a href="/advanced/">Advanced</a></li>' : ''}<li><a href="/#categories">${t.category}</a></li><li aria-current="page">${t.name}</li></ol></nav>
+  <section class="page-hero container${advanced ? ' advanced-hero' : ''}">
+    <div class="page-hero-head"><div><span class="eyebrow">${advanced ? 'Advanced dashboard' : t.category}</span><h1>${c.h1}</h1><p>${c.intro}</p></div>
       <div class="btn-row"><button class="btn btn-secondary btn-small" type="button" data-favorite aria-pressed="false">${icon('star', 16)} <span data-favorite-label>Save</span></button><button class="btn btn-secondary btn-small" type="button" data-print>${icon('print', 16)} Print</button></div>
     </div>
     ${adSlot('tool', ADS.enabled)}
@@ -219,7 +238,7 @@ function toolPage(t) {
 </main>`;
   return shell({
     title: `${c.seoTitle} | StudentHub`, desc: c.desc, path: url, ld: breadcrumb,
-    bodyAttrs: `data-page="tool" data-tool-id="${t.id}"`, body,
+    bodyAttrs: `data-page="tool" data-tool-id="${t.id}"${advanced ? ' data-advanced="true"' : ''}`, body,
     scripts: `<script src="/tools/${t.id}/tool.js" defer></script>`
   });
 }
@@ -257,13 +276,18 @@ function homepage() {
         <div class="search-results" id="home-search-results" data-search-results role="listbox" aria-label="Tool search results"></div>
       </div>
       <ul class="hero-points"><li>${icon('check', 16)} Works offline</li><li>${icon('check', 16)} No sign-up</li><li>${icon('check', 16)} Your data stays local</li></ul>
-      <div class="btn-row" style="margin-top:1.6rem"><a class="btn btn-primary" href="#all-tools">Explore all tools ${icon('arrow', 16)}</a><a class="btn btn-secondary" href="/workspace/">Open my workspace</a></div>
+      <div class="btn-row" style="margin-top:1.6rem"><a class="btn btn-primary" href="#all-tools">Explore all tools ${icon('arrow', 16)}</a><a class="btn btn-secondary" href="/advanced/">Open advanced dashboards</a></div>
     </div>
     <div class="hero-visual animate-in"><div class="hero-panel">
       <div class="hero-panel-head"><span>WEEKLY STUDY SNAPSHOT</span><span>Private · on this device</span></div>
       <div class="mini-bars" aria-hidden="true"><span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:20%"></span></div>
       <div class="mini-stats"><div class="mini-stat"><strong>12.5h</strong><span>Studied this week</span></div><div class="mini-stat"><strong>8</strong><span>Sessions logged</span></div><div class="mini-stat"><strong>4</strong><span>Subjects tracked</span></div></div>
     </div><div class="float-card">${icon('shield', 20)} Your notes stay on your device</div></div>
+  </div></section>
+
+  <section class="section advanced-showcase" aria-labelledby="advanced-home-heading"><div class="container">
+    <div class="section-head advanced-showcase-head"><div><span class="eyebrow">${icon('spark', 15)} Premium study intelligence</span><h2 id="advanced-home-heading">Advanced dashboards</h2><p>Turn your saved study data into clear scores, forecasts and next actions.</p></div><a class="btn btn-primary btn-small" href="/advanced/">View all advanced tools ${icon('arrow', 15)}</a></div>
+    <div class="advanced-card-grid advanced-preview">${ADVANCED_IDS.slice(0, 4).map((id, i) => advancedCard(id, i)).join('')}</div>
   </div></section>
 
   <section class="section section-soft" aria-labelledby="featured-heading"><div class="container"><div class="section-head"><span class="eyebrow">Start here</span><h2 id="featured-heading">Featured tools</h2><p>The tools students open most often, ready to use without setup.</p></div><div class="grid tool-grid">${featured.map(id => toolCard(find(id))).join('')}</div></div></section>
@@ -374,6 +398,75 @@ function articlePage(slug, a) {
   return shell({ title: `${a.title} | StudentHub`, desc: a.desc, path: `/articles/${slug}/`, body });
 }
 
+function advancedPage() {
+  const stats = [
+    [String(ADVANCED_IDS.length), 'Advanced dashboards'],
+    ['100%', 'Calculated in your browser'],
+    ['0', 'Accounts or subscriptions'],
+    ['Live', 'Saved-data insights']
+  ];
+  const body = `<main id="main" data-page="advanced">
+  <nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Advanced tools</li></ol></nav>
+  <section class="advanced-hub-hero container">
+    <div class="advanced-hero-copy">
+      <span class="eyebrow">${icon('spark', 15)} Advanced workspace</span>
+      <h1>Study intelligence, <span class="gradient">beautifully simple.</span></h1>
+      <p>Eight focused dashboards that turn the study data already on your device into honest scores, clear forecasts and a practical next step. No account, no setup, no waiting.</p>
+      <div class="btn-row"><a class="btn btn-primary" href="/tools/exam-readiness-score/">Check my readiness ${icon('arrow', 16)}</a><a class="btn btn-secondary" href="#advanced-grid">Browse dashboards</a></div>
+    </div>
+    <div class="advanced-hero-visual" aria-hidden="true">
+      <div class="advanced-glow"></div>
+      <div class="advanced-window">
+        <div class="advanced-window-head"><span>READINESS OVERVIEW</span><span class="live-dot"></span></div>
+        <div class="advanced-window-score"><strong>78<small>%</small></strong><span>On track</span></div>
+        <div class="advanced-window-bars"><i style="height:48%"></i><i style="height:72%"></i><i style="height:58%"></i><i style="height:90%"></i><i style="height:66%"></i><i style="height:82%"></i><i style="height:94%"></i></div>
+        <div class="advanced-window-foot"><span>Marks 90%</span><span>Coverage 60%</span><span>Revision 80%</span></div>
+      </div>
+      <div class="advanced-float">${icon('checkcircle', 18)} Calculated locally</div>
+    </div>
+  </section>
+  <section class="container"><div class="advanced-stat-strip">${stats.map(([v, l]) => `<div class="advanced-stat"><strong>${v}</strong><span>${l}</span></div>`).join('')}</div></section>
+  <section class="section" style="padding-top:.8rem"><div class="container">
+    <div class="advanced-toolbar" role="region" aria-label="Advanced tool filters">
+      <div class="advanced-filters" role="group" aria-label="Filter by category">
+        <button class="advanced-filter is-active" type="button" data-advanced-filter="all" aria-pressed="true">All dashboards</button>
+        <button class="advanced-filter" type="button" data-advanced-filter="study-planning" aria-pressed="false">Planning &amp; tracking</button>
+        <button class="advanced-filter" type="button" data-advanced-filter="academic-calculators" aria-pressed="false">Scores &amp; analysis</button>
+      </div>
+      <label class="advanced-search">${icon('search', 17)}<span class="visually-hidden">Search advanced tools</span><input id="advanced-search" type="search" placeholder="Search 8 dashboards" autocomplete="off"></label>
+    </div>
+    <p class="advanced-status" id="advanced-status" role="status" aria-live="polite">Loading advanced dashboards…</p>
+    <div class="advanced-skeleton-grid" id="advanced-skeleton" aria-hidden="true">${[0, 1, 2, 3].map(() => `<div class="advanced-skeleton-card"><i></i><i></i><i></i><i></i></div>`).join('')}</div>
+    <div class="advanced-card-grid" id="advanced-grid">${ADVANCED_IDS.map((id, i) => advancedCard(id, i)).join('')}</div>
+    <div class="empty-state" id="advanced-empty" hidden><strong>No dashboards match that search</strong><span>Try a different word or choose All dashboards.</span></div>
+  </div></section>
+  <div class="container">${adSlot('advanced', ADS.enabled)}</div>
+  <section class="section section-soft" aria-labelledby="advanced-flow-heading"><div class="container">
+    <div class="section-head"><span class="eyebrow">Connected workflow</span><h2 id="advanced-flow-heading">Use them together</h2><p>Each dashboard is useful alone. Together they form a simple study loop.</p></div>
+    <div class="advanced-flow">
+      <a class="advanced-flow-step" href="/tools/syllabus-coverage-tracker/"><span>01</span><strong>Map the syllabus</strong><em>Mark what is done, in progress or weak.</em></a>
+      <a class="advanced-flow-step" href="/tools/spaced-revision-scheduler/"><span>02</span><strong>Schedule reviews</strong><em>Turn weak topics into a spaced plan.</em></a>
+      <a class="advanced-flow-step" href="/tools/exam-readiness-score/"><span>03</span><strong>Measure readiness</strong><em>Combine four signals into one score.</em></a>
+      <a class="advanced-flow-step" href="/tools/study-pace-forecaster/"><span>04</span><strong>Forecast the finish</strong><em>See the daily hours your deadline needs.</em></a>
+    </div>
+  </div></section>
+  <section class="section" aria-labelledby="advanced-faq-heading"><div class="container prose">
+    <h2 id="advanced-faq-heading">Advanced tool questions</h2>
+    ${faq([
+      ['Do advanced tools need an account?', 'No. Every dashboard runs in your browser, and any saved data stays in LocalStorage or IndexedDB on this device.'],
+      ['Will these tools work offline?', 'Yes. After the first visit the advanced hub and its tool pages are cached by the service worker for offline use.'],
+      ['Are the scores official predictions?', 'No. They are planning signals based on the information you enter or save locally. Always confirm official results with your institution.'],
+      ['Can I use all eight dashboards for free?', 'Yes. All advanced tools are free, with no subscription, paid API or hidden upgrade.']
+    ])}
+  </div></section>
+</main>`;
+  return shell({
+    title: 'Advanced Study Tools & Dashboards | StudentHub',
+    desc: 'Explore eight advanced StudentHub dashboards for readiness scores, syllabus coverage, study pace, focus streaks and workload planning.',
+    path: '/advanced/', body,
+    scripts: '<script src="/assets/js/advanced.js" defer></script>'
+  });
+}
 function staticPage(opts) {
   /* Static pages have no built-in slot in their body. Add the same native
      placement used by tools and articles so every generated page has ads. */
@@ -386,6 +479,7 @@ function staticPage(opts) {
 // Build tool pages
 TOOLS.forEach(t => write(`tools/${t.id}/index.html`, toolPage(t)));
 write('index.html', homepage());
+write('advanced.html', advancedPage());
 Object.keys(articleData).forEach(slug => write(`articles/${slug}/index.html`, articlePage(slug, articleData[slug])));
 
 const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Privacy policy</li></ol></nav>
@@ -459,7 +553,7 @@ const notFoundBody = `<main id="main"><section class="page-hero container"><span
 write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc: `The requested StudentHub page could not be found. Search the ${TOOLS.length} free tools instead.`, path: '/404/', robots: 'noindex', body: notFoundBody }));
 
 // Pretty URLs work on any static host: /about/ and /about.html both resolve.
-['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace'].forEach(function (name) {
+['about', 'contact', 'privacy-policy', 'terms', 'offline', '404', 'workspace', 'advanced'].forEach(function (name) {
   write(`${name}/index.html`, generated[`${name}.html`]);
 });
 
@@ -467,6 +561,7 @@ write('404.html', staticPage({ title: 'Page Not Found (404) | StudentHub', desc:
 const urls = [
   ['/', '1.0', 'weekly'], ['/about/', '0.7', 'monthly'], ['/contact/', '0.5', 'monthly'],
   ['/privacy-policy/', '0.4', 'yearly'], ['/terms/', '0.4', 'yearly'],
+  ['/advanced/', '0.9', 'weekly'],
   ...Object.keys(articleData).map(s => ['/articles/' + s + '/', '0.7', 'monthly']),
   ...TOOLS.map(t => ['/tools/' + t.id + '/', '0.9', 'monthly'])
 ];
@@ -481,12 +576,12 @@ write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /workspace/\n\nSitemap: 
 // Service worker with a content-derived version so deployments invalidate old caches.
 const crypto = require('crypto');
 const precache = [
-  '/', '/offline/', '/404.html', '/about/', '/contact/', '/privacy-policy/', '/terms/', '/workspace/',
+  '/', '/offline/', '/404.html', '/about/', '/contact/', '/privacy-policy/', '/terms/', '/workspace/', '/advanced/',
   ...Object.keys(articleData).map(s => `/articles/${s}/`),
   ...TOOLS.map(t => `/tools/${t.id}/`),
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
   ...['themes', 'main', 'components', 'responsive'].map(n => `/assets/css/${n}.css`),
-  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace'].map(n => `/assets/js/${n}.js`),
+  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
   ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];
@@ -544,4 +639,4 @@ self.addEventListener('fetch', function (event) {
 `;
 write('sw.js', sw);
 
-console.log(`Generated ${TOOLS.length} tool pages, 4 articles, 7 static pages, sitemap.xml, robots.txt and sw.js.`);
+console.log(`Generated ${TOOLS.length} tool pages, 4 articles, 8 static pages (including /advanced/ with ${ADVANCED_IDS.length} dashboards), sitemap.xml, robots.txt and sw.js.`);
