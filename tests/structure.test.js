@@ -141,7 +141,7 @@ test('all internal links and asset paths resolve to generated files', () => {
     const paths = Array.from(html.matchAll(/(?:href|src)="([^"]*)"/g)).map(m => m[1])
       .filter(value => value && !/^(https?:|mailto:|data:|#)/.test(value));
     paths.forEach(value => {
-      const relative = value.split('#')[0];
+      const relative = value.split('#')[0].split('?')[0];
       if (!relative) return;
       const resolved = path.posix.normalize(path.posix.join(dir, relative));
       assert.ok(exists(resolved) && fs.statSync(path.join(ROOT, resolved)).isFile(), `${page}: broken local path ${value}`);

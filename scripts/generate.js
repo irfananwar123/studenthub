@@ -3,9 +3,17 @@
    Produces real, crawlable HTML files with unique metadata and content. */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { icon, f, faq } = require('./helpers');
 
 const ROOT = path.resolve(__dirname, '..');
+/* Stylesheets get a content-derived query so a CSS-only deploy reaches visitors
+   immediately instead of waiting on the one-hour CDN/browser cache. */
+const CSS_NAMES = ['themes', 'main', 'components', 'responsive'];
+const cssHash = crypto.createHash('sha256');
+CSS_NAMES.forEach(n => cssHash.update(fs.readFileSync(path.join(ROOT, 'assets/css', `${n}.css`))));
+const CSS_VERSION = cssHash.digest('hex').slice(0, 10);
+const cssUrl = n => `/assets/css/${n}.css?v=${CSS_VERSION}`;
 const SITE = 'https://studenthub-2gs.pages.dev';
 /* Advertising tags. They are written into the HTML at build time, not injected
    after load: the 468x60 tag calls document.write, which only works while the
@@ -121,10 +129,10 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <meta property="og:url" content="${canonical}">
 <script>(function(){if(location.protocol==='file:')return;var l=document.createElement('link');l.rel='manifest';l.href=(document.documentElement.getAttribute('data-base')||'')+'manifest.webmanifest';document.head.appendChild(l);})();</script>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/css/themes.css">
-<link rel="stylesheet" href="/assets/css/main.css">
-<link rel="stylesheet" href="/assets/css/components.css">
-<link rel="stylesheet" href="/assets/css/responsive.css">
+<link rel="stylesheet" href="${cssUrl('themes')}">
+<link rel="stylesheet" href="${cssUrl('main')}">
+<link rel="stylesheet" href="${cssUrl('components')}">
+<link rel="stylesheet" href="${cssUrl('responsive')}">
 ${ADS.enabled ? `<script>(function(){window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'&&/afders\\.org|bicea\\.org/.test(t.src||''))document.documentElement.setAttribute('data-ad-blocked','1');},true);})();</script>
 ${headAds()}` : ''}
 ${ld}
@@ -590,13 +598,12 @@ write('sitemap-fallback.xml', sitemapXml);
 write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /workspace/\n\nSitemap: ${SITE}/sitemap.xml\nSitemap: ${SITE}/sitemap-fallback.xml\n`);
 
 // Service worker with a content-derived version so deployments invalidate old caches.
-const crypto = require('crypto');
 const precache = [
   '/', '/offline/', '/404.html', '/about/', '/contact/', '/privacy-policy/', '/terms/', '/workspace/', '/advanced/',
   ...Object.keys(articleData).map(s => `/articles/${s}/`),
   ...TOOLS.map(t => `/tools/${t.id}/`),
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
-  ...['themes', 'main', 'components', 'responsive'].map(n => `/assets/css/${n}.css`),
+  ...CSS_NAMES.map(cssUrl),
   ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
   ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
@@ -612,7 +619,7 @@ function localFile(u) {
     if (fs.existsSync(asIndex)) return asIndex;
     return path.join(ROOT, (dir || 'index').replace(/\/$/, '') + '.html');
   }
-  return path.join(ROOT, u.slice(1));
+  return path.join(ROOT, u.split('?')[0].slice(1));
 }
 precache.forEach(u => {
   const file = localFile(u);
