@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 43 working tools with dashboard-style analytics, learning-theory planners, everyday calculators, a dedicated Advanced hub, a private local workspace, search, an honest on-device live usage strip, PWA/offline support, SEO-ready pages and responsive design. Saved Light / Dark / Auto and accent colour choices control the whole interface, including charts, ad slots and study panels. Keyword-rich copy, hreflang signals and sitemap alternates help students everywhere discover the site. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 49 working tools with dashboard-style analytics, learning-theory planners, math and everyday calculators, a dedicated Advanced hub, a private local workspace, search, a global scroll/command interface, an honest on-device live usage strip, PWA/offline support, SEO-ready pages and responsive design. Saved Light / Dark / Auto and accent colour choices control the whole interface, including charts, ad slots and study panels. Keyword-rich copy, hreflang signals and sitemap alternates help students everywhere discover the site. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -22,9 +22,10 @@ studenthub/
 │   ├── js/                     core.js, calculations.js, storage.js, theme.js,
 │   │                           navigation.js, search.js, tool-base.js, pwa.js,
 │   │                           ads.js, app.js, home.js, contact.js,
-│   │                           workspace.js, config.js, advanced.js, usage.js
+│   │                           workspace.js, config.js, advanced.js, usage.js,
+│   │                           global-ui.js
 │   └── icons/                  favicon.svg, icon-192.png, icon-512.png
-├── tools/<43 tools>/           index.html + tool.js for each tool
+├── tools/<49 tools>/           index.html + tool.js for each tool
 ├── articles/<4 guides>/        index.html
 ├── scripts/
 │   ├── generate.js             Regenerates all HTML, sitemap, robots and service worker
@@ -91,11 +92,11 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 40 calculation + structure checks
-node tests/browser-smoke.js # 80 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 47 calculation + structure checks
+node tests/browser-smoke.js # 93 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters and the live usage strip, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), saved accent colours and appearance reset, mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 56 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (896/896 clean).
+The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters and the live usage strip, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), saved accent colours and appearance reset, scroll progress/back-to-top, sticky context, reveal-on-scroll, smooth anchors, the Ctrl+K command palette, the mobile quick bar, mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 62 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (992/992 clean).
 
 See `TEST_REPORT.md` for the latest results and known limits.
 
@@ -151,8 +152,10 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 
 ## 7. Features delivered
 
-- **43 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner, focus streak & habits, syllabus coverage tracker, exam readiness score, study pace forecaster, assignment priority matrix, deliberate practice planner, Feynman clarity score, interleaving schedule builder, confidence calibrator, scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator and GPA percentage converter.
+- **49 working tools**: percentage, CGPA, GPA, grade, marks, attendance, score predictor, timetable maker, Pomodoro, exam countdown, study tracker, assignment planner, flashcards, quiz maker, revision notes, question picker, vocabulary trainer, word counter, character counter, reading time, text case, citation formatter, age, date difference, unit converter, study hours tracker, spaced revision scheduler, grade goal planner, focus streak & habits, syllabus coverage tracker, exam readiness score, study pace forecaster, assignment priority matrix, deliberate practice planner, Feynman clarity score, interleaving schedule builder, confidence calibrator, scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator, GPA percentage converter, slope calculator, quadratic equation solver, Pythagorean theorem calculator, area calculator, volume calculator and time calculator.
 - **Everyday calculators**: a keyword-rich homepage section and six dedicated pages for searches students use daily — scientific expressions (safe parser, no `eval`), fractions, ratios/proportions, standard deviation, mean/median/mode and GPA↔percentage conversion. Each page has formulas, worked examples, FAQs, structured data and a sitemap entry.
+- **Math essentials**: a second homepage section with six more fully working calculators — slope from two points, quadratic roots (including complex conjugates), Pythagorean theorem sides, five shape areas, five solid volumes and time add/subtract with decimal hours. Pure functions live in `calculations.js`, pair with unit tests and a dedicated homepage `ItemList`, and never use a server.
+- **Global interface**: a compact scroll-progress bar, back-to-top control, context-aware sticky header, reveal-on-scroll cards, smooth in-page anchors with an active section indicator, a Ctrl+K command palette with keyboard navigation, and a mobile quick bar. One deferred `global-ui.js` powers all of it inside the existing four stylesheets, and reduced-motion preferences disable the animation.
 - **Advanced hub**: a premium, filterable `/advanced/` dashboard with live loading skeletons, category/search filters, twelve linked tool cards, a fourth “Learning theory” filter, a connected workflow and crawlable nested URLs. The hub, its filters and all advanced tools are precached for offline use.
 - **Advanced study analytics**: live study timer with saved sessions, weekly goal ring, 7-day bars, subject breakdown and 35-day heatmap; automatic spaced-review plans with completion tracking; required-marks planning for every remaining assessment; daily habit streaks with a consistency heatmap; syllabus coverage by subject and confidence; weighted exam readiness scoring; pace forecasting with ideal vs current curves; and assignment urgency/workload ranking. All charts and totals are calculated locally and stored only in the browser.
 - **Learning-theory dashboards**: deliberate practice planning with feedback weighting, Feynman clarity scoring with a five-part breakdown, an interleaving schedule builder that actually favours weak topics without back-to-back repeats, and confidence calibration with bias, Brier-style error and trend. Each has a local draft, an example button and a plain-language explanation of the model.
@@ -163,7 +166,7 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - **PWA**: manifest, installable icons, versioned service worker, offline fallback, offline indicator and automatic cache cleanup.
 - **Appearance studio**: a homepage panel with live preview plus Light/Dark/Auto and Blue/Violet/Teal/Amber accent controls. Both choices are applied before paint, saved in LocalStorage, included in backup export/import, cleared with workspace data and available in the mobile navigation. Accents recolour buttons, charts, cards, gradients, heatmaps and ad slots without changing themes.
 - **Global discovery**: keyword-rich homepage and page-level keyword metas, `hreflang="en"` plus `x-default` on every page, matching `xhtml:link` alternates in both sitemaps, richer WebSite/Organization/ItemList structured data, and an honest English-first worldwide section. No translated pages are claimed.
-- **SEO**: unique titles/descriptions/canonical/OG tags, Google Search Console and Bing Webmaster Tools verification metas, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data (including an `ItemList` of the six everyday calculators), primary and fallback sitemaps, and robots.
+- **SEO**: unique titles/descriptions/canonical/OG tags, Google Search Console and Bing Webmaster Tools verification metas, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data (including `ItemList`s for the six everyday and six math/time calculators), primary and fallback sitemaps, and robots.
 - **Visual system**: token-driven premium UI in exactly four stylesheets — ambient mesh background, glass header, animated hero rails, card spotlights, category-tinted Advanced dashboards, refined tool workspaces and smoother easing. Stylesheets use content-derived version queries so CSS-only deploys appear immediately instead of waiting on the one-hour cache; all motion is neutralised by reduced-motion settings.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.
 - **Performance**: system fonts, no dependencies, small vanilla scripts, deferred JS, tiny PNG/SVG assets, no layout-shifting imagery, simple CSS animations only.

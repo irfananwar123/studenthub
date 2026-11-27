@@ -944,6 +944,155 @@
     } catch (e) { return null; }
   }
 
+  /* ---- Geometry, algebra and time helpers for the next six tools ---- */
+
+  function linearEquation(slope, intercept) {
+    var s = T_fmt(slope), b = T_fmt(intercept);
+    if (b === '0') return 'y = ' + s + 'x';
+    return 'y = ' + s + 'x ' + (intercept < 0 ? '− ' + Math.abs(intercept) : '+ ' + b);
+  }
+  function T_fmt(n) {
+    var v = round(n, 6);
+    return String(v === 0 ? 0 : v);
+  }
+
+  function slopeFromPoints(x1, y1, x2, y2) {
+    if (!isNum(x1) || !isNum(y1) || !isNum(x2) || !isNum(y2)) return null;
+    var dx = x2 - x1, dy = y2 - y1;
+    if (dx === 0) {
+      return { vertical: true, slope: null, intercept: null, equation: 'x = ' + T_fmt(x1),
+        rise: round(dy, 6), run: 0, angle: null, distance: round(Math.abs(dy), 6) };
+    }
+    var slope = dy / dx, intercept = y1 - slope * x1;
+    return {
+      vertical: false, slope: round(slope, 6), intercept: round(intercept, 6),
+      equation: linearEquation(slope, intercept), rise: round(dy, 6), run: round(dx, 6),
+      angle: round(Math.atan(slope) * 180 / Math.PI, 4),
+      distance: round(Math.sqrt(dx * dx + dy * dy), 6)
+    };
+  }
+
+  function quadraticRoots(a, b, c) {
+    if (!isNum(a) || !isNum(b) || !isNum(c) || a === 0) return null;
+    var d = b * b - 4 * a * c;
+    var vertexX = -b / (2 * a), vertexY = a * vertexX * vertexX + b * vertexX + c;
+    var base = { discriminant: round(d, 6), vertex: { x: round(vertexX, 6), y: round(vertexY, 6) } };
+    if (d > 0) {
+      var rootD = Math.sqrt(d);
+      return Object.assign(base, { type: 'two-real', roots: [round((-b + rootD) / (2 * a), 6), round((-b - rootD) / (2 * a), 6)] });
+    }
+    if (d === 0) return Object.assign(base, { type: 'one-real', roots: [round(-b / (2 * a), 6)] });
+    return Object.assign(base, { type: 'complex',
+      roots: [
+        { real: round(-b / (2 * a), 6), imaginary: round(Math.sqrt(-d) / (2 * Math.abs(a)), 6) },
+        { real: round(-b / (2 * a), 6), imaginary: round(-Math.sqrt(-d) / (2 * Math.abs(a)), 6) }
+      ] });
+  }
+
+  function pythagorean(a, b, c, mode) {
+    if (!isNum(a) || !isNum(b) || !isNum(c) || a < 0 || b < 0 || c < 0) return null;
+    var missing, value, legs;
+    if (mode === 'hypotenuse') {
+      if (a <= 0 || b <= 0) return null;
+      value = Math.sqrt(a * a + b * b); missing = 'c'; legs = [a, b];
+    } else if (mode === 'leg-a') {
+      if (b <= 0 || c <= 0 || c <= b) return null;
+      value = Math.sqrt(c * c - b * b); missing = 'a'; legs = [value, b];
+    } else if (mode === 'leg-b') {
+      if (a <= 0 || c <= 0 || c <= a) return null;
+      value = Math.sqrt(c * c - a * a); missing = 'b'; legs = [a, value];
+    } else return null;
+    var answer = round(value, 6);
+    return {
+      missing: missing, value: answer,
+      legs: [round(legs[0], 6), round(legs[1], 6)],
+      hypotenuse: round(mode === 'hypotenuse' ? value : c, 6),
+      statement: mode === 'hypotenuse'
+        ? 'c = √(' + T_fmt(a) + '² + ' + T_fmt(b) + '²) = ' + answer
+        : missing + ' = √(' + T_fmt(c) + '² − ' + T_fmt(mode === 'leg-a' ? b : a) + '²) = ' + answer
+    };
+  }
+
+  function areaOfShape(shape, d) {
+    d = d || {};
+    var a = d.a, b = d.b, h = d.h, r = d.r, area;
+    if (shape === 'rectangle' || shape === 'parallelogram') {
+      if (!isNum(a) || !isNum(b) || a <= 0 || b <= 0) return null;
+      area = a * b;
+      return { area: round(area, 6), formula: 'A = base × height', shape: shape, inputs: { base: a, height: b } };
+    }
+    if (shape === 'triangle') {
+      if (!isNum(a) || !isNum(h) || a <= 0 || h <= 0) return null;
+      area = a * h / 2;
+      return { area: round(area, 6), formula: 'A = ½ × base × height', shape: shape, inputs: { base: a, height: h } };
+    }
+    if (shape === 'circle') {
+      if (!isNum(r) || r <= 0) return null;
+      area = Math.PI * r * r;
+      return { area: round(area, 6), formula: 'A = πr²', shape: shape, inputs: { radius: r } };
+    }
+    if (shape === 'trapezoid') {
+      if (!isNum(a) || !isNum(b) || !isNum(h) || a <= 0 || b <= 0 || h <= 0) return null;
+      area = (a + b) * h / 2;
+      return { area: round(area, 6), formula: 'A = ½(a + b) × height', shape: shape, inputs: { a: a, b: b, height: h } };
+    }
+    return null;
+  }
+
+  function volumeOfShape(shape, d) {
+    d = d || {};
+    var a = d.a, b = d.b, h = d.h, r = d.r, v;
+    if (shape === 'cube') {
+      if (!isNum(a) || a <= 0) return null;
+      v = a * a * a;
+      return { volume: round(v, 6), formula: 'V = side³', shape: shape, inputs: { side: a } };
+    }
+    if (shape === 'prism') {
+      if (!isNum(a) || !isNum(b) || !isNum(h) || a <= 0 || b <= 0 || h <= 0) return null;
+      v = a * b * h;
+      return { volume: round(v, 6), formula: 'V = length × width × height', shape: shape, inputs: { length: a, width: b, height: h } };
+    }
+    if (shape === 'cylinder') {
+      if (!isNum(r) || !isNum(h) || r <= 0 || h <= 0) return null;
+      v = Math.PI * r * r * h;
+      return { volume: round(v, 6), formula: 'V = πr²h', shape: shape, inputs: { radius: r, height: h } };
+    }
+    if (shape === 'sphere') {
+      if (!isNum(r) || r <= 0) return null;
+      v = 4 / 3 * Math.PI * r * r * r;
+      return { volume: round(v, 6), formula: 'V = 4/3 × πr³', shape: shape, inputs: { radius: r } };
+    }
+    if (shape === 'cone') {
+      if (!isNum(r) || !isNum(h) || r <= 0 || h <= 0) return null;
+      v = Math.PI * r * r * h / 3;
+      return { volume: round(v, 6), formula: 'V = ⅓ × πr²h', shape: shape, inputs: { radius: r, height: h } };
+    }
+    return null;
+  }
+
+  function timeCalculate(first, second, op) {
+    if (!first || !second || !isNum(first.h) || !isNum(first.m) || !isNum(first.s) ||
+        !isNum(second.h) || !isNum(second.m) || !isNum(second.s)) return null;
+    var parts = [first, second];
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].h < 0 || parts[i].m < 0 || parts[i].m > 59 || parts[i].s < 0 || parts[i].s > 59) return null;
+    }
+    var a = first.h * 3600 + first.m * 60 + first.s;
+    var b = second.h * 3600 + second.m * 60 + second.s;
+    if (op !== 'add' && op !== 'subtract') return null;
+    var total = op === 'add' ? a + b : a - b;
+    var sign = total < 0 ? '-' : '';
+    var abs = Math.abs(total);
+    var h = Math.floor(abs / 3600), m = Math.floor((abs % 3600) / 60), s = abs % 60;
+    return {
+      totalSeconds: total, hours: h, minutes: m, seconds: s, sign: sign,
+      display: sign + h + 'h ' + m + 'm ' + s + 's',
+      decimalHours: round(total / 3600, 4),
+      firstSeconds: a, secondSeconds: b,
+      note: op === 'subtract' && total < 0 ? 'The second time is longer than the first, so the difference is negative.' : null
+    };
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -961,7 +1110,10 @@
     gcd: gcd, factorial: factorial, parseNumberList: parseNumberList,
     fractionCalculate: fractionCalculate, ratioSolve: ratioSolve, ratioSimplify: ratioSimplify,
     standardDeviation: standardDeviation, centralTendency: centralTendency,
-    convertGpaPercent: convertGpaPercent, scientificEvaluate: scientificEvaluate
+    convertGpaPercent: convertGpaPercent, scientificEvaluate: scientificEvaluate,
+    slopeFromPoints: slopeFromPoints, quadraticRoots: quadraticRoots,
+    pythagorean: pythagorean, areaOfShape: areaOfShape, volumeOfShape: volumeOfShape,
+    timeCalculate: timeCalculate
   };
   return api;
 });

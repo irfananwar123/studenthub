@@ -60,7 +60,13 @@ const TOOL_TESTS = {
   'ratio-calculator': `set('rt-a',2);set('rt-b',3);set('rt-c',10);submit('ratio-calculator-form');return R();`,
   'standard-deviation-calculator': `set('sd-values','2,4,4,4,5,5,7,9');submit('standard-deviation-calculator-form');return R();`,
   'mean-median-mode-calculator': `set('mm-values','1,2,2,3,4,7,9');submit('mean-median-mode-calculator-form');return R();`,
-  'gpa-percentage-converter': `set('gp-gpa',3.5);submit('gpa-percentage-converter-form');return R();`
+  'gpa-percentage-converter': `set('gp-gpa',3.5);submit('gpa-percentage-converter-form');return R();`,
+  'slope-calculator': `set('sl-x1',1);set('sl-y1',3);set('sl-x2',3);set('sl-y2',7);submit('slope-calculator-form');return R();`,
+  'quadratic-equation-solver': `set('qe-a',1);set('qe-b',-5);set('qe-c',6);submit('quadratic-equation-solver-form');return R();`,
+  'pythagorean-theorem-calculator': `set('py-a',3);set('py-b',4);set('py-c',0);submit('pythagorean-theorem-calculator-form');return R();`,
+  'area-calculator': `set('ar-a',8);set('ar-b',5);submit('area-calculator-form');return R();`,
+  'volume-calculator': `set('vo-a',3);submit('volume-calculator-form');return R();`,
+  'time-calculator': `set('ti-h1',1);set('ti-m1',45);set('ti-s1',30);set('ti-h2',0);set('ti-m2',20);set('ti-s2',45);submit('time-calculator-form');return R();`
 };
 
 const TOOL_EXPECTED = {
@@ -69,7 +75,13 @@ const TOOL_EXPECTED = {
   'ratio-calculator': '15',
   'standard-deviation-calculator': '2.1381',
   'mean-median-mode-calculator': 'Median 3',
-  'gpa-percentage-converter': '87.5'
+  'gpa-percentage-converter': '87.5',
+  'slope-calculator': 'y = 2x + 1',
+  'quadratic-equation-solver': 'Roots: 3, 2',
+  'pythagorean-theorem-calculator': 'Side c = 5',
+  'area-calculator': 'Area: 40',
+  'volume-calculator': 'Volume: 27',
+  'time-calculator': 'Time: 2h 6m 15s'
 };
 
 const HELPERS = `
@@ -170,6 +182,14 @@ async function main() {
       await check(id, `/tools/${id}/`, expression, TOOL_EXPECTED[id]);
     }
     await check('homepage-search', '/', `set('home-search','attendance');await wait(50);return document.getElementById('home-search-results').textContent.includes('Attendance Calculator')?'search ok':'search failed';`);
+    await check('scroll-progress-backtop', '/', `document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,650);await wait(300);const bar=document.querySelector('[data-scroll-progress]');const pct=Number(bar.getAttribute('aria-valuenow'));const top=document.querySelector('[data-back-to-top]');const shown=!top.hidden;top.click();await wait(1400);const y=Math.round(window.scrollY);document.documentElement.style.scrollBehavior='';return 'pct:'+pct+'|shown:'+shown+'|y:'+y;`, '|shown:true|y:0');
+    await check('sticky-header-context', '/', `document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,900);await wait(300);const stuck=document.querySelector('.site-header').classList.contains('is-stuck');const context=document.querySelector('[data-header-context]');const ok=stuck&&!context.hidden&&context.textContent.trim().length>0;document.documentElement.style.scrollBehavior='';return ok?'sticky ok':'sticky failed';`, 'sticky ok');
+    await check('reveal-on-scroll', '/', `document.documentElement.style.scrollBehavior='auto';const card=document.querySelector('.tool-card');const has=document.documentElement.classList.contains('has-reveal');const marked=document.querySelectorAll('[data-reveal]').length>=60;window.scrollTo(0,Math.max(0,card.getBoundingClientRect().top+window.scrollY-220));await wait(850);const visible=card.classList.contains('is-visible')&&getComputedStyle(card).opacity==='1';document.documentElement.style.scrollBehavior='';return has&&marked&&visible?'reveal ok':'reveal '+[has,marked,card.classList.contains('is-visible'),getComputedStyle(card).opacity].join(',');`, 'reveal ok');
+    await send('Emulation.setEmulatedMedia', { media: 'screen', features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    await check('smooth-anchor-navigation', '/', `document.querySelector('a[href="#all-tools"]').click();await wait(400);const active=document.documentElement.getAttribute('data-active-section');const indicated=document.querySelectorAll('a[aria-current="location"]').length;return location.hash==='#all-tools'&&active==='all-tools'&&indicated>=1?'anchor ok':'anchor '+[location.hash,active,indicated].join(',');`, 'anchor ok');
+    await send('Emulation.setEmulatedMedia', { media: '', features: [] });
+    await check('command-palette', '/', `document.dispatchEvent(new KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true,cancelable:true}));const palette=document.querySelector('[data-command-palette]');const open=!palette.hidden;const input=document.querySelector('[data-palette-input]');input.value='slope';input.dispatchEvent(new Event('input',{bubbles:true}));const found=document.querySelector('[data-palette-results]').textContent.includes('Slope Calculator');document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));return open&&found&&palette.hidden?'palette ok':'palette failed';`, 'palette ok');
+    await check('command-palette-keyboard', '/', `document.querySelector('[data-palette-open]').click();const before=document.querySelector('.palette-item.is-selected').textContent;document.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));const after=document.querySelector('.palette-item.is-selected').textContent;document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));return before!==after?'palette keyboard ok':'palette keyboard failed';`, 'palette keyboard ok');
     await check('advanced-hub-filters', '/advanced/', `await wait(350);const visible=()=>document.querySelectorAll('#advanced-grid [data-advanced-category]:not([hidden])').length;const before=visible();document.querySelector('[data-advanced-filter="academic-calculators"]').click();const academic=visible();set('advanced-search','readiness');await wait(20);const searched=visible();document.querySelector('[data-advanced-filter="learning-tools"]').click();set('advanced-search','');await wait(20);const learning=visible();document.querySelector('[data-advanced-filter="all"]').click();set('advanced-search','nothingmatches');await wait(20);const empty=!document.getElementById('advanced-empty').hidden;const ready=document.documentElement.getAttribute('data-hub-ready')==='true'&&!document.getElementById('advanced-skeleton');return before+'|'+academic+'|'+searched+'|'+learning+'|'+empty+'|'+ready;`, '12|3|1|2|true|true');
     await check('advanced-hub-dashboard-links', '/advanced/', `const links=[...document.querySelectorAll('#advanced-grid a')];const ok=links.length===24&&links.every(a=>a.getAttribute('href').indexOf('tools/')>-1)&&getComputedStyle(document.querySelector('.advanced-card')).borderTopWidth!=='0px';return ok?'advanced ui ok':'advanced ui failed';`, 'advanced ui ok');
     await check('live-usage-strip', '/', `await wait(150);const bar=document.getElementById('usage-bar');const actions=Number(bar.querySelector('[data-usage="actions"]').textContent);const events=StudentHub.usage.events();const local=bar.getAttribute('aria-label').indexOf('this device')>-1&&bar.textContent.includes('Live usage');return bar&&actions>=1&&events.length>=1&&local?'usage local live':'usage failed';`, 'usage local live');
@@ -229,6 +249,7 @@ async function main() {
     await check('file-relative-links', `${FILE_ROOT}/tools/percentage-calculator/index.html`, `return document.querySelector('.site-header .brand').getAttribute('href')+'|'+StudentHub.toolUrl('quiz-maker')+'|'+StudentHub.homeUrl('#all-tools');`, '../../index.html|../../tools/quiz-maker/index.html|../../index.html#all-tools');
 
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+    await check('mobile-quick-bar', '/', `const bar=document.querySelector('.quick-bar');const shown=getComputedStyle(bar).display==='grid';bar.querySelector('[data-quick-action="search"]').click();const open=!document.querySelector('[data-command-palette]').hidden;document.querySelector('.palette-close').click();return shown&&open&&document.querySelector('[data-command-palette]').hidden?'quick bar ok':'quick bar failed';`, 'quick bar ok');
     await check('mobile-homepage-no-overflow', '/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
     await check('mobile-tool-no-overflow', '/tools/marks-calculator/', `return 'overflow:'+(document.documentElement.scrollWidth>window.innerWidth+1);`, 'overflow:false');
 

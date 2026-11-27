@@ -2,7 +2,7 @@
   "name": "studenthub",
   "version": "1.0.0",
   "private": true,
-  "description": "Free browser-based student productivity platform with 43 working tools, everyday calculators, learning-theory dashboards, an on-device live usage strip, PWA and offline support.",
+  "description": "Free browser-based student productivity platform with 49 working tools, math and everyday calculators, learning-theory dashboards, a global scroll/command interface, an on-device live usage strip, PWA and offline support.",
   "scripts": {
     "build": "node scripts/generate.js",
     "icons": "python scripts/make-icons.py",

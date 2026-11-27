@@ -345,5 +345,164 @@ module.exports = {
       ['Why does CGPA use 9.5?', 'The multiply-by-9.5 rule is a common 10-point convention. Some institutions use a different multiplier, so treat the result as an estimate.'],
       ['Can I convert between 4.0 GPA and 10-point CGPA?', 'Convert through percentage: GPA to percentage, then percentage to CGPA. Keep the same scale in mind for each step.']
     ]
+  },
+  'slope-calculator': {
+    h1: 'Slope Calculator',
+    seoTitle: 'Slope Calculator — Gradient, Intercept & Line Equation',
+    desc: 'Free slope calculator from two points. Get the gradient, y-intercept, line equation, angle and distance with clear working.',
+    intro: 'Enter two points on a straight line and see the rise over run, the slope-intercept equation and the angle of the line. This slope calculator works locally and shows the arithmetic so you can check your homework.',
+    icon: 'chart',
+    form: `
+      <div class="form-grid">
+        ${f('sl-x1', 'x₁ of first point', 'number', 'step="any" placeholder="e.g. 1"')}
+        ${f('sl-y1', 'y₁ of first point', 'number', 'step="any" placeholder="e.g. 3"')}
+        ${f('sl-x2', 'x₂ of second point', 'number', 'step="any" placeholder="e.g. 3"')}
+        ${f('sl-y2', 'y₂ of second point', 'number', 'step="any" placeholder="e.g. 7"')}
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Calculate slope</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>Slope is <code>m = (y₂ − y₁) ÷ (x₂ − x₁)</code>. Once you know the slope, the y-intercept is <code>b = y₁ − m × x₁</code>, giving the line <code>y = mx + b</code>.</p>
+      <p>If the two x-values are equal, the line is vertical. Its slope is undefined and the equation is <code>x = x₁</code>.</p>`,
+    example: `<p><strong>Example 1:</strong> points (1, 3) and (3, 7): rise = 4, run = 2, slope = <strong>2</strong>. Intercept = 3 − 2 × 1 = 1, so <code>y = 2x + 1</code>.</p>
+      <p><strong>Example 2:</strong> points (0, 5) and (2, 1): slope = <strong>−2</strong>, so <code>y = −2x + 5</code>.</p>`,
+    steps: ['Enter the x and y values of both points.', 'Choose Calculate slope.', 'Read the gradient, intercept, equation, angle and distance between the points.'],
+    faq: [
+      ['What if the line is vertical?', 'When both x-values match, slope is undefined. The calculator reports a vertical line and shows its equation as x = the shared x-value.'],
+      ['Can I use decimals or negative coordinates?', 'Yes. Decimals and negatives are accepted; results are rounded to six decimal places for display.'],
+      ['Is the angle in degrees?', 'Yes. The angle is measured from the positive x-axis in degrees. A horizontal line has an angle of 0°.']
+    ]
+  },
+  'quadratic-equation-solver': {
+    h1: 'Quadratic Equation Solver',
+    seoTitle: 'Quadratic Equation Solver — Real, Repeated & Complex Roots',
+    desc: 'Solve quadratic equations with this free calculator. See real, repeated or complex roots, the discriminant and the vertex.',
+    intro: 'Enter a, b and c for ax² + bx + c = 0 and get the roots instantly. The solver handles two real roots, one repeated root and complex conjugates, and explains which case applies.',
+    icon: 'calculator',
+    form: `
+      <div class="form-grid">
+        ${f('qe-a', 'a (coefficient of x²)', 'number', 'step="any" placeholder="e.g. 1"')}
+        ${f('qe-b', 'b (coefficient of x)', 'number', 'step="any" placeholder="e.g. -5"')}
+        ${f('qe-c', 'c (constant)', 'number', 'step="any" placeholder="e.g. 6"')}
+      </div>
+      <p class="field-hint">The coefficient a cannot be zero, or the equation is not quadratic.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Solve equation</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>The discriminant is <code>D = b² − 4ac</code>. If D > 0 there are two real roots; if D = 0 there is one repeated root; if D < 0 the roots are complex conjugates.</p>
+      <p>Real roots use <code>x = (−b ± √D) ÷ 2a</code>. The vertex is at <code>x = −b ÷ 2a</code>, with y found by substituting that x back into the equation.</p>`,
+    example: `<p><strong>Example 1:</strong> x² − 5x + 6 = 0 gives D = 1 and roots <strong>3 and 2</strong>.</p>
+      <p><strong>Example 2:</strong> x² + 4x + 4 = 0 gives D = 0 and one repeated root <strong>−2</strong>.</p>
+      <p><strong>Example 3:</strong> x² + 2x + 5 = 0 gives D = −16 and complex roots <strong>−1 ± 2i</strong>.</p>`,
+    steps: ['Enter the coefficients a, b and c in ax² + bx + c = 0.', 'Choose Solve equation.', 'Read the roots, discriminant and vertex shown with the result.'],
+    faq: [
+      ['Why must a be non-zero?', 'If a is zero, the x² term disappears and the equation becomes linear, not quadratic. Use a linear method instead.'],
+      ['What are complex roots?', 'When the discriminant is negative, no real x satisfies the equation. The roots use the imaginary unit i, where i² = −1.'],
+      ['Does this show working?', 'Yes. The discriminant and vertex are shown with every result so you can follow the quadratic formula.']
+    ]
+  },
+  'pythagorean-theorem-calculator': {
+    h1: 'Pythagorean Theorem Calculator',
+    seoTitle: 'Pythagorean Theorem Calculator — Find a Missing Right Triangle Side',
+    desc: 'Find a missing side of a right triangle with the Pythagorean theorem calculator. See a² + b² = c² working and checks.',
+    intro: 'Use the Pythagorean theorem to find a hypotenuse or a missing leg of a right triangle. Enter two known sides, choose what to find and see the square-root working instantly.',
+    icon: 'chart',
+    form: `
+      <div class="form-grid">
+        ${f('py-a', 'Side a', 'number', 'step="any" placeholder="e.g. 3"')}
+        ${f('py-b', 'Side b', 'number', 'step="any" placeholder="e.g. 4"')}
+        ${f('py-c', 'Side c (hypotenuse)', 'number', 'step="any" placeholder="e.g. 5 or 0"')}
+      </div>
+      <div class="field"><label for="py-mode">What do you want to find?</label><select id="py-mode"><option value="hypotenuse">Hypotenuse c from a and b</option><option value="leg-a">Leg a from b and c</option><option value="leg-b">Leg b from a and c</option></select></div>
+      <p class="field-hint">Enter 0 for the side you want to find. The hypotenuse must be the longest side.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Calculate side</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>For a right triangle, <code>a² + b² = c²</code>, where c is the hypotenuse. To find c, use <code>c = √(a² + b²)</code>.</p>
+      <p>To find a leg, subtract the known square: <code>a = √(c² − b²)</code> or <code>b = √(c² − a²)</code>.</p>`,
+    example: `<p><strong>Example 1:</strong> with a = 3 and b = 4, <code>c = √(9 + 16) = √25 = <strong>5</strong></code>.</p>
+      <p><strong>Example 2:</strong> with b = 4 and c = 5, <code>a = √(25 − 16) = <strong>3</strong></code>.</p>`,
+    steps: ['Enter the two sides you know and put 0 in the field you want to find.', 'Choose hypotenuse, leg a or leg b.', 'Select Calculate side and read the square-root working.'],
+    faq: [
+      ['Does this work for non-right triangles?', 'No. The Pythagorean theorem only applies to right triangles. Other triangles need the cosine rule.'],
+      ['Which side is the hypotenuse?', 'It is the longest side, opposite the 90° angle. The calculator checks that c is longer than the known leg.'],
+      ['Why is my answer a long decimal?', 'Not every square root is a whole number. The result is rounded to six decimal places for display.']
+    ]
+  },
+  'area-calculator': {
+    h1: 'Area Calculator',
+    seoTitle: 'Area Calculator — Rectangle, Triangle, Circle & More',
+    desc: 'Calculate area for rectangles, triangles, circles, trapezoids and parallelograms with formulas and worked examples.',
+    intro: 'Choose a shape and enter its dimensions. The area calculator shows the correct formula, the substituted values and the final answer in square units.',
+    icon: 'chart',
+    form: `
+      <div class="field"><label for="ar-shape">Shape</label><select id="ar-shape"><option value="rectangle">Rectangle</option><option value="triangle">Triangle</option><option value="circle">Circle</option><option value="trapezoid">Trapezoid</option><option value="parallelogram">Parallelogram</option></select></div>
+      <div class="form-grid">
+        ${f('ar-a', 'Base / length / a', 'number', 'step="any" placeholder="e.g. 8"')}
+        ${f('ar-b', 'Width / second base', 'number', 'step="any" placeholder="e.g. 5"')}
+        ${f('ar-h', 'Height', 'number', 'step="any" placeholder="e.g. 4"')}
+        ${f('ar-r', 'Radius', 'number', 'step="any" placeholder="e.g. 2"')}
+      </div>
+      <p class="field-hint">Only fill the fields used by your shape: rectangle uses length and width; triangle uses base and height; circle uses radius; trapezoid uses both bases and height; parallelogram uses base and height.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Calculate area</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>Rectangle and parallelogram: <code>A = base × height</code>. Triangle: <code>A = ½ × base × height</code>. Circle: <code>A = πr²</code>. Trapezoid: <code>A = ½(a + b) × height</code>.</p>
+      <p>Area is measured in square units. If the inputs are centimetres, the answer is in cm²; if they are metres, the answer is in m².</p>`,
+    example: `<p><strong>Example 1:</strong> an 8 m by 5 m rectangle has area <code>8 × 5 = <strong>40 m²</strong></code>.</p>
+      <p><strong>Example 2:</strong> a triangle with base 6 cm and height 4 cm has area <code>½ × 6 × 4 = <strong>12 cm²</strong></code>.</p>`,
+    steps: ['Choose the shape from the list.', 'Enter only the dimensions that shape needs.', 'Select Calculate area and check the formula shown with the answer.'],
+    faq: [
+      ['What units should I use?', 'Use the same unit for every dimension. The result is in square units of whatever you entered.'],
+      ['How accurate is π?', 'The calculator uses JavaScript’s full precision for π and rounds the displayed answer to six decimal places.'],
+      ['Can I use decimals?', 'Yes. Decimal dimensions are supported for every shape.']
+    ]
+  },
+  'volume-calculator': {
+    h1: 'Volume Calculator',
+    seoTitle: 'Volume Calculator — Cube, Prism, Cylinder, Sphere & Cone',
+    desc: 'Find the volume of cubes, rectangular prisms, cylinders, spheres and cones online, with the formula and units explained.',
+    intro: 'Pick a solid, enter its dimensions and get the volume with the formula and substituted values. All calculations run in your browser and results are shown in cubic units.',
+    icon: 'chart',
+    form: `
+      <div class="field"><label for="vo-shape">Solid</label><select id="vo-shape"><option value="cube">Cube</option><option value="prism">Rectangular prism</option><option value="cylinder">Cylinder</option><option value="sphere">Sphere</option><option value="cone">Cone</option></select></div>
+      <div class="form-grid">
+        ${f('vo-a', 'Side / length', 'number', 'step="any" placeholder="e.g. 3"')}
+        ${f('vo-b', 'Width', 'number', 'step="any" placeholder="e.g. 4"')}
+        ${f('vo-h', 'Height', 'number', 'step="any" placeholder="e.g. 5"')}
+        ${f('vo-r', 'Radius', 'number', 'step="any" placeholder="e.g. 2"')}
+      </div>
+      <p class="field-hint">Cube uses side; prism uses length, width and height; cylinder and cone use radius and height; sphere uses radius only.</p>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Calculate volume</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>Cube: <code>V = side³</code>. Rectangular prism: <code>V = length × width × height</code>. Cylinder: <code>V = πr²h</code>. Sphere: <code>V = 4/3 × πr³</code>. Cone: <code>V = ⅓ × πr²h</code>.</p>
+      <p>Volume is measured in cubic units, such as cm³ or m³. A cone occupies one third of the cylinder with the same radius and height.</p>`,
+    example: `<p><strong>Example 1:</strong> a cube with side 3 cm has volume <code>3³ = <strong>27 cm³</strong></code>.</p>
+      <p><strong>Example 2:</strong> a cylinder with radius 2 m and height 5 m has volume <code>π × 2² × 5 ≈ <strong>62.831853 m³</strong></code>.</p>`,
+    steps: ['Choose the solid from the list.', 'Fill in only the dimensions that solid needs.', 'Select Calculate volume and compare the answer with the formula shown.'],
+    faq: [
+      ['What is the difference between volume and area?', 'Area measures a flat surface in square units; volume measures the space inside a solid in cubic units.'],
+      ['Do I need to convert units first?', 'Yes. Use one unit for all dimensions. Mixing centimetres and metres gives a wrong answer.'],
+      ['Can I enter decimal radii?', 'Yes. Decimals are accepted and the answer is rounded to six decimal places.']
+    ]
+  },
+  'time-calculator': {
+    h1: 'Time Calculator',
+    seoTitle: 'Time Calculator — Add & Subtract Hours, Minutes, Seconds',
+    desc: 'Add or subtract hours, minutes and seconds with a free time calculator that handles borrowing and decimal hours.',
+    intro: 'Combine two durations or find the difference between them. The time calculator handles minute and second borrowing automatically and also gives the total in decimal hours.',
+    icon: 'clock',
+    form: `
+      <div class="form-grid">
+        ${f('ti-h1', 'First hours', 'number', 'min="0" step="1" placeholder="e.g. 1"')}
+        ${f('ti-m1', 'First minutes', 'number', 'min="0" max="59" step="1" placeholder="e.g. 45"')}
+        ${f('ti-s1', 'First seconds', 'number', 'min="0" max="59" step="1" placeholder="e.g. 30"')}
+        ${f('ti-h2', 'Second hours', 'number', 'min="0" step="1" placeholder="e.g. 0"')}
+        ${f('ti-m2', 'Second minutes', 'number', 'min="0" max="59" step="1" placeholder="e.g. 20"')}
+        ${f('ti-s2', 'Second seconds', 'number', 'min="0" max="59" step="1" placeholder="e.g. 45"')}
+      </div>
+      <div class="field"><label for="ti-op">Operation</label><select id="ti-op"><option value="add">Add times</option><option value="subtract">Subtract second from first</option></select></div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Calculate time</button><button class="btn btn-secondary" type="reset">Clear</button></div>`,
+    formula: `<p>Convert each duration to seconds: <code>total = hours × 3600 + minutes × 60 + seconds</code>. Add or subtract the totals, then regroup into hours, minutes and seconds.</p>
+      <p>Decimal hours are <code>total seconds ÷ 3600</code>, which is useful for timesheets. Minutes and seconds must each be between 0 and 59.</p>`,
+    example: `<p><strong>Example 1:</strong> 1h 45m 30s + 0h 20m 45s = <strong>2h 6m 15s</strong> because 75 seconds regroup to 1 minute 15 seconds.</p>
+      <p><strong>Example 2:</strong> 2h 5m 10s − 0h 50m 30s = <strong>1h 14m 40s</strong>.</p>`,
+    steps: ['Enter both durations in hours, minutes and seconds.', 'Choose add or subtract.', 'Select Calculate time and read the regrouped result and decimal hours.'],
+    faq: [
+      ['What happens if the second time is longer?', 'The difference is negative. The calculator shows a minus sign and explains that the second duration is longer.'],
+      ['Why do minutes and seconds stop at 59?', 'Sixty seconds become one minute and sixty minutes become one hour, so each smaller unit must stay below 60.'],
+      ['Can I use this for timesheets?', 'Yes. The decimal hours value is the number employers usually use for payroll calculations.']
+    ]
   }
 };

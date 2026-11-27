@@ -4,7 +4,7 @@
   .hero-grid { grid-template-columns: minmax(0, 1fr); }
   .hero-visual { max-width: 520px; }
   .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .header-chip { display: none; }
+  .header-chip, .header-context { display: none; }
 }
 @media (max-width: 900px) {
   .nav-list { gap: 0; }
@@ -28,7 +28,13 @@
 }
 @media (max-width: 600px) {
   .container { width: min(100% - 1.5rem, var(--max)); }
-  body { background-size: auto, auto, auto, 36px 36px, 36px 36px; }
+  body { background-size: auto, auto, auto, 36px 36px, 36px 36px; padding-bottom: 4.2rem; }
+  html { scroll-padding-top: 80px; }
+  .quick-bar { display: grid; }
+  .back-to-top { bottom: 5.1rem; right: .9rem; width: 44px; height: 44px; }
+  .palette-open { display: none; }
+  .command-palette { padding: .75rem; }
+  .palette-panel { max-height: calc(100vh - 1.5rem); }
   .section { padding: 2.6rem 0; }
   .hero { padding-top: 2.4rem; }
   .hero-panel { transform: none; }
@@ -87,9 +93,14 @@
   .global-panel { padding: 1.1rem; }
   .global-panel-cards span { font-size: .7rem; }
   .ad-slot, .ad-slot.ad-slot-active { padding-inline: .5rem; }
+  body { padding-bottom: 4rem; }
+  .quick-bar { left: .5rem; right: .5rem; bottom: .5rem; gap: .2rem; padding: .3rem; }
+  .quick-bar button { font-size: .64rem; min-height: 46px; }
+  .back-to-top { bottom: 4.85rem; right: .65rem; }
 }
 @media print {
-  .site-header, .usage-bar, .site-footer, .btn, .ad-slot, .no-print, .search-wrap, .header-chip { display: none !important; }
+  .site-header, .usage-bar, .site-footer, .btn, .ad-slot, .no-print, .search-wrap, .header-chip,
+  .scroll-progress, .back-to-top, .quick-bar, .command-palette, .header-context { display: none !important; }
   body { background: #fff !important; color: #000; }
   .card { background: #fff !important; border: 1px solid #ccc !important; box-shadow: none; break-inside: avoid; }
   .tool-card, .category-card, .article-card, .tip-card { box-shadow: none; border-color: #ccc; }

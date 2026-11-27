@@ -391,3 +391,87 @@ test('GPA and percentage conversion: 4.0 and 10-point conventions with validatio
   assert.equal(C.convertGpaPercent(11, 'cgpa-percent'), null);
   assert.equal(C.convertGpaPercent(50, 'unknown'), null);
 });
+
+test('slope calculator: gradient, intercept, vertical lines and distance', () => {
+  const s = C.slopeFromPoints(1, 3, 3, 7);
+  near(s.slope, 2);
+  near(s.intercept, 1);
+  assert.equal(s.equation, 'y = 2x + 1');
+  near(s.angle, 63.4349, 4);
+  near(s.distance, Math.sqrt(20), 6);
+  const negative = C.slopeFromPoints(0, 5, 2, 1);
+  near(negative.slope, -2);
+  assert.equal(negative.equation, 'y = -2x + 5');
+  const vertical = C.slopeFromPoints(4, 1, 4, 9);
+  assert.equal(vertical.vertical, true);
+  assert.equal(vertical.slope, null);
+  assert.equal(vertical.equation, 'x = 4');
+  assert.equal(C.slopeFromPoints(0, 0, 0, 0).vertical, true);
+  assert.equal(C.slopeFromPoints('x', 0, 1, 2), null);
+});
+
+test('quadratic solver: two roots, repeated root and complex conjugates', () => {
+  const two = C.quadraticRoots(1, -5, 6);
+  assert.equal(two.type, 'two-real');
+  assert.deepEqual(two.roots, [3, 2]);
+  assert.equal(two.discriminant, 1);
+  near(two.vertex.x, 2.5);
+  near(two.vertex.y, -0.25);
+  const one = C.quadraticRoots(1, 4, 4);
+  assert.equal(one.type, 'one-real');
+  assert.deepEqual(one.roots, [-2]);
+  const complex = C.quadraticRoots(1, 2, 5);
+  assert.equal(complex.type, 'complex');
+  near(complex.roots[0].real, -1);
+  near(complex.roots[0].imaginary, 2);
+  near(complex.roots[1].imaginary, -2);
+  assert.equal(C.quadraticRoots(0, 1, 2), null);
+});
+
+test('Pythagorean theorem: hypotenuse and either leg with validation', () => {
+  const hyp = C.pythagorean(3, 4, 0, 'hypotenuse');
+  assert.equal(hyp.missing, 'c');
+  assert.equal(hyp.value, 5);
+  const legA = C.pythagorean(0, 4, 5, 'leg-a');
+  assert.equal(legA.value, 3);
+  const legB = C.pythagorean(3, 0, 5, 'leg-b');
+  assert.equal(legB.value, 4);
+  assert.equal(C.pythagorean(5, 4, 3, 'leg-a'), null);
+  assert.equal(C.pythagorean(5, 0, 4, 'leg-b'), null);
+  assert.equal(C.pythagorean(0, 4, 5, 'hypotenuse'), null);
+});
+
+test('area calculator: five shapes and rejected dimensions', () => {
+  near(C.areaOfShape('rectangle', { a: 8, b: 5 }).area, 40);
+  near(C.areaOfShape('triangle', { a: 6, h: 4 }).area, 12);
+  near(C.areaOfShape('circle', { r: 2 }).area, Math.PI * 4, 6);
+  near(C.areaOfShape('trapezoid', { a: 3, b: 5, h: 4 }).area, 16);
+  near(C.areaOfShape('parallelogram', { a: 7, b: 3 }).area, 21);
+  assert.equal(C.areaOfShape('circle', { r: -2 }), null);
+  assert.equal(C.areaOfShape('triangle', { a: 6 }), null);
+  assert.equal(C.areaOfShape('unknown', { a: 1, b: 2 }), null);
+});
+
+test('volume calculator: five solids and rejected dimensions', () => {
+  near(C.volumeOfShape('cube', { a: 3 }).volume, 27);
+  near(C.volumeOfShape('prism', { a: 4, b: 5, h: 6 }).volume, 120);
+  near(C.volumeOfShape('cylinder', { r: 2, h: 5 }).volume, Math.PI * 20, 6);
+  near(C.volumeOfShape('sphere', { r: 3 }).volume, 4 / 3 * Math.PI * 27, 6);
+  near(C.volumeOfShape('cone', { r: 3, h: 4 }).volume, Math.PI * 12, 6);
+  assert.equal(C.volumeOfShape('cube', { a: 0 }), null);
+  assert.equal(C.volumeOfShape('prism', { a: 1, b: 2 }), null);
+  assert.equal(C.volumeOfShape('pyramid', { a: 1 }), null);
+});
+
+test('time calculator: addition, subtraction, borrowing and invalid minutes', () => {
+  const add = C.timeCalculate({ h: 1, m: 45, s: 30 }, { h: 0, m: 20, s: 45 }, 'add');
+  assert.equal(add.display, '2h 6m 15s');
+  near(add.decimalHours, 2.1042, 4);
+  const sub = C.timeCalculate({ h: 2, m: 5, s: 10 }, { h: 0, m: 50, s: 30 }, 'subtract');
+  assert.equal(sub.display, '1h 14m 40s');
+  const negative = C.timeCalculate({ h: 0, m: 10, s: 0 }, { h: 1, m: 0, s: 0 }, 'subtract');
+  assert.equal(negative.sign, '-');
+  assert.equal(negative.display, '-0h 50m 0s');
+  assert.equal(C.timeCalculate({ h: 0, m: 60, s: 0 }, { h: 0, m: 0, s: 0 }, 'add'), null);
+  assert.equal(C.timeCalculate({ h: 0, m: 0, s: 0 }, { h: 0, m: 0, s: 0 }, 'multiply'), null);
+});

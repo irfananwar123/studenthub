@@ -24,9 +24,9 @@ const PAGES = [
   ...['study-tips', 'active-recall', 'spaced-repetition', 'exam-preparation'].map(s => `articles/${s}/index.html`)
 ];
 
-test('all 43 tool pages and scripts exist', () => {
-  assert.equal(IDS.length, 43);
-  assert.equal(PAGES.length, 56);
+test('all 49 tool pages and scripts exist', () => {
+  assert.equal(IDS.length, 49);
+  assert.equal(PAGES.length, 62);
   IDS.forEach(id => {
     assert.ok(exists(`tools/${id}/index.html`), `${id} page exists`);
     assert.ok(exists(`tools/${id}/tool.js`), `${id} script exists`);
@@ -115,6 +115,48 @@ test('global SEO ships keywords, hreflang, keyword copy and richer home data', (
     'mean median mode calculator', 'GPA percentage converter'].forEach(needle => {
     assert.ok(home.toLowerCase().includes(needle.toLowerCase()), `homepage daily keyword: ${needle}`);
   });
+  const math = data['@graph'].find(x => x['@type'] === 'ItemList' && x.name === 'Math and time calculators');
+  assert.ok(math, 'math and time ItemList');
+  assert.equal(math.numberOfItems, 6, 'six math and time calculators');
+  assert.equal(new Set(math.itemListElement.map(x => x.url)).size, 6, 'unique math calculator URLs');
+  assert.ok(home.includes('id="math-essentials"'), 'math essentials homepage section');
+  ['slope calculator', 'quadratic equation solver', 'Pythagorean theorem', 'area calculator',
+    'volume calculator', 'time calculator'].forEach(needle => {
+    assert.ok(home.toLowerCase().includes(needle.toLowerCase()), `homepage math keyword: ${needle}`);
+  });
+});
+
+test('global scroll, reveal, sticky, palette and quick-bar UI ships on every page', () => {
+  const uiJs = read('assets/js/global-ui.js');
+  ['scroll-progress', 'back-to-top', 'header-context', 'is-stuck', 'has-reveal', 'data-reveal',
+    'IntersectionObserver', 'command-palette', 'palette-input', 'palette-results',
+    "key === 'k'", "'escape'", "'arrowdown'", "'enter'", 'quick-action'].forEach(needle => {
+    assert.ok(uiJs.includes(needle), `global-ui.js: ${needle}`);
+  });
+  assert.ok(!/(fetch|XMLHttpRequest|\beval\s*\(|\.innerHTML\s*=)/.test(uiJs), 'global-ui.js stays local and safe');
+
+  PAGES.concat(DIR_PAGES).forEach(page => {
+    const html = read(page);
+    ['data-scroll-progress', 'data-back-to-top', 'data-header-context', 'data-command-palette',
+      'data-palette-input', 'data-palette-results', 'data-palette-open', 'data-palette-close',
+      'data-quick-action="search"', 'data-quick-action="tools"', 'data-quick-action="workspace"',
+      'data-quick-action="top"', 'assets/js/global-ui.js'].forEach(needle => {
+      assert.ok(html.includes(needle), `${page}: ${needle}`);
+    });
+    assert.equal((html.match(/rel="stylesheet"/g) || []).length, 4, `${page}: exactly four stylesheets`);
+  });
+
+  const mainCss = read('assets/css/main.css');
+  const componentsCss = read('assets/css/components.css');
+  const responsiveCss = read('assets/css/responsive.css');
+  ['scroll-progress', 'is-stuck', 'header-context', 'scroll-padding-top', 'has-reveal'].forEach(needle => {
+    assert.ok(mainCss.includes(needle), `main.css: ${needle}`);
+  });
+  ['command-palette', 'palette-backdrop', 'palette-panel', 'palette-results', 'quick-bar', 'back-to-top'].forEach(needle => {
+    assert.ok(componentsCss.includes(needle), `components.css: ${needle}`);
+  });
+  assert.ok(responsiveCss.includes('.quick-bar { display: grid; }'), 'responsive.css: mobile quick bar');
+  assert.ok(responsiveCss.includes('prefers-reduced-motion') || mainCss.includes('prefers-reduced-motion'), 'reduced motion support');
 });
 
 test('live usage strip is on-device only and ships on every page', () => {
@@ -202,10 +244,10 @@ test('sitemap, fallback sitemap, robots, manifest and icons are complete', () =>
     assert.ok(fallback.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in fallback sitemap`);
   });
   assert.ok(sitemap.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in sitemap');
-  assert.equal((sitemap.match(/<loc>/g) || []).length, 53, 'sitemap has 53 crawlable URLs');
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 59, 'sitemap has 59 crawlable URLs');
   assert.ok(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap declares XHTML namespace');
-  assert.equal((sitemap.match(/hreflang="en"/g) || []).length, 53, 'sitemap has English alternates');
-  assert.equal((sitemap.match(/hreflang="x-default"/g) || []).length, 53, 'sitemap has default alternates');
+  assert.equal((sitemap.match(/hreflang="en"/g) || []).length, 59, 'sitemap has English alternates');
+  assert.equal((sitemap.match(/hreflang="x-default"/g) || []).length, 59, 'sitemap has default alternates');
   assert.ok(fallback.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in fallback sitemap');
   assert.ok(fallback.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'fallback sitemap has hreflang namespace');
   assert.equal((fallback.match(/<loc>/g) || []).length, (sitemap.match(/<loc>/g) || []).length, 'fallback sitemap is identical');
@@ -229,7 +271,7 @@ test('service worker precaches every tool page and app shell', () => {
     assert.ok(sw.includes(`/tools/${id}/index.html`), `${id}/index.html precached`);
   });
   ['/offline/', '/advanced/', '/advanced/index.html', '/assets/css/main.css', '/assets/js/core.js', '/assets/js/calculations.js',
-    '/assets/js/usage.js', '/assets/js/advanced.js'].forEach(u => assert.ok(sw.includes(u), `${u} precached`));
+    '/assets/js/global-ui.js', '/assets/js/usage.js', '/assets/js/advanced.js'].forEach(u => assert.ok(sw.includes(u), `${u} precached`));
 });
 
 test('shipped JavaScript has no eval, innerHTML or external service calls', () => {

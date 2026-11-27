@@ -171,6 +171,28 @@ function usageBar() {
     <a class="usage-link" href="/workspace/">Details ${icon('arrow', 13)}</a>
   </div></div>`;
 }
+/* Global interface chrome. Every element is real, labelled and keyboard
+   reachable; styling hides the quick bar on larger screens. */
+function globalUi() {
+  return `<div class="scroll-progress" data-scroll-progress role="progressbar" aria-label="Page reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+<button class="icon-button back-to-top" type="button" data-back-to-top aria-label="Back to top" title="Back to top" hidden>${icon('reset', 18)}</button>
+<div class="command-palette" data-command-palette hidden>
+  <div class="palette-backdrop" data-palette-close></div>
+  <div class="palette-panel" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+    <div class="palette-head"><h2 id="palette-title">Quick tools</h2><button class="icon-button palette-close" type="button" data-palette-close aria-label="Close quick tools" title="Close">×</button></div>
+    <label class="visually-hidden" for="palette-input">Search tools and pages</label>
+    <div class="palette-search">${icon('search', 18)}<input id="palette-input" data-palette-input type="search" autocomplete="off" placeholder="Search ${TOOLS.length} tools and pages"><kbd>Ctrl K</kbd></div>
+    <div class="palette-results" data-palette-results role="listbox" aria-label="Quick tool results"></div>
+    <p class="palette-foot">↑ ↓ to move · Enter to open · Esc to close</p>
+  </div>
+</div>
+<nav class="quick-bar" aria-label="Quick actions">
+  <button type="button" data-quick-action="search">${icon('search', 18)}<span>Search</span></button>
+  <button type="button" data-quick-action="tools">${icon('calculator', 18)}<span>Tools</span></button>
+  <button type="button" data-quick-action="workspace">${icon('folder', 18)}<span>Space</span></button>
+  <button type="button" data-quick-action="top">${icon('reset', 18)}<span>Top</span></button>
+</nav>`;
+}
 function header() {
   return `<header class="site-header"><div class="container header-inner">
     ${brand}
@@ -187,6 +209,8 @@ function header() {
     </ul></nav>
     <div class="header-actions">
       <span class="header-chip">${TOOLS.length} tools · 100% free</span>
+      <span class="header-context" data-header-context hidden></span>
+      <button class="icon-button palette-open" type="button" data-palette-open aria-label="Open quick tool search" title="Quick tools (Ctrl+K)">${icon('search', 18)}</button>
       ${themeSwitch}
       ${accentSwitch}
     </div>
@@ -204,7 +228,7 @@ function footer(adsOn) {
   </div></footer>`;
 }
 function scripts(extra) {
-  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app'];
+  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'global-ui'];
   return base.map(n => `<script src="/assets/js/${n}.js" defer></script>`).join('\n') + '\n' + (extra || '');
 }
 function shell(opts) {
@@ -215,6 +239,7 @@ function shell(opts) {
 ${header()}
 ${usageBar()}
 <div id="offline-indicator" class="offline-indicator" hidden role="status">You are offline. Saved tools and your local data still work.</div>
+${globalUi()}
 ${opts.body}
 ${footer(ADS.enabled)}
 ${scripts(opts.scripts)}
@@ -222,12 +247,12 @@ ${scripts(opts.scripts)}
 }
 function toolCard(t) {
   const c = content[t.id];
-  return `<article class="tool-card"><div class="card-icon">${icon(c && c.icon ? c.icon : 'calculator', 20)}</div><h3><a href="/tools/${t.id}/">${t.name}</a></h3><p>${t.desc}</p><span class="card-link">Open tool →</span></article>`;
+  return `<article class="tool-card" data-reveal><div class="card-icon">${icon(c && c.icon ? c.icon : 'calculator', 20)}</div><h3><a href="/tools/${t.id}/">${t.name}</a></h3><p>${t.desc}</p><span class="card-link">Open tool →</span></article>`;
 }
 function advancedCard(id, index) {
   const t = TOOLS.find(x => x.id === id);
   const c = content[id];
-  return `<article class="advanced-card" data-advanced-category="${t.category}" data-tool-id="${id}">
+  return `<article class="advanced-card" data-advanced-category="${t.category}" data-tool-id="${id}" data-reveal>
     <div class="advanced-card-top"><span class="advanced-card-icon">${icon(c && c.icon ? c.icon : 'spark', 22)}</span><span class="advanced-index">${String(index + 1).padStart(2, '0')}</span></div>
     <span class="advanced-kicker">${t.category}</span>
     <h3><a href="/tools/${id}/">${t.name}</a></h3>
@@ -286,6 +311,7 @@ function toolPage(t) {
 function homepage() {
   const featured = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits', 'percentage-calculator', 'cgpa-calculator', 'attendance-calculator', 'pomodoro-timer'];
   const daily = ['scientific-calculator', 'fraction-calculator', 'ratio-calculator', 'standard-deviation-calculator', 'mean-median-mode-calculator', 'gpa-percentage-converter'];
+  const math = ['slope-calculator', 'quadratic-equation-solver', 'pythagorean-theorem-calculator', 'area-calculator', 'volume-calculator', 'time-calculator'];
   const popular = ['gpa-calculator', 'grade-calculator', 'marks-calculator', 'exam-score-predictor', 'exam-countdown', 'study-tracker', 'quiz-maker', 'unit-converter'];
   const find = id => TOOLS.find(t => t.id === id);
   const cats = [
@@ -308,7 +334,7 @@ function homepage() {
         '@type': 'WebSite', '@id': SITE + '/#website', name: 'StudentHub', url: SITE + '/',
         description: 'Free browser-based study tools, calculators and planners for students.',
         inLanguage: 'en',
-        keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation, mean median mode, GPA percentage converter, grade calculator, flashcards',
+        keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation, mean median mode, GPA percentage converter, grade calculator, flashcards, slope calculator, quadratic solver, Pythagorean theorem, area calculator, volume calculator, time calculator',
         audience: { '@type': 'Audience', audienceType: 'Students worldwide' },
         publisher: { '@id': SITE + '/#organization' },
         potentialAction: { '@type': 'SearchAction', target: SITE + '/#{search_term_string}', 'query-input': 'required name=search_term_string' }
@@ -321,6 +347,10 @@ function homepage() {
       {
         '@type': 'ItemList', name: 'Everyday free calculators', numberOfItems: daily.length,
         itemListElement: daily.map((id, i) => ({ '@type': 'ListItem', position: i + 1, url: SITE + '/tools/' + id + '/' }))
+      },
+      {
+        '@type': 'ItemList', name: 'Math and time calculators', numberOfItems: math.length,
+        itemListElement: math.map((id, i) => ({ '@type': 'ListItem', position: i + 1, url: SITE + '/tools/' + id + '/' }))
       }
     ]
   };
@@ -373,7 +403,9 @@ function homepage() {
 
   <section class="section" id="daily-calculators" aria-labelledby="daily-heading"><div class="container"><div class="section-head"><span class="eyebrow">${icon('calculator', 15)} Everyday maths</span><h2 id="daily-heading">Daily calculators students search for</h2><p>Use the free scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator and GPA percentage converter. Each one works locally with clear worked examples.</p></div><div class="grid tool-grid">${daily.map(id => toolCard(find(id))).join('')}</div></div></section>
 
-  <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card"><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
+  <section class="section section-soft" id="math-essentials" aria-labelledby="math-heading"><div class="container"><div class="section-head"><span class="eyebrow">${icon('chart', 15)} Algebra, geometry &amp; time</span><h2 id="math-heading">Math essentials made clear</h2><p>Find the slope between two points, solve quadratic equations, complete a Pythagorean theorem calculation, check area and volume formulas, and add or subtract time. Every answer includes the working so you can learn from it.</p></div><div class="grid tool-grid">${math.map(id => toolCard(find(id))).join('')}</div></div></section>
+
+  <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card" data-reveal><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
 
   <section class="section section-soft" id="all-tools" aria-labelledby="all-heading"><div class="container"><div class="section-head"><span class="eyebrow">The full library</span><h2 id="all-heading">All ${TOOLS.length} tools</h2><p>Every tool has its own page with instructions, formulas and examples.</p></div><div class="grid tool-grid">${TOOLS.map(toolCard).join('')}</div></div></section>
 
@@ -382,9 +414,9 @@ function homepage() {
   <section class="section section-soft" aria-labelledby="popular-heading"><div class="container"><div class="section-head"><span class="eyebrow">Worth a look</span><h2 id="popular-heading">Popular tools</h2><p>Good next steps once you have the basics covered.</p></div><div class="grid tool-grid">${popular.map(id => toolCard(find(id))).join('')}</div></div></section>
 
   <section class="section" aria-labelledby="tips-heading"><div class="container"><div class="section-head"><span class="eyebrow">Better habits</span><h2 id="tips-heading">Study productivity tips</h2><p>Small changes that make revision easier to keep up.</p></div><div class="grid grid-3">
-    <article class="tip-card"><div class="card-icon">${icon('clock', 20)}</div><h3>Use short, defined sessions</h3><p>Work for 25 minutes, then take a five-minute break. A clear end point makes it easier to start.</p><a class="card-link" href="/tools/pomodoro-timer/">Try the Pomodoro Timer →</a></article>
-    <article class="tip-card"><div class="card-icon">${icon('book', 20)}</div><h3>Test yourself before rereading</h3><p>Close your notes and recall what you can first. Checking afterwards shows what really needs work.</p><a class="card-link" href="/articles/active-recall/">Read the guide →</a></article>
-    <article class="tip-card"><div class="card-icon">${icon('chart', 20)}</div><h3>Look at patterns, not one day</h3><p>A single missed session means little. A weekly view shows whether your routine is realistic.</p><a class="card-link" href="/tools/study-tracker/">Open Study Tracker →</a></article>
+    <article class="tip-card" data-reveal><div class="card-icon">${icon('clock', 20)}</div><h3>Use short, defined sessions</h3><p>Work for 25 minutes, then take a five-minute break. A clear end point makes it easier to start.</p><a class="card-link" href="/tools/pomodoro-timer/">Try the Pomodoro Timer →</a></article>
+    <article class="tip-card" data-reveal><div class="card-icon">${icon('book', 20)}</div><h3>Test yourself before rereading</h3><p>Close your notes and recall what you can first. Checking afterwards shows what really needs work.</p><a class="card-link" href="/articles/active-recall/">Read the guide →</a></article>
+    <article class="tip-card" data-reveal><div class="card-icon">${icon('chart', 20)}</div><h3>Look at patterns, not one day</h3><p>A single missed session means little. A weekly view shows whether your routine is realistic.</p><a class="card-link" href="/tools/study-tracker/">Open Study Tracker →</a></article>
   </div></div></section>
 
   <section class="section section-soft global-section" id="worldwide" aria-labelledby="global-heading"><div class="container global-grid">
@@ -401,7 +433,7 @@ function homepage() {
     <div class="global-panel" aria-hidden="true"><div class="global-orbit">${icon('globe', 68)}</div><div class="global-panel-cards"><span>GPA calculator</span><span>Grade calculator</span><span>Revision planner</span><span>Flashcards</span><span>Word counter</span></div></div>
   </div></section>
 
-  <section class="section section-soft" id="articles" aria-labelledby="articles-heading"><div class="container"><div class="section-head"><span class="eyebrow">Guides</span><h2 id="articles-heading">Helpful educational articles</h2><p>Short, practical reading — no paid content or pop-ups.</p></div><div class="grid grid-2">${articles.map(([slug, title, desc]) => `<article class="article-card"><div class="card-icon">${icon('pencil', 20)}</div><h3><a href="/articles/${slug}/">${title}</a></h3><p>${desc}</p><span class="card-link">Read guide →</span></article>`).join('')}</div></div></section>
+  <section class="section section-soft" id="articles" aria-labelledby="articles-heading"><div class="container"><div class="section-head"><span class="eyebrow">Guides</span><h2 id="articles-heading">Helpful educational articles</h2><p>Short, practical reading — no paid content or pop-ups.</p></div><div class="grid grid-2">${articles.map(([slug, title, desc]) => `<article class="article-card" data-reveal><div class="card-icon">${icon('pencil', 20)}</div><h3><a href="/articles/${slug}/">${title}</a></h3><p>${desc}</p><span class="card-link">Read guide →</span></article>`).join('')}</div></div></section>
 
   <div class="container">${adSlot('home', ADS.enabled)}</div>
 
@@ -417,8 +449,8 @@ function homepage() {
 </main>`;
   return shell({
     title: 'StudentHub — Free Study Tools, Calculators and Planners',
-    desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, study timer, revision scheduler, flashcards, quizzes, word counter and more.`,
-    keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator, GPA percentage converter, grade calculator, attendance calculator, revision planner, flashcard maker, exam preparation, students worldwide',
+    desc: `${TOOLS.length} free private study tools: GPA and grade calculators, attendance tracker, study timer, revision planner, flashcards, quizzes and word counter.`,
+    keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator, GPA percentage converter, grade calculator, attendance calculator, revision planner, flashcard maker, slope calculator, quadratic solver, Pythagorean theorem, area calculator, volume calculator, time calculator, exam preparation, students worldwide',
     path: '/', ld: homeLd, body,
     scripts: `<script src="/assets/js/home.js" defer></script>`
   });
@@ -682,7 +714,7 @@ const precache = [
   ...TOOLS.map(t => `/tools/${t.id}/`),
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
   ...CSS_NAMES.map(cssUrl),
-  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
+  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'global-ui', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
   ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];
