@@ -24,9 +24,9 @@ const PAGES = [
   ...['study-tips', 'active-recall', 'spaced-repetition', 'exam-preparation'].map(s => `articles/${s}/index.html`)
 ];
 
-test('all 37 tool pages and scripts exist', () => {
-  assert.equal(IDS.length, 37);
-  assert.equal(PAGES.length, 50);
+test('all 43 tool pages and scripts exist', () => {
+  assert.equal(IDS.length, 43);
+  assert.equal(PAGES.length, 56);
   IDS.forEach(id => {
     assert.ok(exists(`tools/${id}/index.html`), `${id} page exists`);
     assert.ok(exists(`tools/${id}/tool.js`), `${id} script exists`);
@@ -106,6 +106,15 @@ test('global SEO ships keywords, hreflang, keyword copy and richer home data', (
   assert.equal(website.inLanguage, 'en', 'home language signal');
   assert.ok(website.audience && /worldwide/i.test(website.audience.audienceType), 'home audience signal');
   assert.ok(data['@graph'].some(x => x['@type'] === 'ItemList' && x.numberOfItems === 8), 'featured tool ItemList');
+  const daily = data['@graph'].find(x => x['@type'] === 'ItemList' && x.name === 'Everyday free calculators');
+  assert.ok(daily, 'daily calculator ItemList');
+  assert.equal(daily.numberOfItems, 6, 'six everyday calculators');
+  assert.equal(new Set(daily.itemListElement.map(x => x.url)).size, 6, 'unique daily calculator URLs');
+  assert.ok(home.includes('id="daily-calculators"'), 'daily calculator homepage section');
+  ['scientific calculator', 'fraction calculator', 'ratio calculator', 'standard deviation calculator',
+    'mean median mode calculator', 'GPA percentage converter'].forEach(needle => {
+    assert.ok(home.toLowerCase().includes(needle.toLowerCase()), `homepage daily keyword: ${needle}`);
+  });
 });
 
 test('live usage strip is on-device only and ships on every page', () => {
@@ -193,10 +202,10 @@ test('sitemap, fallback sitemap, robots, manifest and icons are complete', () =>
     assert.ok(fallback.includes(`<loc>${SITE}/tools/${id}/</loc>`), `${id} in fallback sitemap`);
   });
   assert.ok(sitemap.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in sitemap');
-  assert.equal((sitemap.match(/<loc>/g) || []).length, 47, 'sitemap has 47 crawlable URLs');
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 53, 'sitemap has 53 crawlable URLs');
   assert.ok(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap declares XHTML namespace');
-  assert.equal((sitemap.match(/hreflang="en"/g) || []).length, 47, 'sitemap has English alternates');
-  assert.equal((sitemap.match(/hreflang="x-default"/g) || []).length, 47, 'sitemap has default alternates');
+  assert.equal((sitemap.match(/hreflang="en"/g) || []).length, 53, 'sitemap has English alternates');
+  assert.equal((sitemap.match(/hreflang="x-default"/g) || []).length, 53, 'sitemap has default alternates');
   assert.ok(fallback.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in fallback sitemap');
   assert.ok(fallback.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'fallback sitemap has hreflang namespace');
   assert.equal((fallback.match(/<loc>/g) || []).length, (sitemap.match(/<loc>/g) || []).length, 'fallback sitemap is identical');

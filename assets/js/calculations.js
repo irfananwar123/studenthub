@@ -651,6 +651,299 @@
     };
   }
 
+  /* ---- Everyday student calculators (no DOM, no eval, no network) ---- */
+
+  function gcd(a, b) {
+    a = Math.abs(Math.round(a));
+    b = Math.abs(Math.round(b));
+    while (b) { var t = a % b; a = b; b = t; }
+    return a;
+  }
+
+  function factorial(n) {
+    var result = 1;
+    for (var i = 2; i <= n; i++) result *= i;
+    return result;
+  }
+
+  function rationalPair(a, b) {
+    var scale = 1;
+    [a, b].forEach(function (x) {
+      var parts = String(x).split('.');
+      if (parts[1]) scale = Math.max(scale, Math.pow(10, Math.min(6, parts[1].length)));
+    });
+    var n = Math.round(a * scale), d = Math.round(b * scale);
+    if (!isNum(n) || !isNum(d) || d === 0) return null;
+    var g = gcd(n, d);
+    if (!g) return null;
+    n /= g; d /= g;
+    if (d < 0) { n = -n; d = -d; }
+    return { n: n, d: d };
+  }
+
+  function fractionCalculate(a, b, c, d, op) {
+    if (!isNum(a) || !isNum(b) || !isNum(c) || !isNum(d) || b === 0 || d === 0) return null;
+    var map = { '+': 'add', '-': 'subtract', '*': 'multiply', '/': 'divide',
+      add: 'add', subtract: 'subtract', multiply: 'multiply', divide: 'divide' };
+    var mode = map[op];
+    if (!mode) return null;
+    var first = rationalPair(a, b), second = rationalPair(c, d);
+    if (!first || !second) return null;
+    if (mode === 'divide' && second.n === 0) return null;
+    var n, den;
+    if (mode === 'add') { n = first.n * second.d + second.n * first.d; den = first.d * second.d; }
+    else if (mode === 'subtract') { n = first.n * second.d - second.n * first.d; den = first.d * second.d; }
+    else if (mode === 'multiply') { n = first.n * second.n; den = first.d * second.d; }
+    else { n = first.n * second.d; den = first.d * second.n; }
+    if (den === 0) return null;
+    var g = gcd(n, den) || 1;
+    n /= g; den /= g;
+    if (den < 0) { n = -n; den = -den; }
+    var whole = n >= 0 ? Math.floor(n / den) : Math.ceil(n / den);
+    var remainder = Math.abs(n % den);
+    var mixed = remainder === 0 ? String(whole) : (whole === 0 ? '' : whole + ' ') + remainder + '/' + den;
+    return {
+      numerator: n, denominator: den, decimal: round(n / den, 6), mixed: mixed,
+      operation: mode, expression: a + '/' + b + ' ' + ({ add: '+', subtract: '−', multiply: '×', divide: '÷' }[mode]) + ' ' + c + '/' + d
+    };
+  }
+
+  function ratioSolve(a, b, c) {
+    if (!isNum(a) || !isNum(b) || !isNum(c) || a <= 0 || b < 0 || c < 0) return null;
+    var x = c * b / a;
+    return { x: round(x, 6), factor: round(c / a, 6), statement: a + ':' + b + ' = ' + c + ':' + round(x, 6) };
+  }
+
+  function ratioSimplify(a, b, total) {
+    if (!isNum(a) || !isNum(b) || a <= 0 || b <= 0) return null;
+    if (total !== undefined && total !== null && total !== '' && (!isNum(total) || total < 0)) return null;
+    var pair = rationalPair(a, b);
+    if (!pair) return null;
+    var parts = pair.n + pair.d;
+    var result = { a: pair.n, b: pair.d, totalParts: parts, shareA: null, shareB: null };
+    if (isNum(total)) {
+      result.shareA = round(total * pair.n / parts, 4);
+      result.shareB = round(total * pair.d / parts, 4);
+    }
+    return result;
+  }
+
+  function parseNumberList(input) {
+    var parts;
+    if (Array.isArray(input)) parts = input.map(function (x) { return String(x).trim(); });
+    else parts = String(input).split(/[\s,;]+/);
+    parts = parts.filter(function (x) { return x !== ''; });
+    if (!parts.length) return null;
+    var list = [];
+    for (var i = 0; i < parts.length; i++) {
+      var n = Number(parts[i]);
+      if (!isNum(n)) return null;
+      list.push(n);
+    }
+    return list;
+  }
+
+  function standardDeviation(values) {
+    var list = Array.isArray(values) || typeof values === 'string' ? parseNumberList(values) : values;
+    if (!list || !list.length || !list.every(isNum)) return null;
+    var n = list.length;
+    var mean = sum(list) / n;
+    var squares = list.map(function (x) { return Math.pow(x - mean, 2); });
+    var popVar = sum(squares) / n;
+    var sampleVar = n > 1 ? sum(squares) / (n - 1) : null;
+    var min = Math.min.apply(null, list), max = Math.max.apply(null, list);
+    return {
+      count: n, mean: round(mean, 4), min: min, max: max, range: round(max - min, 4),
+      populationVariance: round(popVar, 4), populationDeviation: round(Math.sqrt(popVar), 4),
+      sampleVariance: sampleVar === null ? null : round(sampleVar, 4),
+      sampleDeviation: sampleVar === null ? null : round(Math.sqrt(sampleVar), 4)
+    };
+  }
+
+  function centralTendency(values) {
+    var list = Array.isArray(values) || typeof values === 'string' ? parseNumberList(values) : values;
+    if (!list || !list.length || !list.every(isNum)) return null;
+    var sorted = list.slice().sort(function (a, b) { return a - b; });
+    var mid = Math.floor(sorted.length / 2);
+    var median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    var counts = {}, maxCount = 0;
+    sorted.forEach(function (x) {
+      var key = String(x);
+      counts[key] = (counts[key] || 0) + 1;
+      if (counts[key] > maxCount) maxCount = counts[key];
+    });
+    var modes = maxCount > 1 ? Object.keys(counts).filter(function (k) { return counts[k] === maxCount; }).map(Number).sort(function (a, b) { return a - b; }) : [];
+    return {
+      count: sorted.length, mean: round(sum(sorted) / sorted.length, 4), median: round(median, 4),
+      modes: modes, modeLabel: modes.length ? modes.join(', ') : 'No mode',
+      min: sorted[0], max: sorted[sorted.length - 1], range: round(sorted[sorted.length - 1] - sorted[0], 4)
+    };
+  }
+
+  function convertGpaPercent(value, mode) {
+    if (!isNum(value)) return null;
+    var result, unit, note;
+    if (mode === 'gpa-percent') {
+      if (value < 0 || value > 4) return null;
+      result = value / 4 * 100; unit = '%';
+      note = 'Linear conversion on a 4.0 scale. Institutions may use different grade bands.';
+    } else if (mode === 'percent-gpa') {
+      if (value < 0 || value > 100) return null;
+      result = value / 25; unit = 'GPA points';
+      note = 'Linear conversion on a 4.0 scale. Official grade bands can differ from this estimate.';
+    } else if (mode === 'cgpa-percent') {
+      if (value < 0 || value > 10) return null;
+      result = value * 9.5; unit = '%';
+      note = 'Common 10-point CGPA × 9.5 convention. Check your institution before official use.';
+    } else if (mode === 'percent-cgpa') {
+      if (value < 0 || value > 100) return null;
+      result = value / 9.5; unit = 'CGPA points';
+      note = 'Reverse of the common 10-point × 9.5 convention. Check your institution before official use.';
+    } else return null;
+    return { value: round(result, 2), unit: unit, mode: mode, note: note };
+  }
+
+  /* A small, safe expression parser for the Scientific Calculator. It supports
+     + - * / % ^ !, parentheses, constants and common functions. It never uses
+     eval or Function, so user input is never executed as JavaScript. */
+  var SCI_FUNCTIONS = { sin: 1, cos: 1, tan: 1, asin: 1, acos: 1, atan: 1,
+    log: 2, ln: 1, sqrt: 1, abs: 1, exp: 1, floor: 1, ceil: 1, round: 1, sign: 1,
+    pow: 2, min: 2, max: 2 };
+
+  function sciTokenize(input) {
+    var s = String(input).replace(/π/g, 'pi').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/√/g, 'sqrt');
+    var tokens = [], i = 0;
+    while (i < s.length) {
+      var ch = s.charAt(i);
+      if (/\s/.test(ch)) { i++; continue; }
+      var m = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/.exec(s.slice(i));
+      if (m) { tokens.push({ type: 'num', value: Number(m[0]) }); i += m[0].length; continue; }
+      m = /^[a-zA-Z]+/.exec(s.slice(i));
+      if (m) { tokens.push({ type: 'id', value: m[0].toLowerCase() }); i += m[0].length; continue; }
+      if ('+-*/^!(),'.indexOf(ch) !== -1) { tokens.push({ type: 'op', value: ch }); i++; continue; }
+      throw new Error('Unexpected character');
+    }
+    return tokens;
+  }
+
+  function scientificEvaluate(expression, angleMode) {
+    var tokens;
+    try { tokens = sciTokenize(expression); } catch (e) { return null; }
+    if (!tokens.length) return null;
+    var i = 0, deg = angleMode !== 'rad';
+
+    function peek() { return tokens[i]; }
+    function take() { return tokens[i++]; }
+    function expect(value) { var t = take(); if (!t || t.value !== value) throw new Error('Expected ' + value); }
+    function startsPrimary(t) { return !!t && (t.type === 'num' || t.type === 'id' || (t.type === 'op' && t.value === '(')); }
+    function toRad(x) { return deg ? x * Math.PI / 180 : x; }
+    function fromRad(x) { return deg ? x * 180 / Math.PI : x; }
+
+    function callFunction(name, args) {
+      var x = args[0], y = args[1];
+      switch (name) {
+        case 'sin': return Math.sin(toRad(x));
+        case 'cos': return Math.cos(toRad(x));
+        case 'tan': return Math.tan(toRad(x));
+        case 'asin': if (x < -1 || x > 1) throw new Error('Domain'); return fromRad(Math.asin(x));
+        case 'acos': if (x < -1 || x > 1) throw new Error('Domain'); return fromRad(Math.acos(x));
+        case 'atan': return fromRad(Math.atan(x));
+        case 'log':
+          if (x <= 0) throw new Error('Domain');
+          if (args.length === 1) return Math.log10(x);
+          if (y <= 0 || y === 1) throw new Error('Domain');
+          return Math.log(x) / Math.log(y);
+        case 'ln': if (x <= 0) throw new Error('Domain'); return Math.log(x);
+        case 'sqrt': if (x < 0) throw new Error('Domain'); return Math.sqrt(x);
+        case 'abs': return Math.abs(x);
+        case 'exp': return Math.exp(x);
+        case 'floor': return Math.floor(x);
+        case 'ceil': return Math.ceil(x);
+        case 'round': return Math.round(x);
+        case 'sign': return x > 0 ? 1 : x < 0 ? -1 : 0;
+        case 'pow': return Math.pow(x, y);
+        case 'min': return Math.min(x, y);
+        case 'max': return Math.max(x, y);
+        default: throw new Error('Unknown function');
+      }
+    }
+
+    function parseExpression() {
+      var value = parseTerm();
+      while (peek() && peek().type === 'op' && (peek().value === '+' || peek().value === '-')) {
+        var op = take().value, right = parseTerm();
+        value = op === '+' ? value + right : value - right;
+      }
+      return value;
+    }
+    function parseTerm() {
+      var value = parseUnary();
+      while (peek()) {
+        var t = peek(), op = null;
+        if (t.type === 'op' && (t.value === '*' || t.value === '/' || t.value === '%')) op = take().value;
+        else if (startsPrimary(t)) op = '*';
+        else break;
+        var right = parseUnary();
+        if ((op === '/' || op === '%') && right === 0) throw new Error('Divide by zero');
+        value = op === '*' ? value * right : op === '/' ? value / right : value % right;
+      }
+      return value;
+    }
+    function parseUnary() {
+      var t = peek();
+      if (t && t.type === 'op' && (t.value === '+' || t.value === '-')) {
+        var op = take().value, value = parseUnary();
+        return op === '-' ? -value : value;
+      }
+      return parsePower();
+    }
+    function parsePower() {
+      var value = parsePostfix();
+      if (peek() && peek().type === 'op' && peek().value === '^') {
+        take();
+        value = Math.pow(value, parseUnary());
+      }
+      return value;
+    }
+    function parsePostfix() {
+      var value = parsePrimary();
+      while (peek() && peek().type === 'op' && peek().value === '!') {
+        take();
+        if (value < 0 || Math.floor(value) !== value || value > 170) throw new Error('Invalid factorial');
+        value = factorial(value);
+      }
+      return value;
+    }
+    function parsePrimary() {
+      var t = take();
+      if (!t) throw new Error('Unexpected end');
+      if (t.type === 'num') return t.value;
+      if (t.type === 'op' && t.value === '(') { var v = parseExpression(); expect(')'); return v; }
+      if (t.type === 'id') {
+        if (t.value === 'pi') return Math.PI;
+        if (t.value === 'e') return Math.E;
+        if (t.value === 'tau') return 2 * Math.PI;
+        if (!SCI_FUNCTIONS[t.value]) throw new Error('Unknown name');
+        expect('(');
+        var args = [parseExpression()];
+        while (peek() && peek().type === 'op' && peek().value === ',') {
+          take();
+          if (args.length >= 2) throw new Error('Too many arguments');
+          args.push(parseExpression());
+        }
+        expect(')');
+        return callFunction(t.value, args);
+      }
+      throw new Error('Unexpected token');
+    }
+
+    try {
+      var value = parseExpression();
+      if (i < tokens.length || !isNum(value)) return null;
+      return { value: round(value, 10), mode: deg ? 'deg' : 'rad' };
+    } catch (e) { return null; }
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -664,7 +957,11 @@
     syllabusCoverage: syllabusCoverage, readinessScore: readinessScore,
     studyForecast: studyForecast, priorityMatrix: priorityMatrix,
     deliberatePractice: deliberatePractice, feynmanClarity: feynmanClarity,
-    interleavingPlan: interleavingPlan, confidenceCalibration: confidenceCalibration
+    interleavingPlan: interleavingPlan, confidenceCalibration: confidenceCalibration,
+    gcd: gcd, factorial: factorial, parseNumberList: parseNumberList,
+    fractionCalculate: fractionCalculate, ratioSolve: ratioSolve, ratioSimplify: ratioSimplify,
+    standardDeviation: standardDeviation, centralTendency: centralTendency,
+    convertGpaPercent: convertGpaPercent, scientificEvaluate: scientificEvaluate
   };
   return api;
 });

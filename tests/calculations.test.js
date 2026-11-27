@@ -304,3 +304,90 @@ test('confidence calibration: bias, accuracy, trend and validation', () => {
   assert.ok(result.advice.join(' ').includes('wrong'));
   assert.equal(C.confidenceCalibration([{ predicted: 101, actual: 50 }]), null);
 });
+
+test('scientific calculator: precedence, functions, angle modes and safe parsing', () => {
+  near(C.scientificEvaluate('2+3*4').value, 14);
+  near(C.scientificEvaluate('(2+3)^2').value, 25);
+  near(C.scientificEvaluate('sin(30)', 'deg').value, 0.5);
+  near(C.scientificEvaluate('sin(pi/6)', 'rad').value, 0.5, 6);
+  near(C.scientificEvaluate('asin(0.5)', 'deg').value, 30, 6);
+  near(C.scientificEvaluate('sqrt(16)+2^3').value, 12);
+  near(C.scientificEvaluate('log(100)').value, 2);
+  near(C.scientificEvaluate('log(8,2)').value, 3);
+  near(C.scientificEvaluate('5!').value, 120);
+  near(C.scientificEvaluate('2pi').value, Math.PI * 2, 6);
+  assert.equal(C.scientificEvaluate('1/0'), null);
+  assert.equal(C.scientificEvaluate('sqrt(-1)'), null);
+  assert.equal(C.scientificEvaluate('alert(1)'), null);
+});
+
+test('fraction calculator: exact results, mixed numbers and invalid inputs', () => {
+  const add = C.fractionCalculate(1, 2, 1, 3, 'add');
+  assert.equal(add.numerator, 5);
+  assert.equal(add.denominator, 6);
+  near(add.decimal, 0.833333, 6);
+  const sub = C.fractionCalculate(3, 4, 1, 2, 'subtract');
+  assert.equal(sub.numerator, 1);
+  assert.equal(sub.denominator, 4);
+  const mul = C.fractionCalculate(2, 3, 3, 4, 'multiply');
+  assert.equal(mul.numerator, 1);
+  assert.equal(mul.denominator, 2);
+  const div = C.fractionCalculate(3, 4, 1, 2, 'divide');
+  assert.equal(div.numerator, 3);
+  assert.equal(div.denominator, 2);
+  assert.equal(div.mixed, '1 1/2');
+  assert.equal(C.fractionCalculate(7, 4, 0, 1, 'add').mixed, '1 3/4');
+  assert.equal(C.fractionCalculate(1, 0, 1, 2, 'add'), null);
+  assert.equal(C.fractionCalculate(1, 2, 0, 1, 'divide'), null);
+});
+
+test('ratio calculator: proportion solving and simplified shares', () => {
+  const solved = C.ratioSolve(2, 3, 10);
+  near(solved.x, 15);
+  near(solved.factor, 5);
+  const simplified = C.ratioSimplify(4, 6, 50);
+  assert.equal(simplified.a, 2);
+  assert.equal(simplified.b, 3);
+  assert.equal(simplified.totalParts, 5);
+  near(simplified.shareA, 20);
+  near(simplified.shareB, 30);
+  assert.equal(C.ratioSolve(0, 3, 10), null);
+  assert.equal(C.ratioSimplify(4, 0, 50), null);
+  assert.equal(C.ratioSimplify(4, 6, -1), null);
+});
+
+test('standard deviation: population, sample, range and list parsing', () => {
+  const s = C.standardDeviation([2, 4, 4, 4, 5, 5, 7, 9]);
+  assert.equal(s.count, 8);
+  near(s.mean, 5);
+  near(s.populationVariance, 4);
+  near(s.populationDeviation, 2);
+  near(s.sampleDeviation, 2.1381, 4);
+  assert.equal(s.range, 7);
+  assert.equal(C.standardDeviation('1, 2 3\n4').count, 4);
+  assert.equal(C.standardDeviation([5]).sampleDeviation, null);
+  assert.equal(C.standardDeviation('1, two, 3'), null);
+});
+
+test('mean, median and mode: average, spread and repeated values', () => {
+  const r = C.centralTendency([1, 2, 2, 3, 4, 7, 9]);
+  near(r.mean, 4);
+  assert.equal(r.median, 3);
+  assert.deepEqual(r.modes, [2]);
+  assert.equal(r.range, 8);
+  assert.deepEqual(C.centralTendency([1, 2, 3]).modes, []);
+  assert.deepEqual(C.centralTendency([1, 1, 2, 2, 3]).modes, [1, 2]);
+  near(C.centralTendency([1, 2, 3, 4]).median, 2.5);
+  assert.equal(C.centralTendency([]), null);
+});
+
+test('GPA and percentage conversion: 4.0 and 10-point conventions with validation', () => {
+  near(C.convertGpaPercent(3.5, 'gpa-percent').value, 87.5);
+  near(C.convertGpaPercent(89, 'percent-gpa').value, 3.56);
+  near(C.convertGpaPercent(9.2, 'cgpa-percent').value, 87.4);
+  near(C.convertGpaPercent(95, 'percent-cgpa').value, 10, 6);
+  assert.equal(C.convertGpaPercent(5, 'gpa-percent'), null);
+  assert.equal(C.convertGpaPercent(101, 'percent-gpa'), null);
+  assert.equal(C.convertGpaPercent(11, 'cgpa-percent'), null);
+  assert.equal(C.convertGpaPercent(50, 'unknown'), null);
+});

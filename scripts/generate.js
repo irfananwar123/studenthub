@@ -285,6 +285,7 @@ function toolPage(t) {
 
 function homepage() {
   const featured = ['study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits', 'percentage-calculator', 'cgpa-calculator', 'attendance-calculator', 'pomodoro-timer'];
+  const daily = ['scientific-calculator', 'fraction-calculator', 'ratio-calculator', 'standard-deviation-calculator', 'mean-median-mode-calculator', 'gpa-percentage-converter'];
   const popular = ['gpa-calculator', 'grade-calculator', 'marks-calculator', 'exam-score-predictor', 'exam-countdown', 'study-tracker', 'quiz-maker', 'unit-converter'];
   const find = id => TOOLS.find(t => t.id === id);
   const cats = [
@@ -307,7 +308,7 @@ function homepage() {
         '@type': 'WebSite', '@id': SITE + '/#website', name: 'StudentHub', url: SITE + '/',
         description: 'Free browser-based study tools, calculators and planners for students.',
         inLanguage: 'en',
-        keywords: 'free online study tools, GPA calculator, grade calculator, attendance calculator, revision planner, flashcards, word counter, exam preparation',
+        keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation, mean median mode, GPA percentage converter, grade calculator, flashcards',
         audience: { '@type': 'Audience', audienceType: 'Students worldwide' },
         publisher: { '@id': SITE + '/#organization' },
         potentialAction: { '@type': 'SearchAction', target: SITE + '/#{search_term_string}', 'query-input': 'required name=search_term_string' }
@@ -316,6 +317,10 @@ function homepage() {
       {
         '@type': 'ItemList', name: 'Featured free study tools', numberOfItems: featured.length,
         itemListElement: featured.map((id, i) => ({ '@type': 'ListItem', position: i + 1, url: SITE + '/tools/' + id + '/' }))
+      },
+      {
+        '@type': 'ItemList', name: 'Everyday free calculators', numberOfItems: daily.length,
+        itemListElement: daily.map((id, i) => ({ '@type': 'ListItem', position: i + 1, url: SITE + '/tools/' + id + '/' }))
       }
     ]
   };
@@ -366,6 +371,8 @@ function homepage() {
 
   <div class="container">${adSlot('home-native', ADS.enabled)}</div>
 
+  <section class="section" id="daily-calculators" aria-labelledby="daily-heading"><div class="container"><div class="section-head"><span class="eyebrow">${icon('calculator', 15)} Everyday maths</span><h2 id="daily-heading">Daily calculators students search for</h2><p>Use the free scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator and GPA percentage converter. Each one works locally with clear worked examples.</p></div><div class="grid tool-grid">${daily.map(id => toolCard(find(id))).join('')}</div></div></section>
+
   <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card"><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
 
   <section class="section section-soft" id="all-tools" aria-labelledby="all-heading"><div class="container"><div class="section-head"><span class="eyebrow">The full library</span><h2 id="all-heading">All ${TOOLS.length} tools</h2><p>Every tool has its own page with instructions, formulas and examples.</p></div><div class="grid tool-grid">${TOOLS.map(toolCard).join('')}</div></div></section>
@@ -411,7 +418,7 @@ function homepage() {
   return shell({
     title: 'StudentHub — Free Study Tools, Calculators and Planners',
     desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, study timer, revision scheduler, flashcards, quizzes, word counter and more.`,
-    keywords: 'free online study tools, GPA calculator, grade calculator, attendance calculator, study hours tracker, spaced revision planner, flashcard maker, word counter, exam preparation, students worldwide',
+    keywords: 'free online study tools, scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator, GPA percentage converter, grade calculator, attendance calculator, revision planner, flashcard maker, exam preparation, students worldwide',
     path: '/', ld: homeLd, body,
     scripts: `<script src="/assets/js/home.js" defer></script>`
   });

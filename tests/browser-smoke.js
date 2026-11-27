@@ -54,7 +54,22 @@ const TOOL_TESTS = {
   'deliberate-practice-planner': `click('dp-demo');const ok=R().includes('Practice plan ready')&&document.getElementById('dp-stats').textContent.includes('12')&&document.getElementById('dp-steps').textContent.includes('12')&&document.getElementById('dp-plan').textContent.includes('reaction arrows');if(!ok)throw new Error('deliberate practice failed');return 'plan ready';`,
   'feynman-clarity-score': `click('fx-demo');const parts=document.getElementById('fx-breakdown').textContent.includes('Sentence clarity');const gaps=document.getElementById('fx-gaps').textContent.includes('Fix 1');const stats=document.getElementById('fx-stats').textContent.includes('Simple words');const ok=R().includes('Clarity score')&&parts&&gaps&&stats;if(!ok)throw new Error('feynman clarity failed');return 'clarity scored';`,
   'interleaving-schedule-builder': `click('ib-demo');const ok=R().includes('Schedule ready')&&document.querySelectorAll('#ib-days .interleave-day').length===7&&document.getElementById('ib-totals').textContent.includes('Biology');if(!ok)throw new Error('interleaving failed');return 'schedule ready';`,
-  'confidence-calibrator': `click('cc-demo');const ok=R().includes('Calibration ready')&&document.getElementById('cc-stats').textContent.includes('Overconfident')&&document.getElementById('cc-list').textContent.includes('Quiz 1');if(!ok)throw new Error('calibration failed');return 'calibration ready';`
+  'confidence-calibrator': `click('cc-demo');const ok=R().includes('Calibration ready')&&document.getElementById('cc-stats').textContent.includes('Overconfident')&&document.getElementById('cc-list').textContent.includes('Quiz 1');if(!ok)throw new Error('calibration failed');return 'calibration ready';`,
+  'scientific-calculator': `set('sc-expression','sin(30)+2^3');submit('scientific-calculator-form');return R();`,
+  'fraction-calculator': `set('fr-a',1);set('fr-b',2);set('fr-c',1);set('fr-d',3);submit('fraction-calculator-form');return R();`,
+  'ratio-calculator': `set('rt-a',2);set('rt-b',3);set('rt-c',10);submit('ratio-calculator-form');return R();`,
+  'standard-deviation-calculator': `set('sd-values','2,4,4,4,5,5,7,9');submit('standard-deviation-calculator-form');return R();`,
+  'mean-median-mode-calculator': `set('mm-values','1,2,2,3,4,7,9');submit('mean-median-mode-calculator-form');return R();`,
+  'gpa-percentage-converter': `set('gp-gpa',3.5);submit('gpa-percentage-converter-form');return R();`
+};
+
+const TOOL_EXPECTED = {
+  'scientific-calculator': '8.5',
+  'fraction-calculator': '5/6',
+  'ratio-calculator': '15',
+  'standard-deviation-calculator': '2.1381',
+  'mean-median-mode-calculator': 'Median 3',
+  'gpa-percentage-converter': '87.5'
 };
 
 const HELPERS = `
@@ -152,7 +167,7 @@ async function main() {
     };
 
     for (const [id, expression] of Object.entries(TOOL_TESTS)) {
-      await check(id, `/tools/${id}/`, expression);
+      await check(id, `/tools/${id}/`, expression, TOOL_EXPECTED[id]);
     }
     await check('homepage-search', '/', `set('home-search','attendance');await wait(50);return document.getElementById('home-search-results').textContent.includes('Attendance Calculator')?'search ok':'search failed';`);
     await check('advanced-hub-filters', '/advanced/', `await wait(350);const visible=()=>document.querySelectorAll('#advanced-grid [data-advanced-category]:not([hidden])').length;const before=visible();document.querySelector('[data-advanced-filter="academic-calculators"]').click();const academic=visible();set('advanced-search','readiness');await wait(20);const searched=visible();document.querySelector('[data-advanced-filter="learning-tools"]').click();set('advanced-search','');await wait(20);const learning=visible();document.querySelector('[data-advanced-filter="all"]').click();set('advanced-search','nothingmatches');await wait(20);const empty=!document.getElementById('advanced-empty').hidden;const ready=document.documentElement.getAttribute('data-hub-ready')==='true'&&!document.getElementById('advanced-skeleton');return before+'|'+academic+'|'+searched+'|'+learning+'|'+empty+'|'+ready;`, '12|3|1|2|true|true');

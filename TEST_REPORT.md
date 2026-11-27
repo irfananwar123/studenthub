@@ -7,10 +7,10 @@ Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via 
 
 | Command | Result |
 | --- | --- |
-| `node --test tests` | **34/34 passed** |
-| `node tests/browser-smoke.js` | **74/74 passed** |
+| `node --test tests` | **40/40 passed** |
+| `node tests/browser-smoke.js` | **80/80 passed** |
 
-### Unit tests (22 suites)
+### Unit tests (28 suites)
 
 Independent calculation checks compare output against separately calculated expected values:
 
@@ -36,27 +36,33 @@ Independent calculation checks compare output against separately calculated expe
 - Feynman clarity: plain language outscores jargon, five weighted components, gap advice and minimum-length validation.
 - Interleaving schedule: a deficit-based weighted mix gives weak topics more blocks, avoids immediate repeats and validates topic input.
 - Confidence calibration: signed bias, mean absolute error, Brier-style score, trend and out-of-range validation.
+- Scientific calculator: precedence, implicit multiplication, degree/radian functions, factorials, constants and rejection of unknown names or invalid domains; no `eval`.
+- Fractions: exact add/subtract/multiply/divide results, simplification, mixed numbers and division-by-zero rejection.
+- Ratios: proportion solving, scale factors, simplified ratios, shared totals and positive-value validation.
+- Standard deviation: population/sample variance and deviation, mean/range, mixed separators and one-value handling.
+- Mean/median/mode: sorted middle value for odd and even counts, single/multiple modes and empty-list validation.
+- GPA conversion: 4.0 linear and 10-point ×9.5 conventions in both directions, with out-of-range and unknown-mode rejection.
 
 ### Structural tests (13 suites)
 
-- All 37 tool directories contain `index.html` and `tool.js` across 50 generated pages.
-- All 50 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags.
+- All 43 tool directories contain `index.html` and `tool.js` across 56 generated pages.
+- All 56 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags.
 - Every generated page ships the pre-paint theme and accent scripts, all three theme controls, four accent swatches, a reset control and `theme.js`; no stale hidden light-only toggle remains. Dark and accent palette tokens are present in `themes.css`, and `storage.js` reads, writes, exports, imports and clears the accent preference.
-- Global SEO checks confirm keyword metas and English/default hreflang links on all 50 pages, keyword-rich worldwide copy and an appearance studio on the homepage, and richer WebSite/Organization/ItemList JSON-LD with `inLanguage` and audience signals.
+- Global SEO checks confirm keyword metas and English/default hreflang links on all 56 pages, keyword-rich worldwide copy, an appearance studio and a daily-calculators section on the homepage, and richer WebSite/Organization/ItemList JSON-LD with `inLanguage`, audience signals and a six-item everyday calculator list.
 - Every tool page includes instructions, formulas, worked example, FAQ, related tools, breadcrumb structured data, result region and favourite control.
 - The `/advanced/` hub has matching root and nested pages, twelve crawlable dashboard links, working filter/search controls including the Learning theory filter, and an active ad slot; all twelve tools use the premium single-panel layout.
 - Every page ships the labelled on-device usage strip with all five metrics, `usage.js` is precached, the log is exported/imported/cleared with other prefs, tool opens and results are recorded locally, and the privacy policy states that no global counter exists.
 - All internal links resolve to real generated files (no broken routes).
-- Both sitemaps contain 47 URLs, including the Advanced hub, with XHTML namespace and English/default hreflang alternates on every URL; robots.txt points to both; Cloudflare headers declare the XML MIME type; manifest icons exist.
+- Both sitemaps contain 53 URLs, including the Advanced hub and all six new calculators, with XHTML namespace and English/default hreflang alternates on every URL; robots.txt points to both; Cloudflare headers declare the XML MIME type; manifest icons exist.
 - Service worker precaches the app shell, the Advanced hub, its script and all tool pages with a content-derived cache version.
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
 - All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). Every generated page has active head tags, a slot and a footer link; there is no ad-free page or URL off switch. `ads.js` holds the same URLs but never injects duplicate scripts. The privacy policy discloses every network, and no unrelated ad-network tags are present.
 
-### Real-browser smoke tests (74 checks)
+### Real-browser smoke tests (80 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
-1. Percentage, CGPA, GPA, grade, marks, attendance and score predictor produce expected values.
+1. Percentage, CGPA, GPA, grade, marks, attendance and score predictor produce expected values; the scientific calculator returns 8.5 for `sin(30)+2^3`, fractions return 5/6, a ratio proportion returns x = 15, standard deviation reports 2.1381, mean/median/mode reports a median of 3, and GPA 3.5 converts to 87.5%.
 2. Timetable generation places 7 sessions with no conflicts.
 3. Pomodoro starts, displays a decremented clock and pauses/resets without exceptions.
 4. Exam countdown, study tracker, assignment planner, flashcards, quiz, revision notes, question picker and vocabulary trainer all save and display data through IndexedDB.
@@ -65,7 +71,7 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 7. The Advanced hub loads, removes its skeleton, filters twelve cards to three analysis dashboards, one readiness result and two learning-theory dashboards, shows its empty state, and all 24 card links have the correct local URL. The live usage strip records page views and tool opens, updates its metrics from the local log and stays explicitly device-local.
 8. Instant search finds the right tool; the theme starts on Auto, Dark and Light switches repaint the page and update `theme-color`, the Dark choice persists across navigation, Auto follows an emulated system dark preference and updates live when it changes, the accent starts on Blue, Violet changes the live design tokens and persists across pages, Reset restores Auto/Blue, and the offline page renders.
 9. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
-10. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 50 pages at phone width with ads active: `overflow:none on 50 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px in both Light and Dark, with ads active and with ad domains blocked/first-party slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **800/800 clean**. The new appearance studio and worldwide discovery sections were included in that sweep.
+10. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 56 pages at phone width with ads active: `overflow:none on 56 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px in both Light and Dark, with ads active and with ad domains blocked/first-party slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **896/896 clean**. The appearance studio, worldwide discovery and daily-calculator sections were included in that sweep.
 11. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
 12. Ads are always on: sampled home, Advanced hub, tool, article, About, Terms, Privacy, Contact, Workspace, offline and error pages all contain static head tags, an active slot and a sponsored footer link, and the former URL off switch is ignored. The homepage contains an active 468×60 slot, a native slot, the correct `atOptions` key, exactly one pop-under, social-bar and banner script. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
 
@@ -90,6 +96,7 @@ No JavaScript console exceptions were observed in any passing check.
 - The CSS was refreshed across all four stylesheets: ambient grid/mesh body layers, glass header and toolbar surfaces, animated page-hero/workspace rails, eyebrow and stat polish, card spotlights, softer shadows with a shared easing token, category-tinted Advanced hub cards and refined hover/motion states. The stylesheet count remains exactly four, and reduced-motion rules cover every new animation and transform. Stylesheet links and service-worker precache entries now carry a hash of the CSS files, so a CSS-only deploy bypasses the previous one-hour cache; link-resolution checks strip the query before resolving local files.
 - A saved accent colour system was added without replacing Light/Dark/Auto. The pre-paint script now applies both preferences before CSS loads; `theme.js` syncs every header, mobile-nav and studio control, and `storage.js` includes the accent in export/import/clear. Static blue/violet/teal component colours were changed to derived tokens so accents genuinely recolour buttons, charts, heatmaps and gradients. Header swatches are hidden below 820 px and moved into the open navigation to protect the 320 px layout.
 - The homepage gained an appearance studio with a live token preview and a keyword-rich worldwide section. Every page now has keyword metas and English/default hreflang links, both sitemaps carry matching `xhtml:link` alternates, and the homepage JSON-LD uses a WebSite/Organization/ItemList graph with language and audience signals. The interface remains English only; no translated pages are claimed.
+- Six daily-use calculators were added with pure calculation functions, browser tools, keyword-rich content and a homepage `ItemList`. The scientific parser was written from scratch instead of using `eval`/`Function`, fraction arithmetic uses greatest-common-factor reduction, GPA conversion states its linear/10-point caveats, and a rounded sample standard-deviation expectation was corrected from 2.138089935299395 to 2.1381 to match the displayed precision.
 
 ## Not measured in this environment
 
@@ -98,5 +105,6 @@ No JavaScript console exceptions were observed in any passing check.
 - Real AdSense behaviour: not used; the supplied third-party network tags were integrated instead.
 - Device-specific audio behaviour for Pomodoro: sound is opt-in and browser-dependent.
 - Cross-browser manual review beyond headless Chrome (Firefox/Safari layout should still be checked before a public launch).
+- Search engine rankings: structured data, keywords, FAQs and sitemap entries improve discoverability, but no top position in Google, Bing, DuckDuckGo or any browser can be guaranteed.
 
-All 37 tools were individually exercised; none are decorative.
+All 43 tools were individually exercised; none are decorative.
