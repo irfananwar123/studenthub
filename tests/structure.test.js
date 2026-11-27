@@ -50,6 +50,13 @@ test('every page has unique title, description, canonical and one H1', () => {
     assert.ok(html.includes('property="og:title"'), `${page}: Open Graph`);
     assert.ok(html.includes('property="og:description"'), `${page}: OG description`);
     assert.ok(html.includes('property="og:url"'), `${page}: OG URL`);
+    assert.ok(html.includes('<meta name="robots" content="'), `${page}: robots directive`);
+    assert.ok(html.includes('<meta name="author" content="StudentHub">'), `${page}: author meta`);
+    assert.ok(html.includes('<meta property="og:image" content="' + SITE + '/assets/icons/icon-512.png">'), `${page}: OG image`);
+    assert.ok(html.includes('<meta name="twitter:card" content="summary_large_image">'), `${page}: Twitter card`);
+    assert.ok(html.includes('<meta name="twitter:title" content="' + title + '">'), `${page}: Twitter title`);
+    assert.ok(html.includes('<meta name="twitter:description" content="' + desc + '">'), `${page}: Twitter description`);
+    assert.ok(html.includes('<meta name="twitter:image" content="' + SITE + '/assets/icons/icon-512.png">'), `${page}: Twitter image`);
     titles.add(title); descriptions.add(desc);
   });
   assert.equal(titles.size, PAGES.length, 'titles are unique');
@@ -323,6 +330,10 @@ test('ad tags are static, parse-time and present on every generated page', () =>
   assert.ok(home.includes('<script data-cfasync="false" src="' + urls[4] + '"></script>'), 'banner script at parse time');
   assert.ok(home.includes('data-ad-slot="home"') && home.includes('rel="sponsored noopener noreferrer"'), 'home slot and footer link');
   assert.ok(home.includes('data-ad-slot="home-native"'), 'home native ad slot');
+  assert.ok(home.includes('data-ad-slot="home-top"'), 'extra top homepage sponsor slot');
+  assert.ok(home.includes('data-ad-slot="home-math"'), 'extra maths homepage sponsor slot');
+  assert.equal(count(home, 'class="ad-first-party"'), 2, 'two static homepage sponsor banners');
+  assert.equal(count(home, urls[2]), 1, 'extra slots add no duplicate native script');
   assert.ok(home.includes("setAttribute('data-ad-blocked','1')"), 'ad-block detection script runs before ad tags');
   ['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].forEach(name => {
     assert.ok(exists('assets/ads/' + name), `first-party creative ${name}`);
@@ -351,7 +362,7 @@ test('ad tags are static, parse-time and present on every generated page', () =>
   assert.ok(read('articles/study-tips/index.html').includes('data-ad-slot="article"'), 'article slot');
 
   const privacy = read('privacy-policy.html');
-  ['afders.org', 'arwf.org', 'bicea.org', 'Advertising and third parties', 'every generated page', 'no URL switch'].forEach(s => {
+  ['afders.org', 'arwf.org', 'bicea.org', 'Advertising and third parties', 'every generated page', 'homepage also shows two additional', 'no URL switch'].forEach(s => {
     assert.ok(privacy.includes(s), `privacy discloses ${s}`);
   });
   assert.ok(!privacy.includes('Ads are not placed'), 'privacy has no ad-free claim');

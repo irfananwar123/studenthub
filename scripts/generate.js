@@ -53,6 +53,13 @@ function adSlot(kind, on) {
   if (!on) return `<div class="ad-slot" data-ad-slot="${kind}" hidden aria-label="Reserved advertisement placement">Advertisement</div>`;
   return `<div class="ad-slot ad-slot-active" data-ad-slot="${kind}" aria-label="Advertisement">${kind === 'home' ? bannerAd() : nativeAd()}</div>`;
 }
+/* Extra homepage placements use the same first-party, labelled creative and
+   sponsor link. They remain static HTML: no duplicate network tags or IDs. */
+function sponsorSlot(kind, file, label, eager) {
+  return `<div class="ad-slot ad-slot-active ad-slot-sponsor" data-ad-slot="${kind}" aria-label="Advertisement: ${label}">
+  <a class="ad-first-party" href="${ADS.smartlink}" target="_blank" rel="sponsored noopener noreferrer" aria-label="${label} (opens in a new tab)"><img src="${file}" width="468" height="60" alt="${label}" loading="${eager ? 'eager' : 'lazy'}"><span class="ad-fallback-label">Sponsored · Support StudentHub</span></a>
+</div>`;
+}
 function sponsoredLink(on) {
   return on ? `<span class="sponsored-links"><a href="${ADS.smartlink}" target="_blank" rel="sponsored noopener noreferrer">Sponsored</a> · </span>` : '';
 }
@@ -118,7 +125,10 @@ function head(opts) {
 <title>${opts.title}</title>
 <meta name="description" content="${opts.desc}">
 <meta name="keywords" content="${opts.keywords || DEFAULT_KEYWORDS}">
-${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
+<meta name="author" content="StudentHub">
+<meta name="application-name" content="StudentHub">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="${opts.robots || 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'}">
 <link rel="canonical" href="${canonical}">
 <link rel="alternate" hreflang="en" href="${canonical}">
 <link rel="alternate" hreflang="x-default" href="${canonical}">
@@ -131,6 +141,13 @@ ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <meta property="og:title" content="${opts.title}">
 <meta property="og:description" content="${opts.desc}">
 <meta property="og:url" content="${canonical}">
+<meta property="og:image" content="${SITE}/assets/icons/icon-512.png">
+<meta property="og:image:alt" content="StudentHub free study tools">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${opts.title}">
+<meta name="twitter:description" content="${opts.desc}">
+<meta name="twitter:image" content="${SITE}/assets/icons/icon-512.png">
 <script>(function(){if(location.protocol==='file:')return;var l=document.createElement('link');l.rel='manifest';l.href=(document.documentElement.getAttribute('data-base')||'')+'manifest.webmanifest';document.head.appendChild(l);})();</script>
 <link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${cssUrl('themes')}">
@@ -374,6 +391,8 @@ function homepage() {
     </div><div class="float-card">${icon('shield', 20)} Your notes stay on your device</div></div>
   </div></section>
 
+  <div class="container">${sponsorSlot('home-top', '/assets/ads/sponsored-violet.svg', 'Sponsored: study smarter with StudentHub', true)}</div>
+
   <section class="section appearance-studio" aria-labelledby="appearance-heading"><div class="container">
     <div class="section-head"><span class="eyebrow">${icon('spark', 15)} Make it yours</span><h2 id="appearance-heading">An appearance studio that remembers</h2><p>Pick a light, dark or automatic theme, then choose an accent. Your choices are saved on this device and applied to every tool, chart, card and ad slot.</p></div>
     <div class="studio-grid">
@@ -404,6 +423,8 @@ function homepage() {
   <section class="section" id="daily-calculators" aria-labelledby="daily-heading"><div class="container"><div class="section-head"><span class="eyebrow">${icon('calculator', 15)} Everyday maths</span><h2 id="daily-heading">Daily calculators students search for</h2><p>Use the free scientific calculator, fraction calculator, ratio calculator, standard deviation calculator, mean median mode calculator and GPA percentage converter. Each one works locally with clear worked examples.</p></div><div class="grid tool-grid">${daily.map(id => toolCard(find(id))).join('')}</div></div></section>
 
   <section class="section section-soft" id="math-essentials" aria-labelledby="math-heading"><div class="container"><div class="section-head"><span class="eyebrow">${icon('chart', 15)} Algebra, geometry &amp; time</span><h2 id="math-heading">Math essentials made clear</h2><p>Find the slope between two points, solve quadratic equations, complete a Pythagorean theorem calculation, check area and volume formulas, and add or subtract time. Every answer includes the working so you can learn from it.</p></div><div class="grid tool-grid">${math.map(id => toolCard(find(id))).join('')}</div></div></section>
+
+  <div class="container">${sponsorSlot('home-math', '/assets/ads/sponsored-teal.svg', 'Sponsored: keep StudentHub free')}</div>
 
   <section class="section" id="categories" aria-labelledby="categories-heading"><div class="container"><div class="section-head"><span class="eyebrow">Browse by need</span><h2 id="categories-heading">Every category, one place</h2><p>Find the right tool in seconds, whatever you are working on.</p></div><div class="grid category-grid">${cats.map(([name, ico, desc]) => `<article class="category-card" data-reveal><div class="card-icon">${icon(ico, 20)}</div><h3>${name}</h3><p>${desc}</p><span class="category-count">${TOOLS.filter(t => t.category === name).length} free tools</span><a class="card-link" href="#all-tools">Browse tools →</a></article>`).join('')}</div></div></section>
 
@@ -622,9 +643,9 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
 <h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools, recent searches, tool drafts and a short log of interaction times, tool names and page names used by the live usage strip at the top of every page.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>The live usage strip is calculated from that local log and your saved study sessions on this device only. It is never sent to a server, and no global or cross-user counter exists. This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
-<h2>Advertising and third parties</h2><p>To keep StudentHub free, every generated page — home, tools, articles, About, Terms, Privacy, Contact, Workspace, offline and error pages — loads ad scripts from the same third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. There are no ad-free pages and no URL switch that hides the placements: advertising runs on every page view. You can still block the third-party domains with a browser extension; all tools will keep working, and the labelled first-party sponsored banner remains. There is no paid ad-free tier.</p>
+<h2>Advertising and third parties</h2><p>To keep StudentHub free, every generated page — home, tools, articles, About, Terms, Privacy, Contact, Workspace, offline and error pages — loads ad scripts from the same third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. The homepage also shows two additional, clearly labelled first-party sponsor banners as static HTML; they use the same local creatives and sponsor link and add no new third-party network tags. There are no ad-free pages and no URL switch that hides the placements: advertising runs on every page view. You can still block the third-party domains with a browser extension; all tools will keep working, and the labelled first-party sponsored banner remains. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
-<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 26 November 2026.</p>
+<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 27 November 2026.</p>
 </div></section></main>`;
 write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', body: privacyBody }));
 

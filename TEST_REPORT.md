@@ -8,7 +8,7 @@ Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via 
 | Command | Result |
 | --- | --- |
 | `node --test tests` | **47/47 passed** |
-| `node tests/browser-smoke.js` | **93/93 passed** |
+| `node tests/browser-smoke.js` | **94/94 passed** |
 
 ### Unit tests (34 suites)
 
@@ -52,10 +52,11 @@ Independent calculation checks compare output against separately calculated expe
 ### Structural tests (13 suites)
 
 - All 49 tool directories contain `index.html` and `tool.js` across 62 generated pages.
-- All 62 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags.
+- All 62 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags. Every page also ships explicit robots directives (index/follow on public pages, noindex where intended), author/application-name metas, an OG image/locale, and Twitter card/title/description/image metas.
 - Every generated page ships the pre-paint theme and accent scripts, all three theme controls, four accent swatches, a reset control and `theme.js`; no stale hidden light-only toggle remains. Dark and accent palette tokens are present in `themes.css`, and `storage.js` reads, writes, exports, imports and clears the accent preference.
 - Global SEO checks confirm keyword metas and English/default hreflang links on all 62 pages, keyword-rich worldwide copy, an appearance studio, a daily-calculators section and a math-essentials section on the homepage, and richer WebSite/Organization/ItemList JSON-LD with `inLanguage`, audience signals, a six-item everyday calculator list and a six-item math/time calculator list.
 - Every generated page ships the scroll-progress, back-to-top, header-context, command-palette and quick-bar controls plus `global-ui.js`, with exactly four stylesheets; the shipped script stays local, uses IntersectionObserver for reveals and respects reduced motion.
+- The homepage has two extra labelled first-party sponsor slots (`home-top` and `home-math`) as static HTML. They use the existing local creatives and sponsor link, add no duplicate native/banner script or container ID, and the privacy policy discloses them.
 - Every tool page includes instructions, formulas, worked example, FAQ, related tools, breadcrumb structured data, result region and favourite control.
 - The `/advanced/` hub has matching root and nested pages, twelve crawlable dashboard links, working filter/search controls including the Learning theory filter, and an active ad slot; all twelve tools use the premium single-panel layout.
 - Every page ships the labelled on-device usage strip with all five metrics, `usage.js` is precached, the log is exported/imported/cleared with other prefs, tool opens and results are recorded locally, and the privacy policy states that no global counter exists.
@@ -65,7 +66,7 @@ Independent calculation checks compare output against separately calculated expe
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
 - All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). Every generated page has active head tags, a slot and a footer link; there is no ad-free page or URL off switch. `ads.js` holds the same URLs but never injects duplicate scripts. The privacy policy discloses every network, and no unrelated ad-network tags are present.
 
-### Real-browser smoke tests (93 checks)
+### Real-browser smoke tests (94 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
@@ -81,7 +82,7 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 10. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
 11. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 62 pages at phone width with ads active: `overflow:none on 62 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px in both Light and Dark, with ads active and with ad domains blocked/first-party slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **992/992 clean**. The appearance studio, worldwide discovery, daily-calculator and math-essentials sections, global UI and mobile quick bar were included in that sweep.
 12. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
-13. Ads are always on: sampled home, Advanced hub, tool, article, About, Terms, Privacy, Contact, Workspace, offline and error pages all contain static head tags, an active slot and a sponsored footer link, and the former URL off switch is ignored. The homepage contains an active 468×60 slot, a native slot, the correct `atOptions` key, exactly one pop-under, social-bar and banner script. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
+13. Ads are always on: sampled home, Advanced hub, tool, article, About, Terms, Privacy, Contact, Workspace, offline and error pages all contain static head tags, an active slot and a sponsored footer link, and the former URL off switch is ignored. The homepage contains an active 468×60 slot, a native slot, two extra static labelled sponsor banners (`home-top` and `home-math`), the correct `atOptions` key, exactly one pop-under, social-bar, native and banner script. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
 
 No JavaScript console exceptions were observed in any passing check.
 
@@ -105,6 +106,7 @@ No JavaScript console exceptions were observed in any passing check.
 - A saved accent colour system was added without replacing Light/Dark/Auto. The pre-paint script now applies both preferences before CSS loads; `theme.js` syncs every header, mobile-nav and studio control, and `storage.js` includes the accent in export/import/clear. Static blue/violet/teal component colours were changed to derived tokens so accents genuinely recolour buttons, charts, heatmaps and gradients. Header swatches are hidden below 820 px and moved into the open navigation to protect the 320 px layout.
 - The homepage gained an appearance studio with a live token preview and a keyword-rich worldwide section. Every page now has keyword metas and English/default hreflang links, both sitemaps carry matching `xhtml:link` alternates, and the homepage JSON-LD uses a WebSite/Organization/ItemList graph with language and audience signals. The interface remains English only; no translated pages are claimed.
 - Six daily-use calculators were added with pure calculation functions, browser tools, keyword-rich content and a homepage `ItemList`. The scientific parser was written from scratch instead of using `eval`/`Function`, fraction arithmetic uses greatest-common-factor reduction, GPA conversion states its linear/10-point caveats, and a rounded sample standard-deviation expectation was corrected from 2.138089935299395 to 2.1381 to match the displayed precision.
+- The homepage gained two additional static, labelled first-party sponsor placements without duplicating provider scripts or container IDs. All pages gained explicit robots directives, author/application-name metas, OG image/locale and Twitter card metas. These signals help search and social previews understand the pages; they do not guarantee a top ranking, which remains impossible for any site to promise.
 
 ## Not measured in this environment
 

@@ -6,8 +6,10 @@
    When a blocker stops the third-party scripts, the site cannot force those
    exact remote creatives to load. Instead it shows clearly labelled,
    first-party sponsored banners hosted on this domain, plus a polite inline
-   notice asking the visitor to allow ads. Private study data is never sent
-   anywhere. Ads run on every page: there is no URL switch or ad-free page. */
+   notice asking the visitor to allow ads. The homepage also has two extra
+   static first-party sponsor banners; they need no injection and add no new
+   network tags. Private study data is never sent anywhere. Ads run on every
+   page: there is no URL switch or ad-free page. */
 (function (global) {
   'use strict';
   var config = {
