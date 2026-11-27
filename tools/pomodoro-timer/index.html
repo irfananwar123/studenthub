@@ -1,16 +1,19 @@
 <!doctype html>
-<html lang="en" data-theme="light" data-theme-preference="auto" data-base="../../">
+<html lang="en" data-theme="light" data-theme-preference="auto" data-accent="blue" data-base="../../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pomodoro Timer — Custom Focus and Break Sessions | StudentHub</title>
 <meta name="description" content="A keyboard-friendly Pomodoro timer with custom work and break durations, session counting, sound notification and background-tab safeguards.">
+<meta name="keywords" content="Pomodoro Timer, Study Planning, free study tool, student calculator, exam preparation">
 
 <link rel="canonical" href="https://studenthub-2gs.pages.dev/tools/pomodoro-timer/">
+<link rel="alternate" hreflang="en" href="https://studenthub-2gs.pages.dev/tools/pomodoro-timer/">
+<link rel="alternate" hreflang="x-default" href="https://studenthub-2gs.pages.dev/tools/pomodoro-timer/">
 <meta name="google-site-verification" content="WPy7or4AwCbkixtA55pqg55hMDhLUFs1vPnR8EgH-rA" />
 <meta name="msvalidate.01" content="E6A421577F1424D7259F8EE6AA3E0786" />
 <meta name="theme-color" content="#f5f8ff">
-<script>(function(){var d=document.documentElement,p='auto',m=d.getAttribute('data-theme-preference');try{var r=localStorage.getItem('studenthub:theme');if(r!==null){var v=JSON.parse(r);if(v==='light'||v==='dark'||v==='auto')p=v;}else if(m==='light'||m==='dark'||m==='auto')p=m;}catch(e){}var dark=p==='dark'||(p==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',dark?'dark':'light');d.setAttribute('data-theme-preference',p);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',dark?'#07101f':'#f5f8ff');})();</script>
+<script>(function(){var d=document.documentElement,p='auto',m=d.getAttribute('data-theme-preference'),a='blue';try{var r=localStorage.getItem('studenthub:theme');if(r!==null){var v=JSON.parse(r);if(v==='light'||v==='dark'||v==='auto')p=v;}else if(m==='light'||m==='dark'||m==='auto')p=m;}catch(e){}try{var ar=localStorage.getItem('studenthub:accent');if(ar!==null){var av=JSON.parse(ar);if(av==='blue'||av==='violet'||av==='teal'||av==='amber')a=av;}}catch(e){}var dark=p==='dark'||(p==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',dark?'dark':'light');d.setAttribute('data-theme-preference',p);d.setAttribute('data-accent',a);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',dark?'#07101f':'#f5f8ff');})();</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="StudentHub">
 <meta property="og:title" content="Pomodoro Timer — Custom Focus and Break Sessions | StudentHub">
@@ -18,10 +21,10 @@
 <meta property="og:url" content="https://studenthub-2gs.pages.dev/tools/pomodoro-timer/">
 <script>(function(){if(location.protocol==='file:')return;var l=document.createElement('link');l.rel='manifest';l.href=(document.documentElement.getAttribute('data-base')||'')+'manifest.webmanifest';document.head.appendChild(l);})();</script>
 <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/css/themes.css?v=2ccdfac4e3">
-<link rel="stylesheet" href="../../assets/css/main.css?v=2ccdfac4e3">
-<link rel="stylesheet" href="../../assets/css/components.css?v=2ccdfac4e3">
-<link rel="stylesheet" href="../../assets/css/responsive.css?v=2ccdfac4e3">
+<link rel="stylesheet" href="../../assets/css/themes.css?v=c54fb86dcf">
+<link rel="stylesheet" href="../../assets/css/main.css?v=c54fb86dcf">
+<link rel="stylesheet" href="../../assets/css/components.css?v=c54fb86dcf">
+<link rel="stylesheet" href="../../assets/css/responsive.css?v=c54fb86dcf">
 <script>(function(){window.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='SCRIPT'&&/afders\.org|bicea\.org/.test(t.src||''))document.documentElement.setAttribute('data-ad-blocked','1');},true);})();</script>
 <script data-cfasync="false" src="https://afders.org/1/3c0e12112693371a49e8da1ecaf03499"></script>
 <script data-cfasync="false" src="https://bicea.org/14/3d7fa5667db565ec11331c4b0846ee9b"></script>
@@ -40,6 +43,19 @@
       <li><a href="../../workspace/index.html">My workspace</a></li>
       <li><a href="../../index.html#articles">Articles</a></li>
       <li><a href="../../about/index.html">About</a></li>
+      <li class="mobile-appearance"><span class="mobile-appearance-title">Appearance</span>
+      <div class="appearance-controls"><div class="theme-switch" role="group" aria-label="Colour theme">
+      <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false" aria-label="Light theme" title="Light theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M12 1v2"></path><path d="M12 21v2"></path><path d="M4.2 4.2l1.4 1.4"></path><path d="M18.4 18.4l1.4 1.4"></path><path d="M1 12h2"></path><path d="M21 12h2"></path><path d="M4.2 19.8l1.4-1.4"></path><path d="M18.4 5.6l1.4-1.4"></path></svg></button>
+      <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"></path></svg></button>
+      <button class="theme-option" type="button" data-theme-option="auto" aria-pressed="true" aria-label="Auto theme (follows device)" title="Auto theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"></path><path d="M12 3v18"></path><path d="M3.5 9h17"></path><path d="M3.5 15h17"></path></svg></button>
+    </div><div class="accent-switch" role="group" aria-label="Accent colour">
+      <button class="accent-option" type="button" data-accent-option="blue" aria-pressed="true" aria-label="Blue accent" title="Blue accent"></button>
+      <button class="accent-option" type="button" data-accent-option="violet" aria-pressed="false" aria-label="Violet accent" title="Violet accent"></button>
+      <button class="accent-option" type="button" data-accent-option="teal" aria-pressed="false" aria-label="Teal accent" title="Teal accent"></button>
+      <button class="accent-option" type="button" data-accent-option="amber" aria-pressed="false" aria-label="Amber accent" title="Amber accent"></button>
+    </div></div>
+      <button class="btn btn-secondary btn-small" type="button" data-theme-reset>Reset appearance</button>
+    </li>
     </ul></nav>
     <div class="header-actions">
       <span class="header-chip">37 tools · 100% free</span>
@@ -47,6 +63,12 @@
       <button class="theme-option" type="button" data-theme-option="light" aria-pressed="false" aria-label="Light theme" title="Light theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path><path d="M12 1v2"></path><path d="M12 21v2"></path><path d="M4.2 4.2l1.4 1.4"></path><path d="M18.4 18.4l1.4 1.4"></path><path d="M1 12h2"></path><path d="M21 12h2"></path><path d="M4.2 19.8l1.4-1.4"></path><path d="M18.4 5.6l1.4-1.4"></path></svg></button>
       <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"></path></svg></button>
       <button class="theme-option" type="button" data-theme-option="auto" aria-pressed="true" aria-label="Auto theme (follows device)" title="Auto theme"><svg class="sh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"></path><path d="M12 3v18"></path><path d="M3.5 9h17"></path><path d="M3.5 15h17"></path></svg></button>
+    </div>
+      <div class="accent-switch" role="group" aria-label="Accent colour">
+      <button class="accent-option" type="button" data-accent-option="blue" aria-pressed="true" aria-label="Blue accent" title="Blue accent"></button>
+      <button class="accent-option" type="button" data-accent-option="violet" aria-pressed="false" aria-label="Violet accent" title="Violet accent"></button>
+      <button class="accent-option" type="button" data-accent-option="teal" aria-pressed="false" aria-label="Teal accent" title="Teal accent"></button>
+      <button class="accent-option" type="button" data-accent-option="amber" aria-pressed="false" aria-label="Amber accent" title="Amber accent"></button>
     </div>
     </div>
   </div></header>

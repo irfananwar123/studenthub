@@ -41,6 +41,7 @@
   --brand-strong: var(--blue-700);
   --brand-soft: #e9f1ff;
   --accent: var(--sky-500);
+  --accent-2: var(--violet-500);
   --on-brand: #ffffff;
   --brand-shadow: rgba(37, 99, 235, .35);
   --green-glow: rgba(5, 150, 105, .14);
@@ -107,7 +108,7 @@
   --ease: cubic-bezier(.22, .61, .36, 1);
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --glass-line: rgba(255, 255, 255, .6);
-  --brand-gradient: linear-gradient(135deg, var(--brand), var(--accent) 58%, var(--violet-500));
+  --brand-gradient: linear-gradient(135deg, var(--brand), var(--accent) 55%, var(--accent-2));
   --surface-raised: linear-gradient(155deg, var(--surface), var(--surface-2));
   --radius-sm: 10px;
   --radius: 16px;
@@ -263,4 +264,55 @@ html[data-theme="dark"] {
     --shadow-lg: 0 34px 76px -30px rgba(0, 0, 0, .72), 0 14px 32px -18px rgba(0, 0, 0, .55);
     --shadow-glow: 0 20px 48px -20px rgba(59, 130, 246, .55);
   }
+}
+
+/* Accent palettes. The pre-paint script sets data-accent before CSS loads.
+   Palette rules only change the core hue tokens; the shared block derives soft
+   surfaces, rings, charts and heatmaps so Light, Dark and Auto stay consistent. */
+html[data-accent="blue"] { --brand: #2563eb; --brand-strong: #1d4ed8; --accent: #0ea5e9; --accent-2: #7c3aed; }
+html[data-accent="violet"] { --brand: #7c3aed; --brand-strong: #6d28d9; --accent: #4f46e5; --accent-2: #db2777; }
+html[data-accent="teal"] { --brand: #0d9488; --brand-strong: #0f766e; --accent: #06b6d4; --accent-2: #2563eb; }
+html[data-accent="amber"] { --brand: #d97706; --brand-strong: #b45309; --accent: #f59e0b; --accent-2: #7c3aed; }
+html[data-theme="dark"][data-accent="blue"] { --brand: #7cb2ff; --brand-strong: #60a5fa; --accent: #38bdf8; }
+html[data-theme="dark"][data-accent="violet"] { --brand: #c4b5fd; --brand-strong: #a78bfa; --accent: #a5b4fc; --accent-2: #f0abfc; }
+html[data-theme="dark"][data-accent="teal"] { --brand: #5eead4; --brand-strong: #2dd4bf; --accent: #67e8f9; --accent-2: #93c5fd; }
+html[data-theme="dark"][data-accent="amber"] { --brand: #fbbf24; --brand-strong: #f59e0b; --accent: #fcd34d; --accent-2: #f0abfc; }
+html[data-accent] {
+  --brand-soft: color-mix(in srgb, var(--brand) 13%, var(--surface));
+  --surface-accent: color-mix(in srgb, var(--brand) 8%, transparent);
+  --border-accent: color-mix(in srgb, var(--brand) 26%, var(--border));
+  --card-icon-border: color-mix(in srgb, var(--brand) 24%, var(--border));
+  --ring: color-mix(in srgb, var(--brand) 34%, transparent);
+  --brand-shadow: color-mix(in srgb, var(--brand) 42%, transparent);
+  --hero-glow: color-mix(in srgb, var(--brand) 18%, transparent);
+  --ad-glow: color-mix(in srgb, var(--brand) 14%, transparent);
+  --ad-label-bg: var(--brand-soft);
+  --ad-label-text: var(--brand);
+  --card-icon-bg: linear-gradient(145deg, var(--brand-soft), var(--surface));
+  --flashcard-back-bg: linear-gradient(155deg, var(--brand-soft), var(--surface-2));
+  --timer-console-bg: linear-gradient(155deg, var(--brand-soft), var(--surface));
+  --shadow-glow: 0 20px 48px -22px var(--brand-shadow);
+  --body-glow-1: color-mix(in srgb, var(--brand) 16%, transparent);
+  --body-glow-2: color-mix(in srgb, var(--accent) 12%, transparent);
+  --body-glow-3: color-mix(in srgb, var(--accent-2) 9%, transparent);
+  --section-soft-bg: linear-gradient(180deg, color-mix(in srgb, var(--brand) 5%, var(--surface)), color-mix(in srgb, var(--brand) 9%, var(--surface)));
+  --chart-bar-start: color-mix(in srgb, var(--accent) 58%, var(--surface));
+  --chart-bar-end: var(--brand);
+  --heat-1: color-mix(in srgb, var(--brand) 14%, var(--surface));
+  --heat-1-border: color-mix(in srgb, var(--brand) 24%, var(--border));
+  --heat-2: color-mix(in srgb, var(--brand) 30%, var(--surface));
+  --heat-2-border: color-mix(in srgb, var(--brand) 42%, var(--border));
+  --heat-3: color-mix(in srgb, var(--brand) 58%, var(--surface));
+  --heat-3-border: color-mix(in srgb, var(--brand) 68%, var(--border));
+  --heat-4: var(--brand-strong);
+  --heat-4-border: var(--brand-strong);
+  --timer-gradient: linear-gradient(135deg, var(--brand-strong), var(--brand));
+  --timer-console-bg: linear-gradient(155deg, var(--brand-soft), var(--surface));
+  --flashcard-back-bg: linear-gradient(155deg, var(--brand-soft), var(--surface-2));
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme])[data-accent="blue"] { --brand: #7cb2ff; --brand-strong: #60a5fa; --accent: #38bdf8; }
+  html:not([data-theme])[data-accent="violet"] { --brand: #c4b5fd; --brand-strong: #a78bfa; --accent: #a5b4fc; --accent-2: #f0abfc; }
+  html:not([data-theme])[data-accent="teal"] { --brand: #5eead4; --brand-strong: #2dd4bf; --accent: #67e8f9; --accent-2: #93c5fd; }
+  html:not([data-theme])[data-accent="amber"] { --brand: #fbbf24; --brand-strong: #f59e0b; --accent: #fcd34d; --accent-2: #f0abfc; }
 }

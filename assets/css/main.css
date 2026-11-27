@@ -83,7 +83,7 @@ ul, ol { padding-left: 1.25rem; }
 .brand:hover { text-decoration: none; }
 .brand-mark {
   width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
-  background: linear-gradient(145deg, var(--blue-500), var(--navy-800));
+  background: var(--brand-gradient);
   color: var(--on-brand); box-shadow: inset 0 1px 0 var(--hero-panel-grid), 0 8px 18px -8px var(--brand-shadow);
 }
 .brand-mark svg { width: 20px; height: 20px; }
@@ -157,6 +157,36 @@ ul, ol { padding-left: 1.25rem; }
 .theme-option[aria-pressed="true"] {
   color: var(--brand); background: var(--surface); box-shadow: var(--shadow-sm);
 }
+
+/* Accent colours — saved locally and applied through the same design tokens */
+.accent-switch {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding: 4px; border-radius: 999px;
+  background: var(--bg-soft); border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 var(--glass-line);
+}
+.accent-option {
+  width: 20px; height: 20px; padding: 0; border-radius: 50%;
+  border: 2px solid transparent; background: var(--swatch); cursor: pointer;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
+}
+.accent-option[data-accent-option="blue"] { --swatch: #2563eb; }
+.accent-option[data-accent-option="violet"] { --swatch: #7c3aed; }
+.accent-option[data-accent-option="teal"] { --swatch: #0d9488; }
+.accent-option[data-accent-option="amber"] { --swatch: #d97706; }
+.accent-option:hover { transform: scale(1.16); }
+.accent-option[aria-pressed="true"] {
+  border-color: var(--surface); transform: scale(1.12);
+  box-shadow: 0 0 0 2px var(--swatch), var(--shadow-sm);
+}
+.mobile-appearance { display: none; }
+#primary-navigation .mobile-appearance {
+  margin-top: .7rem; padding: .9rem .8rem .4rem; border-top: 1px solid var(--border);
+  border-radius: 12px; background: var(--surface-2);
+}
+.mobile-appearance-title { display: block; margin-bottom: .55rem; color: var(--text-soft); font-size: .74rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.mobile-appearance .appearance-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; }
+.mobile-appearance .btn { margin-top: .5rem; }
 .offline-indicator {
   position: fixed; bottom: 16px; left: 16px; z-index: 150; max-width: calc(100% - 2rem);
   background: var(--navy-900); color: var(--on-brand); padding: .6rem 1rem;
@@ -186,8 +216,8 @@ ul, ol { padding-left: 1.25rem; }
 .hero-panel {
   position: relative; overflow: hidden;
   background:
-    radial-gradient(520px 200px at 100% 0%, rgba(96, 165, 250, .28), transparent 65%),
-    linear-gradient(155deg, rgba(59, 130, 246, .24), transparent 48%),
+    radial-gradient(520px 200px at 100% 0%, color-mix(in srgb, var(--brand) 28%, transparent), transparent 65%),
+    linear-gradient(155deg, color-mix(in srgb, var(--accent) 24%, transparent), transparent 48%),
     linear-gradient(155deg, var(--navy-900), var(--navy-700));
   border: 1px solid var(--hero-panel-border);
   border-radius: var(--radius-lg); padding: clamp(1.2rem, 3vw, 1.7rem); color: var(--hero-panel-text);
@@ -224,7 +254,7 @@ ul, ol { padding-left: 1.25rem; }
 .site-footer {
   position: relative; overflow: hidden;
   background:
-    radial-gradient(700px 260px at 90% 0%, rgba(37, 99, 235, .3), transparent 65%),
+    radial-gradient(700px 260px at 90% 0%, color-mix(in srgb, var(--brand) 30%, transparent), transparent 65%),
     var(--navy-950);
   color: var(--footer-text); padding: 3.8rem 0 1.5rem;
 }
@@ -261,7 +291,7 @@ ul, ol { padding-left: 1.25rem; }
 }
 .page-hero::before {
   content: ""; position: absolute; inset: 0 0 auto; height: 3px;
-  background: linear-gradient(90deg, var(--brand), var(--accent), var(--violet-500), var(--brand));
+  background: linear-gradient(90deg, var(--brand), var(--accent), var(--accent-2), var(--brand));
   background-size: 220% 100%; animation: rail-flow 9s var(--ease) infinite alternate;
 }
 .page-hero::after {

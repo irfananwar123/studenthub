@@ -56,20 +56,56 @@ test('every page has unique title, description, canonical and one H1', () => {
   assert.equal(descriptions.size, PAGES.length, 'descriptions are unique');
 });
 
-test('light, dark and auto theme controls are shipped on every page', () => {
+test('light, dark, auto and saved accent controls are shipped on every page', () => {
   const themeJs = read('assets/js/theme.js');
-  ['studenthub:theme', 'prefers-color-scheme', "'light'", "'dark'", "'auto'"].forEach(needle => {
+  ['studenthub:theme', 'studenthub:accent', 'prefers-color-scheme', "'light'", "'dark'", "'auto'",
+    "'blue'", 'violet', 'teal', 'amber', 'data-accent-option', 'data-theme-reset'].forEach(needle => {
     assert.ok(themeJs.includes(needle), `theme.js: ${needle}`);
   });
-  assert.ok(read('assets/css/themes.css').includes('html[data-theme="dark"]'), 'dark tokens exist');
+  const themesCss = read('assets/css/themes.css');
+  assert.ok(themesCss.includes('html[data-theme="dark"]'), 'dark tokens exist');
+  assert.ok(themesCss.includes('html[data-accent="violet"]'), 'accent palettes exist');
+  const storageJs = read('assets/js/storage.js');
+  ['getAccent', 'setAccent', "'accent'"].forEach(needle => assert.ok(storageJs.includes(needle), `storage.js: ${needle}`));
   PAGES.forEach(page => {
     const html = read(page);
     assert.ok(html.includes('data-theme-preference="auto"'), `${page}: default preference`);
+    assert.ok(html.includes('data-accent="blue"'), `${page}: default accent`);
     assert.ok(html.includes("localStorage.getItem('studenthub:theme')"), `${page}: pre-paint theme script`);
+    assert.ok(html.includes("localStorage.getItem('studenthub:accent')"), `${page}: pre-paint accent script`);
     ['light', 'dark', 'auto'].forEach(mode => assert.ok(html.includes(`data-theme-option="${mode}"`), `${page}: ${mode} control`));
+    ['blue', 'violet', 'teal', 'amber'].forEach(accent => assert.ok(html.includes(`data-accent-option="${accent}"`), `${page}: ${accent} swatch`));
+    assert.ok(html.includes('data-theme-reset'), `${page}: reset control`);
     assert.ok(html.includes('theme.js'), `${page}: theme script`);
     assert.ok(!html.includes('data-theme-toggle'), `${page}: no stale hidden toggle`);
   });
+});
+
+test('global SEO ships keywords, hreflang, keyword copy and richer home data', () => {
+  const home = read('index.html');
+  assert.ok(home.includes('<meta name="keywords" content="'), 'homepage keywords');
+  ['free online study tools', 'GPA calculator', 'grade calculator', 'attendance calculator',
+    'spaced revision planner', 'exam preparation'].forEach(needle => {
+    assert.ok(home.includes(needle), `homepage keyword copy: ${needle}`);
+  });
+  assert.ok(home.includes('id="worldwide"'), 'worldwide section anchor');
+  assert.ok(home.includes('Built for students everywhere'), 'worldwide section heading');
+  assert.ok(home.includes('The interface is in English'), 'honest English-first language note');
+  assert.ok(home.includes('appearance-studio'), 'appearance studio section');
+  PAGES.forEach(page => {
+    const html = read(page);
+    assert.ok(html.includes('<meta name="keywords" content="'), `${page}: keywords meta`);
+    assert.ok(html.includes('<link rel="alternate" hreflang="en" href="'), `${page}: English hreflang`);
+    assert.ok(html.includes('<link rel="alternate" hreflang="x-default" href="'), `${page}: default hreflang`);
+  });
+  const ld = home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(ld, 'home structured data');
+  const data = JSON.parse(ld[1]);
+  assert.ok(Array.isArray(data['@graph']), 'home structured data uses a graph');
+  const website = data['@graph'].find(x => x['@type'] === 'WebSite');
+  assert.equal(website.inLanguage, 'en', 'home language signal');
+  assert.ok(website.audience && /worldwide/i.test(website.audience.audienceType), 'home audience signal');
+  assert.ok(data['@graph'].some(x => x['@type'] === 'ItemList' && x.numberOfItems === 8), 'featured tool ItemList');
 });
 
 test('live usage strip is on-device only and ships on every page', () => {
@@ -158,7 +194,11 @@ test('sitemap, fallback sitemap, robots, manifest and icons are complete', () =>
   });
   assert.ok(sitemap.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in sitemap');
   assert.equal((sitemap.match(/<loc>/g) || []).length, 47, 'sitemap has 47 crawlable URLs');
+  assert.ok(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap declares XHTML namespace');
+  assert.equal((sitemap.match(/hreflang="en"/g) || []).length, 47, 'sitemap has English alternates');
+  assert.equal((sitemap.match(/hreflang="x-default"/g) || []).length, 47, 'sitemap has default alternates');
   assert.ok(fallback.includes(`<loc>${SITE}/advanced/</loc>`), 'advanced hub in fallback sitemap');
+  assert.ok(fallback.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'fallback sitemap has hreflang namespace');
   assert.equal((fallback.match(/<loc>/g) || []).length, (sitemap.match(/<loc>/g) || []).length, 'fallback sitemap is identical');
   const robots = read('robots.txt');
   assert.ok(robots.includes(`Sitemap: ${SITE}/sitemap.xml`), 'primary sitemap in robots.txt');

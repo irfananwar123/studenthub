@@ -119,6 +119,11 @@
         return value === 'dark' || value === 'light' || value === 'auto' ? value : 'auto';
       },
       setTheme: function (value) { return lsSet('theme', value); },
+      getAccent: function () {
+        var value = lsGet('accent', 'blue');
+        return ['blue', 'violet', 'teal', 'amber'].includes(value) ? value : 'blue';
+      },
+      setAccent: function (value) { return lsSet('accent', value); },
       arrayPref: function (key) {
         var value = lsGet(key, []);
         return Array.isArray(value) ? value : [];
@@ -164,7 +169,7 @@
     },
     exportData: function () {
       var prefs = {};
-      ['theme', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) { prefs[k] = lsGet(k, null); });
+      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) { prefs[k] = lsGet(k, null); });
       var payload = { app: 'StudentHub', version: 1, exportedAt: new Date().toISOString(), prefs: prefs, collections: {} };
       return Promise.all(COLLECTIONS.map(function (name) {
         return storage.all(name).then(function (rows) { payload.collections[name] = rows; });
@@ -178,11 +183,12 @@
         return Promise.reject(new Error('This is not a StudentHub backup file.'));
       }
       if (data.prefs && typeof data.prefs === 'object') {
-        ['theme', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
+        ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
           var value = data.prefs[k];
           if (value === undefined || value === null) return;
           if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches' || k === 'usageEvents') && !Array.isArray(value)) return;
           if (k === 'theme' && !['auto', 'dark', 'light'].includes(value)) return;
+          if (k === 'accent' && !['blue', 'violet', 'teal', 'amber'].includes(value)) return;
           lsSet(k, value);
         });
       }
@@ -197,7 +203,7 @@
       })).then(function () { return true; });
     },
     clearAll: function () {
-      ['theme', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) {
+      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) {
         try { localStorage.removeItem(PREFIX + k); } catch (e) {}
       });
       return Promise.all(COLLECTIONS.map(function (name) { return storage.clear(name); })).then(function () { return true; });

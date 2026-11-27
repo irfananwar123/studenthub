@@ -23,6 +23,8 @@
   .nav-list { flex-direction: column; align-items: stretch; }
   .nav-list a { padding: .7rem .8rem; font-size: .95rem; }
   .header-inner { flex-wrap: nowrap; }
+  .header-actions .accent-switch { display: none; }
+  .mobile-appearance { display: block; }
 }
 @media (max-width: 600px) {
   .container { width: min(100% - 1.5rem, var(--max)); }
@@ -60,6 +62,11 @@
   .usage-updated { margin-left: 0; }
   .theme-switch { gap: 0; padding: 2px; }
   .theme-option { width: 28px; height: 28px; }
+  .appearance-controls { gap: .45rem; }
+  .studio-preview-chart { height: 120px; }
+  .global-list { grid-template-columns: minmax(0, 1fr); }
+  .global-orbit { width: 140px; height: 140px; }
+  .global-orbit > svg { width: 58px; height: 58px; }
   .stat-grid, .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .breakdown-row { grid-template-columns: minmax(0, 1fr) auto; }
   .breakdown-row .split-bar { grid-column: 1 / -1; }
@@ -77,6 +84,8 @@
   .brand { gap: .45rem; font-size: 1rem; }
   .theme-option { width: 26px; height: 27px; }
   .theme-option svg { width: 14px; height: 14px; }
+  .global-panel { padding: 1.1rem; }
+  .global-panel-cards span { font-size: .7rem; }
   .ad-slot, .ad-slot.ad-slot-active { padding-inline: .5rem; }
 }
 @media print {

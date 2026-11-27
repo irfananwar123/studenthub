@@ -1,6 +1,6 @@
 # StudentHub
 
-A complete, free, browser-based student productivity platform: 37 working tools with dashboard-style analytics, learning-theory planners, a dedicated Advanced hub, a private local workspace, search, an honest on-device live usage strip, PWA/offline support, SEO-ready pages and responsive design. A saved Light / Dark / Auto theme controls the whole interface, including charts, ad slots and study panels. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
+A complete, free, browser-based student productivity platform: 37 working tools with dashboard-style analytics, learning-theory planners, a dedicated Advanced hub, a private local workspace, search, an honest on-device live usage strip, PWA/offline support, SEO-ready pages and responsive design. Saved Light / Dark / Auto and accent colour choices control the whole interface, including charts, ad slots and study panels. Keyword-rich copy, hreflang signals and sitemap alternates help students everywhere discover the site. Built with HTML5, modern CSS3 and vanilla JavaScript. No paid APIs, no backend, no account. The site is funded by third-party advertising; those scripts are listed in the privacy policy.
 
 **Production URL used for canonical tags:** `https://studenthub-2gs.pages.dev`
 
@@ -91,11 +91,11 @@ You can also open `index.html` directly (double-click it) and browse the whole s
 ## 4. Tests
 
 ```bash
-node --test tests          # 33 calculation + structure checks
-node tests/browser-smoke.js # 70 real Chrome checks (needs Google Chrome installed)
+node --test tests          # 34 calculation + structure checks
+node tests/browser-smoke.js # 74 real Chrome checks (needs Google Chrome installed)
 ```
 
-The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters and the live usage strip, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 50 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (800/800 clean).
+The browser test starts its own local server and headless Chrome, then drives every tool, exercises the Advanced hub filters and the live usage strip, checks invalid inputs, persistence, service-worker registration, the Light/Dark/Auto theme (including system changes and local persistence), saved accent colours and appearance reset, mobile overflow and ad behaviour (including always-on pages and a blocked-network simulation). It also opens pages from `file://` to confirm the UI, tools and relative links work directly from disk. It closes both processes when finished. A separate layout sweep verified all 50 routes at 1440, 820, 390 and 320 px in Light and Dark with ads active and blocked (800/800 clean).
 
 See `TEST_REPORT.md` for the latest results and known limits.
 
@@ -160,6 +160,8 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 - **Search**: instant filtering by name, category, description and keywords; keyboard arrows/Enter/Escape; recent searches; empty state; 404-page search.
 - **Privacy**: no login and no server storage of study data. StudentHub's own code has no analytics; third-party ad scripts are disclosed in the privacy policy. LocalStorage for preferences, drafts and the on-device usage log; IndexedDB for collections. The privacy policy explains that no global user counter exists.
 - **PWA**: manifest, installable icons, versioned service worker, offline fallback, offline indicator and automatic cache cleanup.
+- **Appearance studio**: a homepage panel with live preview plus Light/Dark/Auto and Blue/Violet/Teal/Amber accent controls. Both choices are applied before paint, saved in LocalStorage, included in backup export/import, cleared with workspace data and available in the mobile navigation. Accents recolour buttons, charts, cards, gradients, heatmaps and ad slots without changing themes.
+- **Global discovery**: keyword-rich homepage and page-level keyword metas, `hreflang="en"` plus `x-default` on every page, matching `xhtml:link` alternates in both sitemaps, richer WebSite/Organization/ItemList structured data, and an honest English-first worldwide section. No translated pages are claimed.
 - **SEO**: unique titles/descriptions/canonical/OG tags, Google Search Console and Bing Webmaster Tools verification metas, H1/H2 structure, explanatory content, formulas, worked examples, FAQs, related tools, BreadcrumbList and WebSite structured data, primary and fallback sitemaps, and robots.
 - **Visual system**: token-driven premium UI in exactly four stylesheets — ambient mesh background, glass header, animated hero rails, card spotlights, category-tinted Advanced dashboards, refined tool workspaces and smoother easing. Stylesheets use content-derived version queries so CSS-only deploys appear immediately instead of waiting on the one-hour cache; all motion is neutralised by reduced-motion settings.
 - **Accessibility**: semantic landmarks, skip link, visible focus, ARIA live results, labelled controls, reduced-motion support, keyboard search and timer controls.
@@ -171,6 +173,7 @@ Every route has a real file: `/tools/<slug>/index.html`, `/articles/<slug>/index
 ## 8. Known limitations
 
 - No account or cloud sync by design; backups are manual JSON files.
+- The interface is English only. `hreflang="en"` and `x-default` mark that honestly; translated pages are not provided.
 - Citation formatting covers basic books in APA/MLA/Chicago only and is not a verified bibliography service.
 - The score predictor is arithmetic, not a guarantee; institution-specific rules are not modelled.
 - The timetable uses a simple priority-based placement algorithm, not constraint optimisation.

@@ -15,6 +15,7 @@ CSS_NAMES.forEach(n => cssHash.update(fs.readFileSync(path.join(ROOT, 'assets/cs
 const CSS_VERSION = cssHash.digest('hex').slice(0, 10);
 const cssUrl = n => `/assets/css/${n}.css?v=${CSS_VERSION}`;
 const SITE = 'https://studenthub-2gs.pages.dev';
+const DEFAULT_KEYWORDS = 'free study tools, student calculators, revision planner, exam preparation, flashcards, word counter';
 /* Advertising tags. They are written into the HTML at build time, not injected
    after load: the 468x60 tag calls document.write, which only works while the
    document is still parsing. Set enabled to false to remove every placement. */
@@ -110,18 +111,21 @@ function head(opts) {
   const canonical = SITE + opts.path;
   const ld = opts.ld ? jsonLd(opts.ld) : '';
   return `<!doctype html>
-<html lang="en" data-theme="light" data-theme-preference="auto">
+<html lang="en" data-theme="light" data-theme-preference="auto" data-accent="blue">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${opts.title}</title>
 <meta name="description" content="${opts.desc}">
+<meta name="keywords" content="${opts.keywords || DEFAULT_KEYWORDS}">
 ${opts.robots ? `<meta name="robots" content="${opts.robots}">` : ''}
 <link rel="canonical" href="${canonical}">
+<link rel="alternate" hreflang="en" href="${canonical}">
+<link rel="alternate" hreflang="x-default" href="${canonical}">
 <meta name="google-site-verification" content="WPy7or4AwCbkixtA55pqg55hMDhLUFs1vPnR8EgH-rA" />
 <meta name="msvalidate.01" content="E6A421577F1424D7259F8EE6AA3E0786" />
 <meta name="theme-color" content="#f5f8ff">
-<script>(function(){var d=document.documentElement,p='auto',m=d.getAttribute('data-theme-preference');try{var r=localStorage.getItem('studenthub:theme');if(r!==null){var v=JSON.parse(r);if(v==='light'||v==='dark'||v==='auto')p=v;}else if(m==='light'||m==='dark'||m==='auto')p=m;}catch(e){}var dark=p==='dark'||(p==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',dark?'dark':'light');d.setAttribute('data-theme-preference',p);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',dark?'#07101f':'#f5f8ff');})();</script>
+<script>(function(){var d=document.documentElement,p='auto',m=d.getAttribute('data-theme-preference'),a='blue';try{var r=localStorage.getItem('studenthub:theme');if(r!==null){var v=JSON.parse(r);if(v==='light'||v==='dark'||v==='auto')p=v;}else if(m==='light'||m==='dark'||m==='auto')p=m;}catch(e){}try{var ar=localStorage.getItem('studenthub:accent');if(ar!==null){var av=JSON.parse(ar);if(av==='blue'||av==='violet'||av==='teal'||av==='amber')a=av;}}catch(e){}var dark=p==='dark'||(p==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',dark?'dark':'light');d.setAttribute('data-theme-preference',p);d.setAttribute('data-accent',a);var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',dark?'#07101f':'#f5f8ff');})();</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="StudentHub">
 <meta property="og:title" content="${opts.title}">
@@ -144,6 +148,16 @@ const themeSwitch = `<div class="theme-switch" role="group" aria-label="Colour t
       <button class="theme-option" type="button" data-theme-option="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">${icon('moon', 16)}</button>
       <button class="theme-option" type="button" data-theme-option="auto" aria-pressed="true" aria-label="Auto theme (follows device)" title="Auto theme">${icon('auto', 16)}</button>
     </div>`;
+const accentSwitch = `<div class="accent-switch" role="group" aria-label="Accent colour">
+      <button class="accent-option" type="button" data-accent-option="blue" aria-pressed="true" aria-label="Blue accent" title="Blue accent"></button>
+      <button class="accent-option" type="button" data-accent-option="violet" aria-pressed="false" aria-label="Violet accent" title="Violet accent"></button>
+      <button class="accent-option" type="button" data-accent-option="teal" aria-pressed="false" aria-label="Teal accent" title="Teal accent"></button>
+      <button class="accent-option" type="button" data-accent-option="amber" aria-pressed="false" aria-label="Amber accent" title="Amber accent"></button>
+    </div>`;
+const mobileAppearance = `<li class="mobile-appearance"><span class="mobile-appearance-title">Appearance</span>
+      <div class="appearance-controls">${themeSwitch}${accentSwitch}</div>
+      <button class="btn btn-secondary btn-small" type="button" data-theme-reset>Reset appearance</button>
+    </li>`;
 /* A real, device-local usage strip. Every number is recomputed from LocalStorage
    events and IndexedDB study rows on this device; there is no server counter. */
 function usageBar() {
@@ -169,10 +183,12 @@ function header() {
       <li><a href="/workspace/">My workspace</a></li>
       <li><a href="/#articles">Articles</a></li>
       <li><a href="/about/">About</a></li>
+      ${mobileAppearance}
     </ul></nav>
     <div class="header-actions">
       <span class="header-chip">${TOOLS.length} tools · 100% free</span>
       ${themeSwitch}
+      ${accentSwitch}
     </div>
   </div></header>`;
 }
@@ -260,7 +276,8 @@ function toolPage(t) {
   <section class="section section-soft"><div class="container prose"><h2>Frequently asked questions</h2>${faq(c.faq)}</div></section>
 </main>`;
   return shell({
-    title: `${c.seoTitle} | StudentHub`, desc: c.desc, path: url, ld: breadcrumb,
+    title: `${c.seoTitle} | StudentHub`, desc: c.desc,
+    keywords: `${t.name}, ${t.category}, free study tool, student calculator, exam preparation`, path: url, ld: breadcrumb,
     bodyAttrs: `data-page="tool" data-tool-id="${t.id}"${advanced ? ' data-advanced="true"' : ''}`, body,
     scripts: `<script src="/tools/${t.id}/tool.js" defer></script>`
   });
@@ -284,9 +301,23 @@ function homepage() {
     ['exam-preparation', 'A calm exam preparation checklist', 'What to do in the final week, day and hour.']
   ];
   const homeLd = {
-    '@context': 'https://schema.org', '@type': 'WebSite', name: 'StudentHub',
-    url: SITE + '/', description: 'Free browser-based study tools, calculators and planners for students.',
-    potentialAction: { '@type': 'SearchAction', target: SITE + '/#{search_term_string}', 'query-input': 'required name=search_term_string' }
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite', '@id': SITE + '/#website', name: 'StudentHub', url: SITE + '/',
+        description: 'Free browser-based study tools, calculators and planners for students.',
+        inLanguage: 'en',
+        keywords: 'free online study tools, GPA calculator, grade calculator, attendance calculator, revision planner, flashcards, word counter, exam preparation',
+        audience: { '@type': 'Audience', audienceType: 'Students worldwide' },
+        publisher: { '@id': SITE + '/#organization' },
+        potentialAction: { '@type': 'SearchAction', target: SITE + '/#{search_term_string}', 'query-input': 'required name=search_term_string' }
+      },
+      { '@type': 'Organization', '@id': SITE + '/#organization', name: 'StudentHub', url: SITE + '/' },
+      {
+        '@type': 'ItemList', name: 'Featured free study tools', numberOfItems: featured.length,
+        itemListElement: featured.map((id, i) => ({ '@type': 'ListItem', position: i + 1, url: SITE + '/tools/' + id + '/' }))
+      }
+    ]
   };
   const body = `<main id="main">
   <section class="hero"><div class="container hero-grid">
@@ -306,6 +337,24 @@ function homepage() {
       <div class="mini-bars" aria-hidden="true"><span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:20%"></span></div>
       <div class="mini-stats"><div class="mini-stat"><strong>12.5h</strong><span>Studied this week</span></div><div class="mini-stat"><strong>8</strong><span>Sessions logged</span></div><div class="mini-stat"><strong>4</strong><span>Subjects tracked</span></div></div>
     </div><div class="float-card">${icon('shield', 20)} Your notes stay on your device</div></div>
+  </div></section>
+
+  <section class="section appearance-studio" aria-labelledby="appearance-heading"><div class="container">
+    <div class="section-head"><span class="eyebrow">${icon('spark', 15)} Make it yours</span><h2 id="appearance-heading">An appearance studio that remembers</h2><p>Pick a light, dark or automatic theme, then choose an accent. Your choices are saved on this device and applied to every tool, chart, card and ad slot.</p></div>
+    <div class="studio-grid">
+      <div class="card studio-controls">
+        <div class="studio-control-group"><h3>Light, dark or automatic</h3><p>Auto follows the system setting and keeps updating while the page is open.</p><div class="appearance-controls">${themeSwitch}</div></div>
+        <div class="studio-control-group"><h3>Accent colour</h3><p>Blue, violet, teal or amber. Swatches recolour buttons, gradients, charts and study panels.</p><div class="appearance-controls">${accentSwitch}</div></div>
+        <button class="btn btn-secondary btn-small" type="button" data-theme-reset>Reset appearance</button>
+        <p class="studio-note">No account is needed. Appearance preferences stay in this browser and can be exported with your workspace backup.</p>
+      </div>
+      <div class="studio-preview" aria-label="Live preview of the current appearance">
+        <div class="studio-preview-head"><span>Live preview</span><span class="studio-preview-status" data-appearance-status>auto · blue · follows device</span></div>
+        <div class="studio-preview-chart" aria-hidden="true"><i style="height:42%"></i><i style="height:68%"></i><i style="height:52%"></i><i style="height:86%"></i><i style="height:63%"></i><i style="height:74%"></i><i style="height:38%"></i></div>
+        <div class="studio-preview-samples"><span class="studio-sample-btn">Primary action</span><span class="studio-sample-chip">Saved locally</span><span class="badge">Study tools</span></div>
+        <p class="studio-preview-note">This preview uses the same design tokens as the real pages, so what you see here is what the tools use.</p>
+      </div>
+    </div>
   </div></section>
 
   <section class="section advanced-showcase" aria-labelledby="advanced-home-heading"><div class="container">
@@ -331,6 +380,20 @@ function homepage() {
     <article class="tip-card"><div class="card-icon">${icon('chart', 20)}</div><h3>Look at patterns, not one day</h3><p>A single missed session means little. A weekly view shows whether your routine is realistic.</p><a class="card-link" href="/tools/study-tracker/">Open Study Tracker →</a></article>
   </div></div></section>
 
+  <section class="section section-soft global-section" id="worldwide" aria-labelledby="global-heading"><div class="container global-grid">
+    <div class="global-copy"><span class="eyebrow">${icon('globe', 15)} Built for students everywhere</span><h2 id="global-heading">Free online study tools for students everywhere</h2>
+      <p>StudentHub runs in any modern browser, on a phone, tablet or laptop. The interface is in English, and each page publishes English and default language signals so search engines can serve the right version to learners around the world.</p>
+      <p>Use the free GPA calculator, grade calculator, attendance calculator, study hours tracker, spaced revision planner, flashcard maker and word counter for exam preparation, homework planning and everyday revision. No account, no subscription and no paid API — just tools that work locally.</p>
+      <ul class="global-list">
+        <li>${icon('check', 16)} <span><strong>Free study tools:</strong> calculators, planners and learning aids without a subscription.</span></li>
+        <li>${icon('check', 16)} <span><strong>Exam preparation:</strong> revision schedules, readiness scores and calm checklists.</span></li>
+        <li>${icon('check', 16)} <span><strong>Any device:</strong> responsive pages stay available offline after a first visit.</span></li>
+        <li>${icon('check', 16)} <span><strong>Private by design:</strong> notes and progress stay in the browser on this device.</span></li>
+      </ul>
+    </div>
+    <div class="global-panel" aria-hidden="true"><div class="global-orbit">${icon('globe', 68)}</div><div class="global-panel-cards"><span>GPA calculator</span><span>Grade calculator</span><span>Revision planner</span><span>Flashcards</span><span>Word counter</span></div></div>
+  </div></section>
+
   <section class="section section-soft" id="articles" aria-labelledby="articles-heading"><div class="container"><div class="section-head"><span class="eyebrow">Guides</span><h2 id="articles-heading">Helpful educational articles</h2><p>Short, practical reading — no paid content or pop-ups.</p></div><div class="grid grid-2">${articles.map(([slug, title, desc]) => `<article class="article-card"><div class="card-icon">${icon('pencil', 20)}</div><h3><a href="/articles/${slug}/">${title}</a></h3><p>${desc}</p><span class="card-link">Read guide →</span></article>`).join('')}</div></div></section>
 
   <div class="container">${adSlot('home', ADS.enabled)}</div>
@@ -340,12 +403,15 @@ function homepage() {
     ['Do I need an account?', 'No. Everything works without signing in. Your notes, cards and progress are stored on your own device.'],
     ['Can I use StudentHub offline?', 'Yes. After a first visit, the app shell and tool pages are cached by the service worker so you can open them offline.'],
     ['Where is my data stored?', 'Small preferences are kept in LocalStorage and larger collections in IndexedDB on your device. StudentHub itself does not upload them. Third-party ad scripts may collect standard browser information as described in the privacy policy.'],
-    ['Can I use these tools for school submissions?', 'You can use the results as a guide, but always follow your institution’s rules and verify official grades and references.']
+    ['Can I use these tools for school submissions?', 'You can use the results as a guide, but always follow your institution’s rules and verify official grades and references.'],
+    ['Can I use StudentHub outside my country?', 'Yes. The interface is in English and every page publishes English and default language signals. The tools work in any modern browser, and pages you visit are cached for offline use.'],
+    ['Which free tools help most with exam preparation?', 'Students often combine the attendance calculator, study hours tracker, spaced revision scheduler, exam readiness score and flashcard maker. Each tool includes its own instructions and worked example.']
   ])}</div></section>
 </main>`;
   return shell({
     title: 'StudentHub — Free Study Tools, Calculators and Planners',
     desc: `${TOOLS.length} free, private study tools: GPA and grade planners, attendance tracker, study timer, revision scheduler, flashcards, quizzes, word counter and more.`,
+    keywords: 'free online study tools, GPA calculator, grade calculator, attendance calculator, study hours tracker, spaced revision planner, flashcard maker, word counter, exam preparation, students worldwide',
     path: '/', ld: homeLd, body,
     scripts: `<script src="/assets/js/home.js" defer></script>`
   });
@@ -418,7 +484,11 @@ function articlePage(slug, a) {
     <aside class="card"><h2>Try a related tool</h2><p>Use the plan below to turn advice into action.</p><div class="grid">${['study-timetable-maker', 'flashcard-maker', 'pomodoro-timer'].map(id => toolCard(TOOLS.find(t => t.id === id))).join('')}</div>${adSlot('article', ADS.enabled)}</aside>
   </div></section>
 </main>`;
-  return shell({ title: `${a.title} | StudentHub`, desc: a.desc, path: `/articles/${slug}/`, body });
+  return shell({
+    title: `${a.title} | StudentHub`, desc: a.desc,
+    keywords: `${slug.replace(/-/g, ' ')}, study guide, exam preparation, revision tips, free study tools`,
+    path: `/articles/${slug}/`, body
+  });
 }
 
 function advancedPage() {
@@ -487,6 +557,7 @@ function advancedPage() {
   return shell({
     title: 'Advanced Study Tools & Dashboards | StudentHub',
     desc: 'Explore twelve advanced StudentHub dashboards for readiness scores, study pace, deliberate practice, Feynman clarity, interleaving and workload planning.',
+    keywords: 'advanced study dashboards, exam readiness score, study pace forecaster, deliberate practice planner, interleaving schedule builder, free student tools',
     path: '/advanced/', body,
     scripts: '<script src="/assets/js/advanced.js" defer></script>'
   });
@@ -590,7 +661,7 @@ const urls = [
   ...TOOLS.map(t => ['/tools/' + t.id + '/', '0.9', 'monthly'])
 ];
 const today = new Date().toISOString().slice(0, 10);
-const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, p, freq]) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod><changefreq>${freq}</changefreq><priority>${p}</priority></url>`).join('\n')}\n</urlset>\n`;
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.map(([u, p, freq]) => `  <url><loc>${SITE}${u}</loc><xhtml:link rel="alternate" hreflang="en" href="${SITE}${u}"/><xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${u}"/><lastmod>${today}</lastmod><changefreq>${freq}</changefreq><priority>${p}</priority></url>`).join('\n')}\n</urlset>\n`;
 write('sitemap.xml', sitemapXml);
 /* A second, identical sitemap path lets webmaster tools retry with a fresh URL
    if they cache a failed fetch of /sitemap.xml during deployment. */
