@@ -26,6 +26,7 @@
 }
 @media (max-width: 600px) {
   .container { width: min(100% - 1.5rem, var(--max)); }
+  body { background-size: auto, auto, auto, 36px 36px, 36px 36px; }
   .section { padding: 2.6rem 0; }
   .hero { padding-top: 2.4rem; }
   .hero-panel { transform: none; }
@@ -54,6 +55,7 @@
   .header-inner { gap: .5rem; min-height: 64px; }
   .header-actions { gap: .4rem; }
   .usage-inner { gap: .25rem .6rem; font-size: .68rem; padding-block: .35rem; }
+  .usage-metric + .usage-metric { padding-left: .5rem; }
   .usage-metric strong { font-size: .76rem; }
   .usage-updated { margin-left: 0; }
   .theme-switch { gap: 0; padding: 2px; }
