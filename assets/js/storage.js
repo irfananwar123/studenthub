@@ -169,7 +169,7 @@
     },
     exportData: function () {
       var prefs = {};
-      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) { prefs[k] = lsGet(k, null); });
+      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents', 'activeTime', 'studyTimeGoal'].forEach(function (k) { prefs[k] = lsGet(k, null); });
       var payload = { app: 'StudentHub', version: 1, exportedAt: new Date().toISOString(), prefs: prefs, collections: {} };
       return Promise.all(COLLECTIONS.map(function (name) {
         return storage.all(name).then(function (rows) { payload.collections[name] = rows; });
@@ -183,10 +183,11 @@
         return Promise.reject(new Error('This is not a StudentHub backup file.'));
       }
       if (data.prefs && typeof data.prefs === 'object') {
-        ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches'].forEach(function (k) {
+        ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents', 'activeTime', 'studyTimeGoal'].forEach(function (k) {
           var value = data.prefs[k];
           if (value === undefined || value === null) return;
-          if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches' || k === 'usageEvents') && !Array.isArray(value)) return;
+          if ((k === 'favorites' || k === 'recentTools' || k === 'recentSearches' || k === 'usageEvents' || k === 'activeTime') && !Array.isArray(value)) return;
+          if (k === 'studyTimeGoal' && (!isFinite(Number(value)) || Number(value) <= 0)) return;
           if (k === 'theme' && !['auto', 'dark', 'light'].includes(value)) return;
           if (k === 'accent' && !['blue', 'violet', 'teal', 'amber'].includes(value)) return;
           lsSet(k, value);
@@ -203,7 +204,7 @@
       })).then(function () { return true; });
     },
     clearAll: function () {
-      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents'].forEach(function (k) {
+      ['theme', 'accent', 'favorites', 'recentTools', 'recentSearches', 'usageEvents', 'activeTime', 'studyTimeGoal'].forEach(function (k) {
         try { localStorage.removeItem(PREFIX + k); } catch (e) {}
       });
       return Promise.all(COLLECTIONS.map(function (name) { return storage.clear(name); })).then(function () { return true; });

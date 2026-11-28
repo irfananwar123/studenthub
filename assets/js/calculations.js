@@ -1093,6 +1093,73 @@
     };
   }
 
+  /* Summarises device-local active-time events alongside saved study sessions.
+     Events are flushed by active-time.js and never leave this browser. The
+     combined figure is a local activity signal: a saved study session can also
+     overlap with time spent on this site, so it is not a unique-person total. */
+  function activeTimeSummary(events, sessions, goalMinutes, todayKey) {
+    var rows = Array.isArray(events) ? events : [];
+    var byDay = {}, bySource = {}, byPage = {}, totalSeconds = 0;
+    rows.forEach(function (row) {
+      var seconds = Number(row && row.seconds);
+      var day = row && typeof row.day === 'string' ? row.day.slice(0, 10) : '';
+      if (!isNum(seconds) || seconds <= 0 || !parseDate(day)) return;
+      seconds = Math.min(Math.floor(seconds), 86400);
+      var source = String((row && row.source) || (row && row.page) || 'page').trim() || 'page';
+      var page = String((row && row.page) || 'page').trim() || 'page';
+      byDay[day] = (byDay[day] || 0) + seconds;
+      bySource[source] = (bySource[source] || 0) + seconds;
+      byPage[page] = (byPage[page] || 0) + seconds;
+      totalSeconds += seconds;
+    });
+    var today = todayKey && parseDate(todayKey) ? todayKey : isoDay(new Date());
+    var weekKeys = [], cursor = parseDate(today);
+    for (var i = 6; i >= 0; i--) {
+      weekKeys.push(isoDay(new Date(cursor.getTime() - i * 86400000)));
+    }
+    var weekSeconds = weekKeys.reduce(function (a, k) { return a + (byDay[k] || 0); }, 0);
+    function top(map) {
+      return Object.keys(map).sort(function (a, b) {
+        return map[b] - map[a] || a.localeCompare(b);
+      }).slice(0, 5).map(function (name) { return { name: name, seconds: map[name] }; });
+    }
+    var study = hoursSummary(sessions, goalMinutes, today);
+    var studyRows = Array.isArray(sessions) ? sessions : [];
+    var focusByDay = {}, focusSeconds = 0;
+    studyRows.forEach(function (row) {
+      var seconds = Number(row && row.seconds);
+      if (!isNum(seconds) || seconds <= 0) {
+        var minutes = Number(row && row.minutes);
+        seconds = isNum(minutes) && minutes > 0 ? minutes * 60 : 0;
+      }
+      var day = row && typeof row.date === 'string' ? row.date.slice(0, 10) : '';
+      if (!seconds || !parseDate(day)) return;
+      seconds = Math.min(Math.floor(seconds), 86400);
+      focusByDay[day] = (focusByDay[day] || 0) + seconds;
+      focusSeconds += seconds;
+    });
+    var combinedByDay = {};
+    Object.keys(byDay).forEach(function (key) { combinedByDay[key] = byDay[key]; });
+    Object.keys(focusByDay).forEach(function (key) { combinedByDay[key] = (combinedByDay[key] || 0) + focusByDay[key]; });
+    var weekFocusSeconds = weekKeys.reduce(function (a, k) { return a + (focusByDay[k] || 0); }, 0);
+    var weekCombinedSeconds = weekKeys.reduce(function (a, k) { return a + (combinedByDay[k] || 0); }, 0);
+    var goalSeconds = study.goalMinutes ? study.goalMinutes * 60 : null;
+    return {
+      byDay: byDay, bySource: bySource, byPage: byPage, weekKeys: weekKeys,
+      topSources: top(bySource), topPages: top(byPage),
+      todaySeconds: byDay[today] || 0, weekSeconds: weekSeconds, totalSeconds: totalSeconds,
+      study: study, focusByDay: focusByDay, focusSeconds: focusSeconds,
+      todayFocusSeconds: focusByDay[today] || 0, weekFocusSeconds: weekFocusSeconds,
+      combinedByDay: combinedByDay,
+      todayCombinedSeconds: combinedByDay[today] || 0,
+      weekCombinedSeconds: weekCombinedSeconds,
+      combinedSeconds: totalSeconds + focusSeconds,
+      goalSeconds: goalSeconds,
+      goalPercent: goalSeconds ? round(weekCombinedSeconds / goalSeconds * 100, 1) : null,
+      siteGoalPercent: goalSeconds ? round(weekSeconds / goalSeconds * 100, 1) : null
+    };
+  }
+
   var api = {
     isNum: isNum, round: round, sum: sum,
     percentOf: percentOf, percentAmount: percentAmount, percentChange: percentChange, originalFromPercent: originalFromPercent,
@@ -1101,7 +1168,7 @@
     textStats: textStats, readingTime: readingTime,
     parseDate: parseDate, daysBetween: daysBetween, age: age, isLeap: isLeap,
     convertUnit: convertUnit, UNIT_GROUPS: UNIT_GROUPS, formatCitation: formatCitation,
-    isoDay: isoDay, hoursSummary: hoursSummary, revisionPlan: revisionPlan,
+    isoDay: isoDay, hoursSummary: hoursSummary, activeTimeSummary: activeTimeSummary, revisionPlan: revisionPlan,
     gradeGoalPlan: gradeGoalPlan, streakStats: streakStats,
     syllabusCoverage: syllabusCoverage, readinessScore: readinessScore,
     studyForecast: studyForecast, priorityMatrix: priorityMatrix,

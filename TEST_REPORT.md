@@ -1,16 +1,16 @@
 # StudentHub — Test Report
 
-Date: 27 November 2026
+Date: 28 November 2026
 Environment: Windows, Node.js v26.13.0, Python 3.14, headless Google Chrome via Chrome DevTools Protocol, local `python -m http.server`.
 
 ## Automated suites
 
 | Command | Result |
 | --- | --- |
-| `node --test tests` | **47/47 passed** |
-| `node tests/browser-smoke.js` | **94/94 passed** |
+| `node --test tests` | **48/48 passed** |
+| `node tests/browser-smoke.js` | **96/96 passed** |
 
-### Unit tests (34 suites)
+### Unit tests (35 suites)
 
 Independent calculation checks compare output against separately calculated expected values:
 
@@ -48,25 +48,26 @@ Independent calculation checks compare output against separately calculated expe
 - Area: rectangle, triangle, circle, trapezoid and parallelogram results plus rejected dimensions and unknown shapes.
 - Volume: cube, rectangular prism, cylinder, sphere and cone results plus rejected dimensions and unknown solids.
 - Time: addition with borrowing, subtraction with and without a negative result, decimal hours and invalid minute/second ranges.
+- Active time summary: device-local active seconds by day/tool/page, saved-session seconds, weekly combined signal, top-source ordering, goal percentages and invalid-row filtering.
 
 ### Structural tests (13 suites)
 
-- All 49 tool directories contain `index.html` and `tool.js` across 62 generated pages.
-- All 62 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags. Every page also ships explicit robots directives (index/follow on public pages, noindex where intended), author/application-name metas, an OG image/locale, and Twitter card/title/description/image metas.
+- All 51 tool directories contain `index.html` and `tool.js` across 64 generated pages.
+- All 64 generated pages have unique titles, 25–160 character descriptions, canonical URLs and exactly one H1; all have Open Graph plus Google Search Console and Bing Webmaster Tools verification meta tags. Every page also ships explicit robots directives (index/follow on public pages, noindex where intended), author/application-name metas, an OG image/locale, and Twitter card/title/description/image metas.
 - Every generated page ships the pre-paint theme and accent scripts, all three theme controls, four accent swatches, a reset control and `theme.js`; no stale hidden light-only toggle remains. Dark and accent palette tokens are present in `themes.css`, and `storage.js` reads, writes, exports, imports and clears the accent preference.
-- Global SEO checks confirm keyword metas and English/default hreflang links on all 62 pages, keyword-rich worldwide copy, an appearance studio, a daily-calculators section and a math-essentials section on the homepage, and richer WebSite/Organization/ItemList JSON-LD with `inLanguage`, audience signals, a six-item everyday calculator list and a six-item math/time calculator list.
+- Global SEO checks confirm keyword metas and English/default hreflang links on all 64 pages, keyword-rich worldwide copy, an appearance studio, a daily-calculators section and a math-essentials section on the homepage, and richer WebSite/Organization/ItemList JSON-LD with `inLanguage`, audience signals, a six-item everyday calculator list and a six-item math/time calculator list.
 - Every generated page ships the scroll-progress, back-to-top, header-context, command-palette and quick-bar controls plus `global-ui.js`, with exactly four stylesheets; the shipped script stays local, uses IntersectionObserver for reveals and respects reduced motion.
 - The homepage has two extra labelled first-party sponsor slots (`home-top` and `home-math`) as static HTML. They use the existing local creatives and sponsor link, add no duplicate native/banner script or container ID, and the privacy policy discloses them.
 - Every tool page includes instructions, formulas, worked example, FAQ, related tools, breadcrumb structured data, result region and favourite control.
-- The `/advanced/` hub has matching root and nested pages, twelve crawlable dashboard links, working filter/search controls including the Learning theory filter, and an active ad slot; all twelve tools use the premium single-panel layout.
-- Every page ships the labelled on-device usage strip with all five metrics, `usage.js` is precached, the log is exported/imported/cleared with other prefs, tool opens and results are recorded locally, and the privacy policy states that no global counter exists.
+- The `/advanced/` hub has matching root and nested pages, fourteen crawlable dashboard links, working filter/search controls including the Learning theory filter, and an active ad slot; all fourteen tools use the premium single-panel layout.
+- Every page ships the labelled on-device usage strip with all five metrics plus the local `active-time.js` tracker; both scripts are precached. The usage log, active-time timeline and study-time goal are exported/imported/cleared with other prefs, tool opens and results are recorded locally, and the privacy policy states that no global counter exists and no active-time data is uploaded.
 - All internal links resolve to real generated files (no broken routes).
-- Both sitemaps contain 59 URLs, including the Advanced hub, the six everyday calculators and the six math/time calculators, with XHTML namespace and English/default hreflang alternates on every URL; robots.txt points to both; Cloudflare headers declare the XML MIME type; manifest icons exist.
-- Service worker precaches the app shell, the Advanced hub and its script, `global-ui.js` and all tool pages with a content-derived cache version.
+- Both sitemaps contain 61 URLs, including the Advanced hub, the six everyday calculators and the six math/time calculators, with XHTML namespace and English/default hreflang alternates on every URL; robots.txt points to both; Cloudflare headers declare the XML MIME type; manifest icons exist.
+- Service worker precaches the app shell, the Advanced hub and its script, `global-ui.js`, `active-time.js` and all tool pages with a content-derived cache version.
 - Shipped JavaScript contains no `eval`, no `innerHTML` assignments, no network calls and no configured secrets; every file passes `node --check`.
 - All five approved ad tags are emitted as static parse-time HTML (pop-under and social bar in `<head>`, exact native snippet before its container, inline `atOptions` plus banner script, sponsored footer link). Every generated page has active head tags, a slot and a footer link; there is no ad-free page or URL off switch. `ads.js` holds the same URLs but never injects duplicate scripts. The privacy policy discloses every network, and no unrelated ad-network tags are present.
 
-### Real-browser smoke tests (94 checks)
+### Real-browser smoke tests (96 checks)
 
 Each test navigates to the actual page in headless Chrome, fills real controls, submits and reads the result:
 
@@ -75,12 +76,12 @@ Each test navigates to the actual page in headless Chrome, fills real controls, 
 3. Pomodoro starts, displays a decremented clock and pauses/resets without exceptions.
 4. Exam countdown, study tracker, assignment planner, flashcards, quiz, revision notes, question picker and vocabulary trainer all save and display data through IndexedDB.
 5. Word/character counters, reading time, text case, citations, age, date difference and unit converter return correct live results.
-6. All twelve advanced tools are exercised end to end: Study Hours Tracker runs a real timer, saves the session and renders its dashboard; Spaced Revision Scheduler generates and completes review stages; Grade Goal Planner calculates required marks and saves a local draft; Focus Streak & Habits logs completions, streaks and a 35-day heatmap; Syllabus Coverage Tracker saves a done topic and recalculates coverage; Exam Readiness Score produces the weighted 74% result and weakest-signal action; Study Pace Forecaster renders both chart series and detects the pace gap; Assignment Priority Matrix adds an assignment and renders the ranked list and seven-day bars; Deliberate Practice Planner builds the 12-hour weighted plan; Feynman Clarity Score renders its breakdown and gap list; Interleaving Schedule Builder produces seven mixed days; Confidence Calibrator reports overconfidence and per-quiz errors.
-7. The Advanced hub loads, removes its skeleton, filters twelve cards to three analysis dashboards, one readiness result and two learning-theory dashboards, shows its empty state, and all 24 card links have the correct local URL. The live usage strip records page views and tool opens, updates its metrics from the local log and stays explicitly device-local.
+6. All fourteen advanced tools are exercised end to end: Study Hours Tracker runs a real timer, saves the session and renders its dashboard; Spaced Revision Scheduler generates and completes review stages; Grade Goal Planner calculates required marks and saves a local draft; Focus Streak & Habits logs completions, streaks and a 35-day heatmap; Syllabus Coverage Tracker saves a done topic and recalculates coverage; Exam Readiness Score produces the weighted 74% result and weakest-signal action; Study Pace Forecaster renders both chart series and detects the pace gap; Assignment Priority Matrix adds an assignment and renders the ranked list and seven-day bars; Deliberate Practice Planner builds the 12-hour weighted plan; Feynman Clarity Score renders its breakdown and gap list; Interleaving Schedule Builder produces seven mixed days; Confidence Calibrator reports overconfidence and per-quiz errors; Website Time Tracker measures a real 1.2-second active segment, flushes it to LocalStorage and renders the goal ring and seven-day chart; Study Time Analytics reads a saved session plus local active time and renders source, subject and trend panels.
+7. The Advanced hub loads, removes its skeleton, filters fourteen cards to three analysis dashboards, one readiness result and two learning-theory dashboards, shows its empty state, and all 28 card links have the correct local URL. The live usage strip records page views and tool opens, updates its metrics from the local log and stays explicitly device-local.
 8. Instant search finds the right tool; the theme starts on Auto, Dark and Light switches repaint the page and update `theme-color`, the Dark choice persists across navigation, Auto follows an emulated system dark preference and updates live when it changes, the accent starts on Blue, Violet changes the live design tokens and persists across pages, Reset restores Auto/Blue, and the offline page renders.
 9. The global interface layer is checked end to end: scroll progress updates its ARIA value, back-to-top returns to the top, the sticky header adds a live section context, reveal cards become visible on scroll, in-page anchors update the active section under reduced motion, Ctrl+K opens the command palette and finds the new tools, arrow keys change the selection, Escape closes the palette, and the mobile quick bar opens and closes it.
 10. Edge cases in the browser: division by zero, attendance above total and invalid leap date all show guidance instead of wrong numbers or console errors.
-11. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 62 pages at phone width with ads active: `overflow:none on 62 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px in both Light and Dark, with ads active and with ad domains blocked/first-party slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **992/992 clean**. The appearance studio, worldwide discovery, daily-calculator and math-essentials sections, global UI and mobile quick bar were included in that sweep.
+11. Export → import round-trip succeeds; service worker registers; no horizontal overflow at 390×844 on the homepage or a tool page. A full sweep then checks all 64 pages at phone width with ads active: `overflow:none on 64 pages`. A separate layout audit checked every page at 1440, 820, 390 and 320 px in both Light and Dark, with ads active and with ad domains blocked/first-party slots active, looking for overlapping sibling cards/panels, clipped text and viewport overflow: **1024/1024 clean**. The appearance studio, worldwide discovery, daily-calculator and math-essentials sections, global UI and mobile quick bar were included in that sweep.
 12. The homepage and a tool page opened over `file://` load all four stylesheets, show the correct background and colours, run a calculation, and expose working relative links. The web manifest is attached only over HTTP(S), so disk preview produces no console error.
 13. Ads are always on: sampled home, Advanced hub, tool, article, About, Terms, Privacy, Contact, Workspace, offline and error pages all contain static head tags, an active slot and a sponsored footer link, and the former URL off switch is ignored. The homepage contains an active 468×60 slot, a native slot, two extra static labelled sponsor banners (`home-top` and `home-math`), the correct `atOptions` key, exactly one pop-under, social-bar, native and banner script. A tool page contains the native script before its container. With ad domains blocked, block detection fires and a first-party sponsored SVG banner plus a dismissible notice appears immediately; after four seconds the sponsored link fallback is still present. No live creative is required for these checks.
 
@@ -107,6 +108,7 @@ No JavaScript console exceptions were observed in any passing check.
 - The homepage gained an appearance studio with a live token preview and a keyword-rich worldwide section. Every page now has keyword metas and English/default hreflang links, both sitemaps carry matching `xhtml:link` alternates, and the homepage JSON-LD uses a WebSite/Organization/ItemList graph with language and audience signals. The interface remains English only; no translated pages are claimed.
 - Six daily-use calculators were added with pure calculation functions, browser tools, keyword-rich content and a homepage `ItemList`. The scientific parser was written from scratch instead of using `eval`/`Function`, fraction arithmetic uses greatest-common-factor reduction, GPA conversion states its linear/10-point caveats, and a rounded sample standard-deviation expectation was corrected from 2.138089935299395 to 2.1381 to match the displayed precision.
 - The homepage gained two additional static, labelled first-party sponsor placements without duplicating provider scripts or container IDs. All pages gained explicit robots directives, author/application-name metas, OG image/locale and Twitter card metas. These signals help search and social previews understand the pages; they do not guarantee a top ranking, which remains impossible for any site to promise.
+- Two real timing dashboards were added. `active-time.js` counts only visible, focused, non-idle segments with `Date.now()`, clamps system-sleep gaps, merges concurrent tab flushes by day/tool/page, and stores LocalStorage totals that are included in workspace export/import/clear. `activeTimeSummary()` keeps on-site time and saved sessions separate while showing a clearly caveated combined signal, so overlapping activity is never presented as a unique global measurement. The first browser assertion for Study Time Analytics expected 45 minutes in a top-line stat that correctly switched to hours once earlier sessions existed; it was changed to assert the new subject row instead.
 
 ## Not measured in this environment
 
@@ -117,4 +119,4 @@ No JavaScript console exceptions were observed in any passing check.
 - Cross-browser manual review beyond headless Chrome (Firefox/Safari layout should still be checked before a public launch).
 - Search engine rankings: structured data, keywords, FAQs and sitemap entries improve discoverability, but no top position in Google, Bing, DuckDuckGo or any browser can be guaranteed.
 
-All 49 tools were individually exercised; none are decorative.
+All 51 tools were individually exercised; none are decorative.

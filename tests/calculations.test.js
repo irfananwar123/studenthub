@@ -475,3 +475,32 @@ test('time calculator: addition, subtraction, borrowing and invalid minutes', ()
   assert.equal(C.timeCalculate({ h: 0, m: 60, s: 0 }, { h: 0, m: 0, s: 0 }, 'add'), null);
   assert.equal(C.timeCalculate({ h: 0, m: 0, s: 0 }, { h: 0, m: 0, s: 0 }, 'multiply'), null);
 });
+
+test('active time summary: local site time, saved sessions and goal progress', () => {
+  const today = '2026-11-28';
+  const events = [
+    { day: today, seconds: 120, source: 'website-time-tracker', page: 'tool' },
+    { day: today, seconds: 60, source: 'article', page: 'article' },
+    { day: '2026-11-27', seconds: 300, source: 'study-hours-tracker', page: 'tool' },
+    { day: today, seconds: -50, source: 'bad', page: 'tool' },
+    { day: 'not-a-day', seconds: 999, source: 'bad', page: 'tool' }
+  ];
+  const sessions = [
+    { date: today, subject: 'Maths', seconds: 1800, minutes: 30 },
+    { date: '2026-11-27', subject: 'Biology', seconds: 3600, minutes: 60 }
+  ];
+  const s = C.activeTimeSummary(events, sessions, 120, today);
+  assert.equal(s.todaySeconds, 180);
+  assert.equal(s.weekSeconds, 480);
+  assert.equal(s.totalSeconds, 480);
+  assert.equal(s.todayFocusSeconds, 1800);
+  assert.equal(s.weekFocusSeconds, 5400);
+  assert.equal(s.weekCombinedSeconds, 5880);
+  assert.equal(s.combinedSeconds, 5880);
+  near(s.goalPercent, 81.7, 1);
+  near(s.siteGoalPercent, 6.7, 1);
+  assert.deepEqual(s.topSources.map(x => x.name), ['study-hours-tracker', 'website-time-tracker', 'article']);
+  assert.deepEqual(s.topPages.map(x => x.name), ['tool', 'article']);
+  assert.equal(s.study.bySubject.Biology, 60);
+  assert.equal(C.activeTimeSummary([], [], 0, today).goalPercent, null);
+});

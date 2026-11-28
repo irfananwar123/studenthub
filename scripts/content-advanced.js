@@ -488,5 +488,96 @@ module.exports = {
       ['Do I need many quizzes?', 'Three or more give a useful first read. More results make the trend more reliable.'],
       ['Are my scores stored anywhere?', 'Only in this page and, if you choose Save draft, in LocalStorage on this device.']
     ]
+  },
+
+  'website-time-tracker': {
+    h1: 'Website Time Tracker',
+    seoTitle: 'Website Time Tracker — Real Active Time on StudentHub',
+    desc: 'See the real active time you spend on StudentHub today and this week, with local daily trends and your most-used tools and pages.',
+    intro: 'This dashboard measures the time you actively spend on StudentHub on this device. It counts seconds only while the tab is visible, the window has focus and you are not idle; background tabs and two minutes without input are excluded. Every total stays in this browser.',
+    icon: 'clock',
+    form: `
+      <div class="form-grid">
+        ${f('wt-goal', 'Daily active-time goal (minutes)', 'number', 'value="60" min="1" max="1440" step="5"')}
+      </div>
+      <div class="timer-console" id="wt-console">
+        <div class="timer-display" id="wt-clock">00:00:00</div>
+        <p class="timer-ring-text" id="wt-state">Measuring this tab. Paused when hidden, unfocused or idle.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="wt-save">${icon('check', 16)} Save now</button>
+          <button type="button" class="btn btn-secondary" id="wt-refresh">Refresh dashboard</button>
+          <button type="button" class="btn btn-danger" id="wt-clear">Clear local timeline</button>
+        </div>
+      </div>
+      <div class="dashboard-grid" id="wt-stats"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="wt-ring"><span id="wt-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="wt-goal-copy">No active time saved yet</strong><span>Today’s active-time goal</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Last 7 days</h3>
+      <div class="bar-chart" id="wt-chart"></div>
+      <h3 style="margin-top:1.4rem">Most-used tools &amp; pages</h3>
+      <div id="wt-top"></div>
+      <p class="field-hint">Totals update automatically while you study. Use Refresh to redraw them immediately.</p>`,
+    formula: `<p>A segment starts when this page becomes visible and focused, and stops when the tab is hidden, the window loses focus or no keyboard, pointer, touch or scroll input happens for two minutes. Elapsed time is measured with <code>Date.now()</code>, rounded down to whole seconds and stored as one daily total per tool or page. Today’s goal progress is <code>today’s active seconds ÷ (goal minutes × 60) × 100</code>, capped at 100% in the ring.</p>`,
+    example: `<p><strong>Example:</strong> You revise for 20 minutes on the Study Hours Tracker, read an article for 10 minutes and use the dashboard for 5 minutes. Today shows 35 minutes of active StudentHub time. With a 60-minute goal, the ring shows <code>35 ÷ 60 × 100 = 58.3%</code>, and the top-tools list ranks the tracker first.</p>`,
+    steps: [
+      'Leave this tab open while you study; the live clock shows the current active segment.',
+      'Switch tabs, minimise the window or stop interacting for two minutes to pause counting.',
+      'Choose Save now if you want the current partial segment written immediately.',
+      'Read today’s goal ring, the seven-day bars and the most-used tools and pages.',
+      'Change the daily goal or clear the local timeline at any time; all data stays on this device.'
+    ],
+    faq: [
+      ['Does this count time in other tabs or after I close the site?', 'No. Only the currently visible, focused StudentHub tab is counted. Time in other websites or after this site is closed is never included.'],
+      ['Does reading without clicking still count?', 'Yes, up to two minutes without input. The two-minute idle limit stops a forgotten open tab from inflating your totals.'],
+      ['Is this shared with other students?', 'No. There is no account, upload or global leaderboard. The timeline is stored in LocalStorage and included only in your own backup export.'],
+      ['Can I remove the data?', 'Yes. Clear local timeline removes the active-time log on this device, and clearing all workspace data removes it too.']
+    ]
+  },
+
+  'study-time-analytics': {
+    h1: 'Study Time Analytics',
+    seoTitle: 'Study Time Analytics — Local Study Sessions and Active Site Time',
+    desc: 'Combine your saved study sessions with active StudentHub time to see goals, seven-day trends and subject totals on this device.',
+    intro: 'Real study minutes and real website time are different signals. This dashboard brings both together: saved timed sessions from the Study Hours Tracker and active StudentHub time measured on this device. You can see goal progress, seven-day trends, subject totals and which tools you use most without sending anything anywhere.',
+    icon: 'chart',
+    form: `
+      <div class="form-grid">
+        ${f('sa-goal', 'Weekly study goal (minutes)', 'number', 'value="120" min="1" max="10080" step="5"')}
+      </div>
+      <div class="btn-row no-print">
+        <button type="button" class="btn btn-primary" id="sa-refresh">${icon('reset', 16)} Refresh data</button>
+        <button type="button" class="btn btn-secondary" id="sa-export">Export CSV</button>
+      </div>
+      <div class="dashboard-grid" id="sa-stats" style="margin-top:1.2rem"></div>
+      <div class="progress-row">
+        <div class="progress-ring" id="sa-ring"><span id="sa-ring-label">0%</span></div>
+        <div class="progress-copy"><strong id="sa-goal-copy">No local study signal yet</strong><span>Weekly goal progress</span></div>
+      </div>
+      <h3 style="margin-top:1.4rem">Seven-day trend</h3>
+      <div class="bar-chart" id="sa-chart"></div>
+      <h3 style="margin-top:1.4rem">Where the time comes from</h3>
+      <div id="sa-split"></div>
+      <h3 style="margin-top:1.4rem">Study time by subject</h3>
+      <div id="sa-subjects"></div>
+      <h3 style="margin-top:1.4rem">Most-used tools &amp; pages</h3>
+      <div id="sa-top"></div>
+      <div class="notice">${icon('info', 18)} The combined figure adds both local signals. A session you time on StudentHub can appear in both, so treat it as an activity signal rather than a unique total.</div>`,
+    formula: `<p>Saved sessions use the exact <code>seconds</code> field when present, otherwise <code>minutes × 60</code>. Active site time comes from device-local segments counted only while the tab is visible, focused and not idle. The seven-day chart adds both for each calendar day; goal progress is <code>weekly combined seconds ÷ (weekly goal minutes × 60) × 100</code>. Subject totals come only from saved sessions, while the tool list comes only from active site time.</p>`,
+    example: `<p><strong>Example:</strong> This week you saved 90 minutes of Biology and 30 minutes of Maths, and spent 120 active minutes on StudentHub. The combined weekly signal is 240 minutes. With a 120-minute goal, the ring shows 200%, but the honest reading is that both signals overlap and subject totals remain 90 minutes of Biology and 30 minutes of Maths.</p>`,
+    steps: [
+      'Run a real session in the Study Hours Tracker, or add a past session there, to create study data.',
+      'Keep StudentHub open in an active tab while you work so on-site time is measured honestly.',
+      'Set a weekly goal and select Refresh data to combine the two local signals.',
+      'Compare the seven-day bars, source split, subject totals and most-used tools.',
+      'Export the dashboard as CSV or adjust the goal; nothing is uploaded.'
+    ],
+    faq: [
+      ['Why can the goal show more than 100%?', 'Because the combined signal can include the same minutes twice: once as a saved session and once as active time on this site. The source split keeps the two figures separate.'],
+      ['Which study sessions are included?', 'All sessions in the same local collection used by the Daily Study Tracker and Study Hours Tracker, including timer and manually added sessions.'],
+      ['Does idle time count as website time?', 'No. Segments pause when the tab is hidden, the window loses focus or there is no input for two minutes.'],
+      ['Is any of this sent to a server?', 'No. The sessions and active-time totals live in IndexedDB and LocalStorage on this device and appear only in your own export.']
+    ]
   }
 };

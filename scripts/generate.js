@@ -67,12 +67,13 @@ const core = fs.readFileSync(path.join(ROOT, 'assets/js/core.js'), 'utf8');
 const listText = core.match(/var TOOLS = (\[[\s\S]*?\n  \]);/);
 if (!listText) throw new Error('Tool registry not found in core.js');
 const TOOLS = new Function('return ' + listText[1])(); // trusted build-time source only
-/* The Advanced hub is a curated, dashboard-first collection. These twelve tools
+/* The Advanced hub is a curated, dashboard-first collection. These fourteen tools
    share the premium single-panel layout and cross-link through the hub filters. */
 const ADVANCED_IDS = [
   'study-hours-tracker', 'spaced-revision-scheduler', 'grade-goal-planner', 'focus-streak-habits',
   'syllabus-coverage-tracker', 'exam-readiness-score', 'study-pace-forecaster', 'assignment-priority-matrix',
-  'deliberate-practice-planner', 'feynman-clarity-score', 'interleaving-schedule-builder', 'confidence-calibrator'
+  'deliberate-practice-planner', 'feynman-clarity-score', 'interleaving-schedule-builder', 'confidence-calibrator',
+  'website-time-tracker', 'study-time-analytics'
 ];
 
 const content = Object.assign({},
@@ -245,7 +246,7 @@ function footer(adsOn) {
   </div></footer>`;
 }
 function scripts(extra) {
-  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'global-ui'];
+  const base = ['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'active-time', 'pwa', 'ads', 'app', 'global-ui'];
   return base.map(n => `<script src="/assets/js/${n}.js" defer></script>`).join('\n') + '\n' + (extra || '');
 }
 function shell(opts) {
@@ -564,7 +565,7 @@ function advancedPage() {
     <div class="advanced-hero-copy">
       <span class="eyebrow">${icon('spark', 15)} Advanced workspace</span>
       <h1>Study intelligence, <span class="gradient">beautifully simple.</span></h1>
-      <p>Twelve focused dashboards that turn the study data already on your device into honest scores, clear forecasts and a practical next step. Learning-theory tools join the planning and analysis panels — no account, no setup, no waiting.</p>
+      <p>Fourteen focused dashboards that turn the study data already on your device into honest scores, clear forecasts and a practical next step. Real active-time tracking joins the planning, analysis and learning-theory panels — no account, no setup, no waiting.</p>
       <div class="btn-row"><a class="btn btn-primary" href="/tools/exam-readiness-score/">Check my readiness ${icon('arrow', 16)}</a><a class="btn btn-secondary" href="#advanced-grid">Browse dashboards</a></div>
     </div>
     <div class="advanced-hero-visual" aria-hidden="true">
@@ -610,14 +611,14 @@ function advancedPage() {
       ['Do advanced tools need an account?', 'No. Every dashboard runs in your browser, and any saved data stays in LocalStorage or IndexedDB on this device.'],
       ['Will these tools work offline?', 'Yes. After the first visit the advanced hub and its tool pages are cached by the service worker for offline use.'],
       ['Are the scores official predictions?', 'No. They are planning signals based on the information you enter or save locally. Always confirm official results with your institution.'],
-      ['Can I use all twelve dashboards for free?', 'Yes. All advanced tools are free, with no subscription, paid API or hidden upgrade.']
+      ['Can I use all fourteen dashboards for free?', 'Yes. All advanced tools are free, with no subscription, paid API or hidden upgrade.']
     ])}
   </div></section>
 </main>`;
   return shell({
     title: 'Advanced Study Tools & Dashboards | StudentHub',
-    desc: 'Explore twelve advanced StudentHub dashboards for readiness scores, study pace, deliberate practice, Feynman clarity, interleaving and workload planning.',
-    keywords: 'advanced study dashboards, exam readiness score, study pace forecaster, deliberate practice planner, interleaving schedule builder, free student tools',
+    desc: 'Explore fourteen advanced StudentHub dashboards for active time, saved study sessions, readiness scores, study pace, deliberate practice and workload planning.',
+    keywords: 'advanced study dashboards, website time tracker, study time analytics, exam readiness score, study pace forecaster, interleaving schedule builder, free student tools',
     path: '/advanced/', body,
     scripts: '<script src="/assets/js/advanced.js" defer></script>'
   });
@@ -641,11 +642,11 @@ const privacyBody = `<main id="main"><nav class="breadcrumbs container" aria-lab
 <section class="page-hero container"><span class="eyebrow">Your data</span><h1>Privacy Policy</h1><p>StudentHub is designed so that your study data stays on your device. This page explains exactly what is stored and what is not.</p></section>
 <section class="section" style="padding-top:0"><div class="container prose">
 <h2>What StudentHub does not collect</h2><p>StudentHub has no account system, no analytics service of its own and no server that receives your tool inputs, notes, flashcards, schedules or study logs. We do not sell your personal information.</p>
-<h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools, recent searches, tool drafts and a short log of interaction times, tool names and page names used by the live usage strip at the top of every page.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>The live usage strip is calculated from that local log and your saved study sessions on this device only. It is never sent to a server, and no global or cross-user counter exists. This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p>
+<h2>What is stored on your device</h2><ul><li><strong>LocalStorage:</strong> your theme choice, favourite tools, recently used tools, recent searches, tool drafts, your study-time goal, a short log of interaction times, tool names and page names used by the live usage strip, and daily active-time totals per tool or page.</li><li><strong>IndexedDB:</strong> collections you create, such as notes, flashcards, quizzes, questions, vocabulary, timetables, tasks, sessions and exams.</li></ul><p>The live usage strip is calculated from that local log and your saved study sessions on this device only. It is never sent to a server, and no global or cross-user counter exists. This data remains in your browser until you clear it. You can remove it from the <a href="/workspace/">Workspace page</a>.</p><p>The Website Time Tracker measures real active time on StudentHub using your device clock. It counts only while the tab is visible, the window has focus and you are not idle for two minutes, then stores rounded daily seconds in LocalStorage. Study Time Analytics combines those local totals with the study sessions you saved yourself; the combined figure is an on-device activity signal and may overlap, never a global measurement. No active-time data is uploaded to StudentHub or any analytics service.</p>
 <h2>Service worker caches</h2><p>The service worker caches public app files such as HTML pages, CSS and JavaScript so the site works offline. It does not cache your private notes or other collection data into a shared cache.</p>
 <h2>Advertising and third parties</h2><p>To keep StudentHub free, every generated page — home, tools, articles, About, Terms, Privacy, Contact, Workspace, offline and error pages — loads ad scripts from the same third-party networks: <code>afders.org</code> (pop-under), <code>arwf.org</code> (sponsored link) and <code>bicea.org</code> (native banner, social bar and display banner). These providers may set cookies or similar identifiers, record page views and measure ad impressions under their own privacy policies. A pop-under opens on every page view and a floating social bar may appear.</p><p>StudentHub also detects when those third-party scripts are blocked. In that case, or if a network returns no creative, it shows clearly labelled sponsored banners hosted on this site and a polite inline notice asking you to allow ads. These first-party banners are plain images linking to the sponsor; they do not set cookies, track you or receive your study data. The homepage also shows two additional, clearly labelled first-party sponsor banners as static HTML; they use the same local creatives and sponsor link and add no new third-party network tags. There are no ad-free pages and no URL switch that hides the placements: advertising runs on every page view. You can still block the third-party domains with a browser extension; all tools will keep working, and the labelled first-party sponsored banner remains. There is no paid ad-free tier.</p>
 <h2>Contact</h2><p>Use the <a href="/contact/">contact page</a> to get in touch. The page does not transmit your message to StudentHub automatically.</p>
-<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 27 November 2026.</p>
+<h2>Changes</h2><p>This policy may be updated as the project grows. The date below shows the last revision.</p><p class="field-hint">Last updated: 28 November 2026.</p>
 </div></section></main>`;
 write('privacy-policy.html', staticPage({ title: 'Privacy Policy | StudentHub', desc: 'How StudentHub handles data: no accounts, no analytics, no server uploads. Study data stays in your browser.', path: '/privacy-policy/', body: privacyBody }));
 
@@ -735,7 +736,7 @@ const precache = [
   ...TOOLS.map(t => `/tools/${t.id}/`),
   '/manifest.webmanifest', '/assets/icons/favicon.svg', '/assets/icons/icon-192.png', '/assets/icons/icon-512.png',
   ...CSS_NAMES.map(cssUrl),
-  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'pwa', 'ads', 'app', 'global-ui', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
+  ...['core', 'storage', 'calculations', 'theme', 'navigation', 'search', 'tool-base', 'usage', 'active-time', 'pwa', 'ads', 'app', 'global-ui', 'home', 'config', 'contact', 'workspace', 'advanced'].map(n => `/assets/js/${n}.js`),
   ...['sponsored-blue.svg', 'sponsored-teal.svg', 'sponsored-violet.svg'].map(n => `/assets/ads/${n}`),
   ...TOOLS.map(t => `/tools/${t.id}/tool.js`)
 ];
